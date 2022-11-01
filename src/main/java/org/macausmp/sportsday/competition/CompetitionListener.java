@@ -33,19 +33,22 @@ public class CompetitionListener implements Listener {
         if (!p.getGameMode().equals(GameMode.ADVENTURE) || !Competitions.containPlayer(p)) return;
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);
-        ICompetition competition = Competitions.getCurrentlyCompetition();
-        if (!SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType().equals(CHECKPOINT)) {
-            p.performCommand("spawnpoint");
-            p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
-            SPAWNPOINT_LIST.add(p.getUniqueId());
-        }
         if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && !loc.getWorld().getBlockAt(loc).getType().equals(CHECKPOINT)) {
             SPAWNPOINT_LIST.remove(p.getUniqueId());
         }
         if (loc.getWorld().getBlockAt(loc).getType().equals(DEATH)) {
             p.performCommand("kill");
         }
-        competition.onEvent(e);
+        Competitions.getCurrentlyCompetition().onEvent(e);
+    }
+
+    public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
+        if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType().equals(CHECKPOINT)) {
+            player.performCommand("spawnpoint");
+            player.setBedSpawnLocation(player.getLocation(), true);
+            player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+            SPAWNPOINT_LIST.add(player.getUniqueId());
+        }
     }
 
     @EventHandler

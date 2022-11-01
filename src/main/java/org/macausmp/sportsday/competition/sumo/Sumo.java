@@ -130,7 +130,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     @Override
     public void onRoundEnd() {
         SumoRound round = getSumoStage().getCurrentRound();
-        round.getLoser().getWorld().strikeLightningEffect(round.getLoser().getLocation());
+        getWorld().strikeLightningEffect(round.getLoser().getLocation());
         getOnlinePlayers().forEach(p -> {
             p.sendActionBar(Component.text("回合結束").color(NamedTextColor.YELLOW));
             p.sendMessage(Component.text(round.getWinner().getName() + "獲得了本場勝利").color(NamedTextColor.YELLOW));

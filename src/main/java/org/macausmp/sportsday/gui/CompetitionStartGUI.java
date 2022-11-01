@@ -16,6 +16,7 @@ public class CompetitionStartGUI extends AbstractGUI {
         getInventory().setItem(2, SELECTED);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(5, GUIButton.VERSION);
     }
 
     @Override

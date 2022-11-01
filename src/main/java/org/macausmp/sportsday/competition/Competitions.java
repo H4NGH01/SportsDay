@@ -26,6 +26,11 @@ public class Competitions {
     private static int NUMBER = 1;
     private static final List<Integer> REGISTERED_NUMBER_LIST = new ArrayList<>();
 
+    /**
+     * Registry competition
+     * @param competition competition to registry
+     * @return competition after registered
+     */
     private static <T extends AbstractCompetition> T registry(T competition) {
         COMPETITIONS.add(competition);
         return competition;
@@ -51,32 +56,28 @@ public class Competitions {
         SportsDay.getInstance().savePlayerConfig();
     }
 
-    public static List<PlayerData> getPlayerDataList() {
-        return PLAYERS;
-    }
-
-    public static boolean containPlayer(OfflinePlayer player) {
-        for (PlayerData data : PLAYERS) {
-            if (data.getUUID().equals(player.getUniqueId())) return true;
-        }
-        return false;
-    }
-
-    public static @Nullable PlayerData getPlayerData(UUID uuid) {
-        for (PlayerData data : PLAYERS) {
-            if (data.getUUID().equals(uuid)) return data;
-        }
-        return null;
-    }
-
+    /**
+     * Current competition
+     * @return current competition
+     */
     public static ICompetition getCurrentlyCompetition() {
         return CURRENTLY_COMPETITION;
     }
 
-    public static void setCurrentlyCompetition(ICompetition newCompetition) {
-        CURRENTLY_COMPETITION = newCompetition;
+    /**
+     * Set current competition
+     * @param competition new competition
+     */
+    public static void setCurrentlyCompetition(ICompetition competition) {
+        CURRENTLY_COMPETITION = competition;
     }
 
+    /**
+     * Add player to competition player list
+     * @param player player to add to competition player list
+     * @param number player's competition number
+     * @return True if player successfully added to competition player list
+     */
     public static boolean join(@NotNull Player player, int number) {
         for (PlayerData data : Competitions.getPlayerDataList()) {
             if (data.getNumber() == number) {
@@ -89,6 +90,11 @@ public class Competitions {
         return true;
     }
 
+    /**
+     * Remove player from competition player list
+     * @param player player to remove from competition player list
+     * @return True if player successfully removed to competition player list
+     */
     public static boolean leave(OfflinePlayer player) {
         if (containPlayer(player)) {
             for (PlayerData data : getPlayerDataList()) {
@@ -108,6 +114,10 @@ public class Competitions {
         return false;
     }
 
+    /**
+     * Generate player numbers for competitions
+     * @return Unoccupied player number
+     */
     public static int genNumber() {
         PLAYERS.forEach(data -> {
             if (!REGISTERED_NUMBER_LIST.contains(data.getNumber())) REGISTERED_NUMBER_LIST.add(data.getNumber());
@@ -117,5 +127,37 @@ public class Competitions {
         }
         REGISTERED_NUMBER_LIST.add(NUMBER);
         return NUMBER;
+    }
+
+    /**
+     * Get registered player data list of competitions
+     * @return player data list
+     */
+    public static List<PlayerData> getPlayerDataList() {
+        return PLAYERS;
+    }
+
+    /**
+     * Return true if the player is in competition player list
+     * @param player player who presence in competition player list is to be tested
+     * @return True if the player is in competition player list
+     */
+    public static boolean containPlayer(OfflinePlayer player) {
+        for (PlayerData data : PLAYERS) {
+            if (data.getUUID().equals(player.getUniqueId())) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get player data by uuid
+     * @param uuid player uuid
+     * @return player data
+     */
+    public static @Nullable PlayerData getPlayerData(UUID uuid) {
+        for (PlayerData data : PLAYERS) {
+            if (data.getUUID().equals(uuid)) return data;
+        }
+        return null;
     }
 }

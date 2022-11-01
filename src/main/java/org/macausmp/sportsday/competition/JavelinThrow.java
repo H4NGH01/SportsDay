@@ -5,10 +5,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -49,7 +46,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         }
         getOnlinePlayers().forEach(p -> p.sendMessage(sb.toString()));
         recordMap.clear();
-        getLeaderboard().getEntry().clear();
+        getLeaderboard().clear();
     }
 
     @Override
@@ -73,7 +70,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onEnd(boolean force) {
-        for (Player p : SportsDay.getInstance().getServer().getOnlinePlayers()) {
+        for (Player p : getOnlinePlayers()) {
             if (p.isOp()) {
                 TextComponent message = Component.text("點擊這裡清除三叉戟").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/kill @e[type=trident]")).decoration(TextDecoration.UNDERLINED, true);
                 p.sendMessage(message);
@@ -81,7 +78,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         }
         if (force) return;
         getLeaderboard().getEntry().addAll(recordMap.values());
-        getLeaderboard().getEntry().sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
+        getLeaderboard().getEntry().sort((o1, o2) -> Double.compare(o2.getDistance(), o1.getDistance()));
         StringBuilder sb = new StringBuilder();
         int i = 0;
         for (PlayerRecord record : getLeaderboard().getEntry()) {
@@ -118,7 +115,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 }
                 record.recordTridentLocation(trident);
                 trident.customName(Component.text(player.getName() + "的標槍 " + record.getDistance()));
-                trident.getWorld().strikeLightningEffect(trident.getLocation());
+                getWorld().strikeLightningEffect(trident.getLocation());
                 getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "擲出了" + record.getDistance() + "米的成績")));
                 onRoundEnd();
             }
@@ -196,7 +193,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         }
 
         public OfflinePlayer getPlayer() {
-            return SportsDay.getPlayer(this.uuid);
+            return Bukkit.getOfflinePlayer(this.uuid);
         }
 
         public boolean isRecorded() {

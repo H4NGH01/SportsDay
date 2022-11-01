@@ -61,6 +61,7 @@ public class Parkour extends AbstractCompetition {
             if (getLeaderboard().getEntry().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
+            CompetitionListener.spawnpoint(player, loc);
             if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
                 getLeaderboard().getEntry().add(Competitions.getPlayerData(player.getUniqueId()));
                 getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));

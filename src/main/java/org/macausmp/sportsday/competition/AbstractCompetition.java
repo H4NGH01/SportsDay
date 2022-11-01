@@ -2,10 +2,7 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,23 +20,29 @@ import java.util.Objects;
 
 public abstract class AbstractCompetition implements ICompetition, Listener {
     private Stage stage = Stage.IDLE;
-    private final int leastPlayerRequired = SportsDay.getInstance().getConfig().getInt(this.getID() + ".least_players_required");
+    private final int leastPlayersRequired = SportsDay.getInstance().getConfig().getInt(this.getID() + ".least_players_required");
     private final Location location = SportsDay.getInstance().getConfig().getLocation(this.getID() + ".location");
+    private final World world = Objects.requireNonNull(this.location).getWorld();
     protected final List<BukkitTask> runnableList = new ArrayList<>();
 
     @Override
     public Component getName() {
-        return Component.text(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name"))).decoration(TextDecoration.ITALIC, false);
+        return Component.text(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")));
     }
 
     @Override
-    public int getLeastPlayerRequired() {
-        return this.leastPlayerRequired;
+    public int getLeastPlayersRequired() {
+        return this.leastPlayersRequired;
     }
 
     @Override
     public Location getLocation() {
         return this.location;
+    }
+
+    @Override
+    public World getWorld() {
+        return this.world;
     }
 
     @Override
@@ -49,10 +52,12 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
 
     @Override
     public void setup() {
-        SportsDay.getInstance().getServer().getConsoleSender().sendMessage("§a一場" + SportsDay.getInstance().getConfig().getString(getID() + ".name") + "§a即將開始");
+        Bukkit.getConsoleSender().sendMessage(Component.text("§a一場").append(getName()).append(Component.text("§a即將開始")));
         setStage(Stage.COMING);
+        getOnlinePlayers().forEach(p -> p.sendMessage(getName().append(Component.text("§a將於15秒後開始"))));
         getPlayerDataList().forEach(data -> {
             if (data.isPlayerOnline()) {
+                data.getPlayer().setBedSpawnLocation(getLocation(), true);
                 data.getPlayer().getInventory().clear();
                 data.getPlayer().teleport(getLocation());
                 data.getPlayer().setGameMode(GameMode.ADVENTURE);
@@ -84,31 +89,38 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     @Override
     public void start() {
         setStage(Stage.STARTED);
-        SportsDay.getInstance().getServer().getPluginManager().callEvent(new CompetitionStartEvent(this));
+        Bukkit.getPluginManager().callEvent(new CompetitionStartEvent(this));
         onStart();
     }
 
     @Override
     public void end(boolean force) {
+        Bukkit.getConsoleSender().sendMessage(getName().append(Component.text(force ? "§c已強制結束" : "§c已結束")));
         setStage(Stage.ENDED);
-        SportsDay.getInstance().getServer().getPluginManager().callEvent(new CompetitionEndEvent(this));
+        Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this));
         onEnd(force);
-        getLeaderboard().getEntry().clear();
+        getLeaderboard().clear();
         Competitions.setCurrentlyCompetition(null);
-    }
-
-    protected abstract void onSetup();
-
-    protected abstract void onStart();
-
-    protected abstract void onEnd(boolean force);
-
-    public void reset() {
         if (isEnable()) {
             setStage(Stage.IDLE);
             runnableList.forEach(BukkitTask::cancel);
         }
     }
+
+    /**
+     * extra event on {@link AbstractCompetition#setup()}
+     */
+    protected abstract void onSetup();
+
+    /**
+     * extra event on {@link AbstractCompetition#start()}
+     */
+    protected abstract void onStart();
+
+    /**
+     * extra event on {@link AbstractCompetition#end(boolean)}}
+     */
+    protected abstract void onEnd(boolean force);
 
     @Override
     public Stage getStage() {
@@ -121,11 +133,19 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
         CompetitionGUI.COMPETITION_INFO_GUI.update();
     }
 
+    /**
+     * Get the player data list of competition
+     * @return player data list of competition
+     */
     public List<PlayerData> getPlayerDataList() {
         return Competitions.getPlayerDataList();
     }
 
+    /**
+     * Get the online players of server
+     * @return online players of server
+     */
     protected Collection<? extends Player> getOnlinePlayers() {
-        return SportsDay.getInstance().getServer().getOnlinePlayers();
+        return Bukkit.getOnlinePlayers();
     }
 }

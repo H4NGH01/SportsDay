@@ -14,7 +14,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
 
@@ -45,7 +44,6 @@ public class GUIListener implements Listener {
                     } else if (GUIButton.isSameButton(item, GUIButton.END_COMPETITION)) {
                         if (Competitions.getCurrentlyCompetition() != null) {
                             Competitions.getCurrentlyCompetition().end(true);
-                            Competitions.COMPETITIONS.forEach(AbstractCompetition::reset);
                             player.sendMessage(Component.text("已強制結束一場比賽"));
                         } else {
                             player.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
@@ -64,12 +62,12 @@ public class GUIListener implements Listener {
                                         player.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
                                         return;
                                     }
-                                    if (Competitions.getPlayerDataList().size() >= competition.getLeastPlayerRequired()) {
+                                    if (Competitions.getPlayerDataList().size() >= competition.getLeastPlayersRequired()) {
                                         player.sendMessage(Component.text("開始新一場比賽中..."));
                                         Competitions.setCurrentlyCompetition(competition);
                                         competition.setup();
                                     } else {
-                                        player.sendMessage(Component.text("參賽選手人數不足，無法開始比賽，最少需要" + competition.getLeastPlayerRequired() + "人開始比賽").color(NamedTextColor.RED));
+                                        player.sendMessage(Component.text("參賽選手人數不足，無法開始比賽，最少需要" + competition.getLeastPlayersRequired() + "人開始比賽").color(NamedTextColor.RED));
                                     }
                                     return;
                                 }

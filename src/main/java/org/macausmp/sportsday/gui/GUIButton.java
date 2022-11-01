@@ -26,6 +26,7 @@ public class GUIButton {
     public static final ItemStack START_COMPETITION = startCompetition();
     public static final ItemStack END_COMPETITION = endCompetition();
     public static final ItemStack COMPETITION_SETTINGS = competitionSettings();
+    public static final ItemStack VERSION = version();
     public static final ItemStack ELYTRA_RACING = elytraRacing();
     public static final ItemStack ICE_BOAT_RACING = iceBoatRacing();
     public static final ItemStack JAVELIN_THROW = javelinThrow();
@@ -92,6 +93,12 @@ public class GUIButton {
             meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition_settings");
         });
         return stack;
+    }
+
+    private static @NotNull ItemStack version() {
+        ItemStack version = new ItemStack(Material.OAK_SIGN);
+        version.editMeta(meta -> meta.displayName(Component.text("當前插件版本: " + SportsDay.getInstance().getDescription().getVersion()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW)));
+        return version;
     }
 
     public static @NotNull ItemStack elytraRacing() {

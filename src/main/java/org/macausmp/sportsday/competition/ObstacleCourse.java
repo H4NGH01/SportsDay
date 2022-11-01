@@ -60,6 +60,7 @@ public class ObstacleCourse extends AbstractCompetition {
             if (getLeaderboard().getEntry().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
+            CompetitionListener.spawnpoint(player, loc);
             if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
                 PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);

@@ -1,10 +1,10 @@
 package org.macausmp.sportsday.gui;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 
 public abstract class AbstractGUI implements IPluginGUI {
     private final Inventory inventory;
@@ -13,7 +13,7 @@ public abstract class AbstractGUI implements IPluginGUI {
     private IPluginGUI next;
 
     public AbstractGUI(int size, Component title) {
-        this.inventory = SportsDay.getInstance().getServer().createInventory(null, size, this.title = title);
+        this.inventory = Bukkit.createInventory(null, size, this.title = title);
         update();
     }
 

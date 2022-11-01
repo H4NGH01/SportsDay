@@ -2,6 +2,7 @@ package org.macausmp.sportsday.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -9,8 +10,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.PlayerData;
-import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
 
@@ -35,12 +34,12 @@ public class CompetitionCommand extends PluginCommand {
                                     sender.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
                                     return;
                                 }
-                                if (Competitions.getPlayerDataList().size() >= competition.getLeastPlayerRequired()) {
+                                if (Competitions.getPlayerDataList().size() >= competition.getLeastPlayersRequired()) {
                                     sender.sendMessage(Component.text("開始新一場比賽中..."));
                                     Competitions.setCurrentlyCompetition(competition);
                                     competition.setup();
                                 } else {
-                                    sender.sendMessage(Component.text("參賽選手人數不足，無法開始比賽，最少需要" + competition.getLeastPlayerRequired() + "人開始比賽").color(NamedTextColor.RED));
+                                    sender.sendMessage(Component.text("參賽選手人數不足，無法開始比賽，最少需要" + competition.getLeastPlayersRequired() + "人開始比賽").color(NamedTextColor.RED));
                                 }
                                 return;
                             }
@@ -56,7 +55,6 @@ public class CompetitionCommand extends PluginCommand {
                 case "end":
                     if (Competitions.getCurrentlyCompetition() != null) {
                         Competitions.getCurrentlyCompetition().end(true);
-                        Competitions.COMPETITIONS.forEach(AbstractCompetition::reset);
                         sender.sendMessage(Component.text("已強制結束一場比賽"));
                     } else {
                         sender.sendMessage(Component.text("現在沒有比賽進行中"));
@@ -64,7 +62,7 @@ public class CompetitionCommand extends PluginCommand {
                     break;
                 case "join": {
                     if (args.length >= 2) {
-                        Player p = SportsDay.getInstance().getServer().getPlayer(args[1]);
+                        Player p = Bukkit.getPlayer(args[1]);
                         if (p == null) {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
@@ -91,7 +89,7 @@ public class CompetitionCommand extends PluginCommand {
                 }
                 case "leave": {
                     if (args.length >= 2) {
-                        OfflinePlayer p = SportsDay.getInstance().getServer().getOfflinePlayer(args[1]);
+                        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
                         if (p.getFirstPlayed() == 0L) {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
@@ -151,14 +149,14 @@ public class CompetitionCommand extends PluginCommand {
                     }
                 });
             } else if (args[0].equals("join")) {
-                for (Player p : SportsDay.getInstance().getServer().getOnlinePlayers()) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
                     if (!Competitions.containPlayer(p)) {
                         l.add(p.getName());
                     }
                 }
             } else if (args[0].equals("leave")) {
                 for (PlayerData data : Competitions.getPlayerDataList()) {
-                    l.add(SportsDay.getPlayer(data.getUUID()).getName());
+                    l.add(Bukkit.getOfflinePlayer(data.getUUID()).getName());
                 }
             }
         } else {

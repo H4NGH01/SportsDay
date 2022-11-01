@@ -9,4 +9,20 @@ public class Leaderboard<T> {
     public List<T> getEntry() {
         return entry;
     }
+
+    public int size() {
+        return entry.size();
+    }
+
+    public boolean contains(T e) {
+        return entry.contains(e);
+    }
+
+    public boolean add(T e) {
+        return entry.add(e);
+    }
+
+    public void clear() {
+        entry.clear();
+    }
 }

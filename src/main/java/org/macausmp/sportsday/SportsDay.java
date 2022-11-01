@@ -2,7 +2,7 @@ package org.macausmp.sportsday;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.GameRule;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
@@ -13,8 +13,6 @@ import org.macausmp.sportsday.command.CommandManager;
 import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIListener;
-
-import java.util.UUID;
 
 public final class SportsDay extends JavaPlugin {
     private static SportsDay instance;
@@ -42,7 +40,7 @@ public final class SportsDay extends JavaPlugin {
         registryTeam(scoreboard, "player", Component.text("選手"), NamedTextColor.GREEN);
         registryTeam(scoreboard, "referee", Component.text("裁判"), NamedTextColor.GOLD);
         registryTeam(scoreboard, "audience", Component.text("觀眾"), NamedTextColor.GRAY);
-        //getServer().getWorlds().forEach(w -> w.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, false));
+        getServer().getWorlds().forEach(w -> w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true));
         getServer().getConsoleSender().sendMessage("Macau SMP SportsDay plugin enabled");
     }
 
@@ -81,9 +79,5 @@ public final class SportsDay extends JavaPlugin {
 
     public void savePlayerConfig() {
         this.playerConfig.saveConfig();
-    }
-
-    public static @NotNull OfflinePlayer getPlayer(UUID uuid) {
-        return getInstance().getServer().getOfflinePlayer(uuid);
     }
 }

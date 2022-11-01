@@ -1,8 +1,8 @@
 package org.macausmp.sportsday;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerData {
@@ -13,13 +13,13 @@ public class PlayerData {
 
     public PlayerData(UUID uuid, int number) {
         this.uuid = uuid;
-        this.name = Objects.requireNonNull(SportsDay.getInstance().getServer().getPlayer(uuid)).getName();
+        this.name = Bukkit.getOfflinePlayer(uuid).getName();
         this.number = number;
     }
 
     public PlayerData(UUID uuid, int number, int score) {
         this.uuid = uuid;
-        this.name = SportsDay.getInstance().getServer().getOfflinePlayer(uuid).getName();
+        this.name = Bukkit.getOfflinePlayer(uuid).getName();
         this.number = number;
         this.score = score;
     }
@@ -33,11 +33,11 @@ public class PlayerData {
     }
 
     public Player getPlayer() {
-        return SportsDay.getPlayer(uuid).getPlayer();
+        return Bukkit.getOfflinePlayer(uuid).getPlayer();
     }
 
     public boolean isPlayerOnline() {
-        return SportsDay.getInstance().getServer().getOfflinePlayer(uuid).isOnline();
+        return Bukkit.getOfflinePlayer(uuid).isOnline();
     }
 
     public int getNumber() {

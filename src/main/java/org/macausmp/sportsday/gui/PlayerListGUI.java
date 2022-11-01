@@ -3,12 +3,12 @@ package org.macausmp.sportsday.gui;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ public class PlayerListGUI extends AbstractGUI {
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(5, GUIButton.VERSION);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class PlayerListGUI extends AbstractGUI {
     private @NotNull ItemStack icon(UUID uuid) {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
-            OfflinePlayer player = SportsDay.getPlayer(uuid);
+            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
             meta.displayName(Component.text(Objects.requireNonNull(player.getName())).decoration(TextDecoration.ITALIC, false));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
