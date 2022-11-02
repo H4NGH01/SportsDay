@@ -24,9 +24,9 @@ import org.macausmp.sportsday.SportsDay;
 import java.util.*;
 
 public class JavelinThrow extends AbstractCompetition implements IRoundGame {
-    private final Leaderboard<PlayerRecord> leaderboard = new Leaderboard<>();
+    private final Leaderboard<PlayerResult> leaderboard = new Leaderboard<>();
     private final List<PlayerData> queue = new ArrayList<>();
-    private final Map<UUID, PlayerRecord> recordMap = new HashMap<>();
+    private final Map<UUID, PlayerResult> resultMap = new HashMap<>();
 
     @Override
     public String getID() {
@@ -37,15 +37,14 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
     public void onSetup() {
         getQueue().clear();
         getQueue().addAll(getPlayerDataList());
+        getQueue().removeIf(d -> !d.isPlayerOnline());
         StringBuilder sb = new StringBuilder("出場順序\n");
         int i = 0;
         for (PlayerData data : getQueue()) {
-            if (data.isPlayerOnline()) {
-                sb.append("第").append(++i).append("位 ").append(data.getPlayer().getName()).append("\n");
-            }
+            sb.append("第").append(++i).append("位 ").append(data.getPlayer().getName()).append("\n");
         }
         getOnlinePlayers().forEach(p -> p.sendMessage(sb.toString()));
-        recordMap.clear();
+        resultMap.clear();
         getLeaderboard().clear();
     }
 
@@ -77,25 +76,22 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             }
         }
         if (force) return;
-        getLeaderboard().getEntry().addAll(recordMap.values());
         getLeaderboard().getEntry().sort((o1, o2) -> Double.compare(o2.getDistance(), o1.getDistance()));
         StringBuilder sb = new StringBuilder();
         int i = 0;
-        for (PlayerRecord record : getLeaderboard().getEntry()) {
-            if (record.isRecorded()) {
-                sb.append("第").append(++i).append("名 ").append(record.getPlayer().getName()).append(" 成績").append(record.getDistance()).append("米").append("\n");
-            }
+        for (PlayerResult result : getLeaderboard().getEntry()) {
+            sb.append("第").append(++i).append("名 ").append(result.getPlayer().getName()).append(" 成績").append(result.getDistance()).append("米").append("\n");
         }
         getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(sb.substring(0, sb.length() - 1))));
     }
 
     @EventHandler
     public void onThrow(ProjectileLaunchEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this) || !getStage().equals(Stage.STARTED)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         if (e.getEntity().getShooter() instanceof Player p) {
             if (!Competitions.containPlayer(p)) return;
             if (e.getEntity() instanceof Trident trident) {
-                recordMap.put(p.getUniqueId(), new PlayerRecord(p.getUniqueId(), p.getLocation()));
+                resultMap.put(p.getUniqueId(), new PlayerResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
                 trident.customName(Component.text(p.getName() + "的標槍"));
@@ -105,18 +101,20 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @EventHandler
     public void onArrived(ProjectileHitEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this) || !getStage().equals(Stage.STARTED)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         if (e.getEntity().getShooter() instanceof Player player) {
             if (!Competitions.containPlayer(player)) return;
             if (e.getEntity() instanceof Trident trident) {
-                PlayerRecord record = recordMap.get(player.getUniqueId());
-                if (record == null) {
+                PlayerResult result = resultMap.get(player.getUniqueId());
+                if (result == null) {
                     return;
                 }
-                record.recordTridentLocation(trident);
-                trident.customName(Component.text(player.getName() + "的標槍 " + record.getDistance()));
+                result.setTridentLocation(trident);
+                getLeaderboard().add(result);
+                trident.customName(Component.text(player.getName() + "的標槍 " + result.getDistance()));
+                resultMap.remove(player.getUniqueId());
                 getWorld().strikeLightningEffect(trident.getLocation());
-                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "擲出了" + record.getDistance() + "米的成績")));
+                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "擲出了" + result.getDistance() + "米的成績")));
                 onRoundEnd();
             }
         }
@@ -128,7 +126,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
     }
 
     @Override
-    public Leaderboard<PlayerRecord> getLeaderboard() {
+    public Leaderboard<PlayerResult> getLeaderboard() {
         return leaderboard;
     }
 
@@ -152,7 +150,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void nextRound() {
-        runnableList.add(new BukkitRunnable() {
+        addRunnable(new BukkitRunnable() {
             int i = 3;
             @Override
             public void run() {
@@ -172,20 +170,18 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         return this.queue;
     }
 
-    public static class PlayerRecord {
+    public static class PlayerResult {
         private final UUID uuid;
         private final Location loc;
-        private boolean recorded = false;
         private double distance;
 
-        public PlayerRecord(UUID uuid, Location loc) {
+        public PlayerResult(UUID uuid, Location loc) {
             this.uuid = uuid;
             this.loc = loc;
         }
 
-        public final void recordTridentLocation(@NotNull Trident trident) {
+        public final void setTridentLocation(@NotNull Trident trident) {
             this.distance = loc.distance(trident.getLocation());
-            this.recorded = true;
         }
 
         public final double getDistance() {
@@ -194,10 +190,6 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
         public OfflinePlayer getPlayer() {
             return Bukkit.getOfflinePlayer(this.uuid);
-        }
-
-        public boolean isRecorded() {
-            return this.recorded;
         }
     }
 }

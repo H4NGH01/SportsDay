@@ -30,13 +30,11 @@ public class SumoStage {
     }
 
     public int getRoundRemaining() {
-        int i = 0;
-        for (SumoRound r : roundList) {
-            if (r.getStatus().equals(SumoRound.RoundStatus.IDLE)) {
-                i++;
-            }
-        }
-        return i;
+        return roundList.size() - roundIndex;
+    }
+
+    public int getRoundIndex() {
+        return roundIndex;
     }
 
     public String getName() {

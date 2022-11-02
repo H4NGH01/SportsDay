@@ -54,7 +54,7 @@ public class GUIListener implements Listener {
                         return;
                     }
                     PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-                    if (CompetitionGUI.GUI_MAP.get(player).equals(CompetitionGUI.COMPETITION_START_GUI)) {
+                    if (CompetitionGUI.GUI_MAP.get(player) == CompetitionGUI.COMPETITION_START_GUI) {
                         if (container.has(GUIButton.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(GUIButton.ITEM_ID, PersistentDataType.STRING), "competition")) {
                             for (ICompetition competition : Competitions.COMPETITIONS) {
                                 if (competition.getID().equals(container.get(GUIButton.COMPETITION_ID, PersistentDataType.STRING))) {
@@ -75,7 +75,7 @@ public class GUIListener implements Listener {
                         }
                         return;
                     }
-                    if (CompetitionGUI.GUI_MAP.get(player).equals(CompetitionGUI.COMPETITION_SETTINGS_GUI)) {
+                    if (CompetitionGUI.GUI_MAP.get(player) == CompetitionGUI.COMPETITION_SETTINGS_GUI) {
                         if (container.has(GUIButton.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(GUIButton.ITEM_ID, PersistentDataType.STRING), "enable_switch")) {
                             for (ICompetition competition : Competitions.COMPETITIONS) {
                                 if (competition.getID().equals(container.get(GUIButton.COMPETITION_ID, PersistentDataType.STRING))) {

@@ -2,6 +2,7 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -57,11 +58,11 @@ public class ObstacleCourse extends AbstractCompetition {
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
             Player player = e.getPlayer();
-            if (getLeaderboard().getEntry().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
+            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
-            if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
+            if (loc.getBlock().getType() == CompetitionListener.FINISH_LINE) {
                 PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -69,9 +70,10 @@ public class ObstacleCourse extends AbstractCompetition {
                 if (lapMap.get(data) == 1) {
                     getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了第一圈").color(NamedTextColor.YELLOW)));
                 } else if (lapMap.get(data) >= 2) {
-                    getLeaderboard().getEntry().add(Competitions.getPlayerData(player.getUniqueId()));
+                    getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
+                    player.setGameMode(GameMode.SPECTATOR);
                     getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
-                    if (getLeaderboard().getEntry().size() >= 3) {
+                    if (getLeaderboard().size() >= 3) {
                         end(false);
                     }
                 }

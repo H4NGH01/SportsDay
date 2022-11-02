@@ -23,7 +23,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     private final int leastPlayersRequired = SportsDay.getInstance().getConfig().getInt(this.getID() + ".least_players_required");
     private final Location location = SportsDay.getInstance().getConfig().getLocation(this.getID() + ".location");
     private final World world = Objects.requireNonNull(this.location).getWorld();
-    protected final List<BukkitTask> runnableList = new ArrayList<>();
+    private final List<BukkitTask> runnableList = new ArrayList<>();
 
     @Override
     public Component getName() {
@@ -52,7 +52,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
 
     @Override
     public void setup() {
-        Bukkit.getConsoleSender().sendMessage(Component.text("§a一場").append(getName()).append(Component.text("§a即將開始")));
+        Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
         setStage(Stage.COMING);
         getOnlinePlayers().forEach(p -> p.sendMessage(getName().append(Component.text("§a將於15秒後開始"))));
         getPlayerDataList().forEach(data -> {
@@ -63,7 +63,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
                 data.getPlayer().setGameMode(GameMode.ADVENTURE);
             }
         });
-        runnableList.add(new BukkitRunnable() {
+        addRunnable(new BukkitRunnable() {
             int i = 15;
             @Override
             public void run() {
@@ -95,7 +95,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
 
     @Override
     public void end(boolean force) {
-        Bukkit.getConsoleSender().sendMessage(getName().append(Component.text(force ? "§c已強制結束" : "§c已結束")));
+        Bukkit.getConsoleSender().sendMessage(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + (force ? "§c已強制結束" : "§c已結束"));
         setStage(Stage.ENDED);
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this));
         onEnd(force);
@@ -147,5 +147,13 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
      */
     protected Collection<? extends Player> getOnlinePlayers() {
         return Bukkit.getOnlinePlayers();
+    }
+
+    /**
+     * Add a runnable task to this competition
+     * @param task runnable task to add
+     */
+    protected void addRunnable(BukkitTask task) {
+        runnableList.add(task);
     }
 }

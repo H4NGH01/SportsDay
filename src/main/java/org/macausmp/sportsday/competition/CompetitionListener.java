@@ -28,22 +28,22 @@ public class CompetitionListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().getStage().equals(ICompetition.Stage.STARTED)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (!p.getGameMode().equals(GameMode.ADVENTURE) || !Competitions.containPlayer(p)) return;
+        if (p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);
-        if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && !loc.getWorld().getBlockAt(loc).getType().equals(CHECKPOINT)) {
+        Competitions.getCurrentlyCompetition().onEvent(e);
+        if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) {
             SPAWNPOINT_LIST.remove(p.getUniqueId());
         }
-        if (loc.getWorld().getBlockAt(loc).getType().equals(DEATH)) {
+        if (loc.getWorld().getBlockAt(loc).getType() == DEATH) {
             p.performCommand("kill");
         }
-        Competitions.getCurrentlyCompetition().onEvent(e);
     }
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
-        if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType().equals(CHECKPOINT)) {
+        if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
             player.performCommand("spawnpoint");
             player.setBedSpawnLocation(player.getLocation(), true);
             player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -54,7 +54,7 @@ public class CompetitionListener implements Listener {
     @EventHandler
     public void onHit(@NotNull EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
-            if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().equals(Competitions.SUMO)) {
+            if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition() == Competitions.SUMO) {
                 SumoRound sumo = ((Sumo) Competitions.getCurrentlyCompetition()).getSumoStage().getCurrentRound();
                 if (sumo != null && sumo.getStatus() == SumoRound.RoundStatus.STARTED && sumo.containPlayer(player) && sumo.containPlayer(damager)) {
                     e.setDamage(0);
@@ -70,7 +70,7 @@ public class CompetitionListener implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage().equals(ICompetition.Stage.STARTED)) return;
+            if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.STARTED) return;
             e.setCancelled(true);
         }
     }

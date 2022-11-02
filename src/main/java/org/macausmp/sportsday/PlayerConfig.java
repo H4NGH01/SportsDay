@@ -22,12 +22,12 @@ public class PlayerConfig {
         if (!playerFile.exists()) {
             try {
                 playerFile.createNewFile();
+                Bukkit.getConsoleSender().sendMessage(Component.text("player.yml file has been created"));
             } catch (IOException e) {
                 Bukkit.getConsoleSender().sendMessage(Component.text("Could not create the player.yml file").color(NamedTextColor.RED));
             }
         }
         playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-        Bukkit.getConsoleSender().sendMessage(Component.text("player.yml file has been created"));
     }
 
     public FileConfiguration getPlayerConfig() {

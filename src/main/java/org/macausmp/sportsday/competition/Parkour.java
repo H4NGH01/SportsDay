@@ -2,10 +2,13 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -58,19 +61,28 @@ public class Parkour extends AbstractCompetition {
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
             Player player = e.getPlayer();
-            if (getLeaderboard().getEntry().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
+            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
-            if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
-                getLeaderboard().getEntry().add(Competitions.getPlayerData(player.getUniqueId()));
-                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
+            if (loc.getBlock().getType() == CompetitionListener.FINISH_LINE) {
+                getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
-                if (getLeaderboard().getEntry().size() >= 3) {
+                player.setGameMode(GameMode.SPECTATOR);
+                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
+                if (getLeaderboard().size() >= 3) {
                     end(false);
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onFall(PlayerDeathEvent e) {
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        Player p = e.getPlayer();
+        if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) return;
+        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false, false));
     }
 
     @Override

@@ -28,11 +28,6 @@ public class CompetitionGUICommand extends PluginCommand {
     }
 
     @Override
-    public String info() {
-        return "Open competition gui";
-    }
-
-    @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         return new ArrayList<>();
     }

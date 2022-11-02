@@ -68,7 +68,7 @@ public class ElytraRacing extends AbstractCompetition {
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerElytraBoostEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this) || !getStage().equals(Stage.STARTED)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
         e.setShouldConsume(false);
@@ -76,10 +76,10 @@ public class ElytraRacing extends AbstractCompetition {
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this) || !getStage().equals(Stage.STARTED)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
-        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && e.getItem() != null && e.getItem().getType().equals(Material.FIREWORK_ROCKET)) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) {
             e.setCancelled(true);
         }
     }
@@ -92,7 +92,7 @@ public class ElytraRacing extends AbstractCompetition {
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
-            if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
+            if (loc.getBlock().getType() == CompetitionListener.FINISH_LINE) {
                 getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 player.setGameMode(GameMode.SPECTATOR);

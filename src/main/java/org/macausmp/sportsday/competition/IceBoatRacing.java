@@ -63,7 +63,7 @@ public class IceBoatRacing extends AbstractCompetition {
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
-            if (loc.getBlock().getType().equals(CompetitionListener.FINISH_LINE)) {
+            if (loc.getBlock().getType() == CompetitionListener.FINISH_LINE) {
                 PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -88,16 +88,16 @@ public class IceBoatRacing extends AbstractCompetition {
 
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (!p.getGameMode().equals(GameMode.ADVENTURE) || !Competitions.containPlayer(p)) return;
+            if (p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onFall(PlayerDeathEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || !Competitions.getCurrentlyCompetition().equals(this)) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         Player p = e.getPlayer();
         boatMap.get(p).remove();
         boatMap.put(p, getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class));
