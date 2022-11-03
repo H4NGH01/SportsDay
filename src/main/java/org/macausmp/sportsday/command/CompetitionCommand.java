@@ -39,7 +39,7 @@ public class CompetitionCommand extends PluginCommand {
                                     Competitions.setCurrentlyCompetition(competition);
                                     competition.setup();
                                 } else {
-                                    sender.sendMessage(Component.text("參賽選手人數不足，無法開始比賽，最少需要" + competition.getLeastPlayersRequired() + "人開始比賽").color(NamedTextColor.RED));
+                                    sender.sendMessage(Component.translatable("參賽選手人數不足，無法開始比賽，最少需要%s人開始比賽").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
                                 }
                                 return;
                             }
@@ -49,7 +49,7 @@ public class CompetitionCommand extends PluginCommand {
                         StringBuilder sb = new StringBuilder("(");
                         Competitions.COMPETITIONS.forEach(c -> sb.append(c.getID()).append("|"));
                         sb.replace(sb.length(), sb.length(), ")");
-                        sender.sendMessage(Component.text("/competition start " + sb));
+                        sender.sendMessage(Component.translatable("/competition start " + sb));
                     }
                     break;
                 case "end":
@@ -68,7 +68,7 @@ public class CompetitionCommand extends PluginCommand {
                             return;
                         }
                         if (!Competitions.containPlayer(p)) {
-                            int number = 0;
+                            int number;
                             if (args.length >= 3) {
                                 try {
                                     number = Integer.parseInt(args[2]);
@@ -78,13 +78,14 @@ public class CompetitionCommand extends PluginCommand {
                                     }
                                 } catch (Exception e) {
                                     sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[2])).color(NamedTextColor.RED));
+                                    return;
                                 }
                             } else {
                                 number = Competitions.genNumber();
                             }
-                            sender.sendMessage(Component.text(Competitions.join(p, number) ? ("已添加" + p.getName() + "為參賽選手，選手號碼為" + number + "號") : ("添加失敗，編號為" + number + "的選手號碼已經被使用了，請選擇其他號碼")));
+                            sender.sendMessage(Competitions.join(p, number) ? Component.translatable("已添加%s為參賽選手，選手號碼為%s號").args(Component.text(p.getName()), Component.text(number)) : Component.translatable("添加失敗，編號為%s的選手號碼已經被使用了，請選擇其他號碼").args(Component.text(number)));
                         } else {
-                            sender.sendMessage(Component.text(p.getName() + "已經在參賽選手名單上"));
+                            sender.sendMessage(Component.translatable("%s已經在參賽選手名單上").args(Component.text(p.getName())).color(NamedTextColor.RED));
                         }
                     } else {
                         sender.sendMessage(Component.text("/competition join <player>"));
@@ -93,14 +94,16 @@ public class CompetitionCommand extends PluginCommand {
                 case "leave":
                     if (args.length >= 2) {
                         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-                        if (p.getFirstPlayed() == 0L) {
+                        if (p.getName() == null || p.getFirstPlayed() == 0L) {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        sender.sendMessage(Competitions.leave(p) ? Component.text("已將" + p.getName() + "從參賽選手名單中移除") : Component.text(p.getName() + "不在參賽選手名單上"));
+                        sender.sendMessage(Competitions.leave(p) ? Component.translatable("已將%s從參賽選手名單中移除").args(Component.text(p.getName())) : Component.translatable( "%s不在參賽選手名單上").args(Component.text(p.getName())).color(NamedTextColor.RED));
                     } else {
                         if (sender instanceof Player p) {
-                            Competitions.leave(p);
+                            if (!Competitions.leave(p)) {
+                                sender.sendMessage(Component.text("你不在參賽選手名單上").color(NamedTextColor.RED));
+                            }
                             return;
                         }
                         sender.sendMessage(Component.text("/competition leave <player>"));
@@ -108,18 +111,18 @@ public class CompetitionCommand extends PluginCommand {
                     break;
                 case "info":
                     sender.sendMessage(Component.text("比賽資訊"));
-                    sender.sendMessage(Component.text("比賽狀態: " + (Competitions.getCurrentlyCompetition() == null ? "未開始" : Competitions.getCurrentlyCompetition().getStage().name())));
+                    sender.sendMessage(Component.translatable("比賽狀態: %s").args(Component.text(Competitions.getCurrentlyCompetition() == null ? "未開始" : Competitions.getCurrentlyCompetition().getStage().name())));
                     if (Competitions.getCurrentlyCompetition() != null) {
-                        sender.sendMessage(Component.text("當前比賽: " + Competitions.getCurrentlyCompetition().getID().toUpperCase()));
+                        sender.sendMessage(Component.translatable("當前比賽: %s").args(Component.text(Competitions.getCurrentlyCompetition().getID().toUpperCase())));
                     }
-                    sender.sendMessage(Component.text("參賽人數: " + Competitions.getPlayerDataList().size()));
+                    sender.sendMessage(Component.translatable("參賽人數: %s").args(Component.text(Competitions.getPlayerDataList().size())));
                     List<String> l = new ArrayList<>();
                     for (ICompetition c : Competitions.COMPETITIONS) {
                         if (c.isEnable()) {
                             l.add(c.getID().toUpperCase());
                         }
                     }
-                    sender.sendMessage(Component.text("可用比賽: " + Arrays.toString(l.toArray())));
+                    sender.sendMessage(Component.translatable("可用比賽: %s").args(Component.text(Arrays.toString(l.toArray()))));
                     break;
                 default:
                     sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));

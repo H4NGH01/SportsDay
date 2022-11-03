@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayerListGUI extends AbstractGUI {
+public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     private static final ItemStack SELECTED = GUIButton.addEffect(GUIButton.playerlist());
+    private int page = 0;
 
     public PlayerListGUI() {
         super(54, Component.text("參賽選手名單"));
@@ -30,19 +31,37 @@ public class PlayerListGUI extends AbstractGUI {
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(5, GUIButton.VERSION);
+        getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
+        getInventory().setItem(13, pages());
+        getInventory().setItem(17, GUIButton.NEXT_PAGE);
     }
 
     @Override
     public void update() {
-        for (int i = 18; i < getInventory().getSize(); i++) {
+        getInventory().setItem(13, pages());
+        for (int i = getStartSlot(); i < getEndSlot(); i++) {
             getInventory().setItem(i, null);
         }
-        for (int i = 0; i < Competitions.getPlayerDataList().size(); i++) {
-            getInventory().setItem(i + 18, icon(Competitions.getPlayerDataList().get(i).getUUID()));
-            if (i >= getInventory().getSize() - 19) {
+        for (int i = 0; i < getSize(); i++) {
+            if (i >= Competitions.getPlayerDataList().size()) {
                 break;
             }
+            getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerDataList().get(i + getPage() * getSize()).getUUID()));
         }
+    }
+
+    public static void updateGUI() {
+        for (AbstractGUI gui : CompetitionGUI.GUI_MAP.values()) {
+            if (gui instanceof PlayerListGUI) {
+                gui.update();
+            }
+        }
+    }
+
+    private @NotNull ItemStack pages() {
+        ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
+        stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
+        return stack;
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
@@ -56,5 +75,35 @@ public class PlayerListGUI extends AbstractGUI {
             meta.lore(lore);
         });
         return icon;
+    }
+
+    public void nextPage() {
+        if (getPage() < getMaxPage() - 1) page++;
+        update();
+    }
+
+    public void previousPage() {
+        if (getPage() > 0) page--;
+        update();
+    }
+
+    @Override
+    public int getPage() {
+        return page;
+    }
+
+    @Override
+    public int getMaxPage() throws ArithmeticException {
+        return Competitions.getPlayerDataList().size() == 0 ? 1 : Competitions.getPlayerDataList().size() % getSize() == 0 ? Competitions.getPlayerDataList().size() / getSize() : Competitions.getPlayerDataList().size() / getSize() + 1;
+    }
+
+    @Override
+    public int getStartSlot() {
+        return 18;
+    }
+
+    @Override
+    public int getEndSlot() {
+        return 54;
     }
 }

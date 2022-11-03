@@ -27,6 +27,8 @@ public class GUIButton {
     public static final ItemStack END_COMPETITION = endCompetition();
     public static final ItemStack COMPETITION_SETTINGS = competitionSettings();
     public static final ItemStack VERSION = version();
+    public static final ItemStack NEXT_PAGE = nextPage();
+    public static final ItemStack PREVIOUS_PAGE = previousPage();
     public static final ItemStack ELYTRA_RACING = elytraRacing();
     public static final ItemStack ICE_BOAT_RACING = iceBoatRacing();
     public static final ItemStack JAVELIN_THROW = javelinThrow();
@@ -95,9 +97,30 @@ public class GUIButton {
         return stack;
     }
 
-    private static @NotNull ItemStack version() {
+    public static @NotNull ItemStack version() {
         ItemStack version = new ItemStack(Material.OAK_SIGN);
-        version.editMeta(meta -> meta.displayName(Component.text("當前插件版本: " + SportsDay.getInstance().getDescription().getVersion()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW)));
+        version.editMeta(meta -> {
+            meta.displayName(Component.text("當前插件版本: " + SportsDay.getInstance().getDescription().getVersion()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "version");
+        });
+        return version;
+    }
+
+    public static @NotNull ItemStack nextPage() {
+        ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
+        version.editMeta(meta -> {
+            meta.displayName(Component.text("下一頁").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "next_page");
+        });
+        return version;
+    }
+
+    public static @NotNull ItemStack previousPage() {
+        ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
+        version.editMeta(meta -> {
+            meta.displayName(Component.text("上一頁").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "previous_page");
+        });
         return version;
     }
 

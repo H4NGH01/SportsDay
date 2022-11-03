@@ -54,7 +54,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     public void setup() {
         Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
         setStage(Stage.COMING);
-        getOnlinePlayers().forEach(p -> p.sendMessage(getName().append(Component.text("§a將於15秒後開始"))));
+        getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s§a將於15秒後開始").args(getName())));
         getPlayerDataList().forEach(data -> {
             if (data.isPlayerOnline()) {
                 data.getPlayer().setBedSpawnLocation(getLocation(), true);

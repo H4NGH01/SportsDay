@@ -63,7 +63,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             SumoRound r = getSumoStage().getRoundList().get(i);
             sb.append("第").append(i + 1).append("場由").append(r.getPlayers().get(0).getName()).append("對戰").append(r.getPlayers().get(1).getName()).append("\n");
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(sb.substring(0, sb.length() - 1))));
+        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         for (PlayerData data : getLeaderboard().getEntry()) {
             sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(sb.substring(0, sb.length() - 1))));
+        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
     @Override
@@ -135,7 +135,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         getWorld().strikeLightningEffect(round.getLoser().getLocation());
         getOnlinePlayers().forEach(p -> {
             p.sendActionBar(Component.text("回合結束").color(NamedTextColor.YELLOW));
-            p.sendMessage(Component.text(round.getWinner().getName() + "獲得了本場勝利").color(NamedTextColor.YELLOW));
+            p.sendMessage(Component.translatable("%s獲得了本場勝利").args(Component.text(round.getWinner().getName())).color(NamedTextColor.YELLOW));
         });
         if (getSumoStage() != SumoStage.SEMI_FINAL) {
             for (PlayerData data : alive) {
@@ -158,9 +158,9 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         } else {
             if (getSumoStage() != SumoStage.FINAL) {
                 nextSumoStage();
-                return;
+            } else {
+                end(false);
             }
-            end(false);
         }
     }
 

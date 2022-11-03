@@ -11,7 +11,6 @@ public abstract class CompetitionGUI {
     public static final HashMap<Player, AbstractGUI> GUI_MAP = new HashMap<>();
     public static final AbstractGUI MENU_GUI = register(new MenuGUI());
     public static final AbstractGUI COMPETITION_INFO_GUI = register(new CompetitionInfoGUI());
-    public static final AbstractGUI PLAYER_LIST_GUI = register(new PlayerListGUI());
     public static final AbstractGUI COMPETITION_START_GUI = register(new CompetitionStartGUI());
     public static final AbstractGUI COMPETITION_SETTINGS_GUI = register(new CompetitionSettingsGUI());
 

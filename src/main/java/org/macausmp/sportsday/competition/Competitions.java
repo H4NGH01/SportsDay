@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.gui.PlayerListGUI;
 
 import java.util.*;
 
@@ -85,7 +85,7 @@ public class Competitions {
             }
         }
         Competitions.getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
-        CompetitionGUI.PLAYER_LIST_GUI.update();
+        PlayerListGUI.updateGUI();
         player.sendMessage(Component.text("你已成功註冊為參賽選手，選手號碼為" + number).color(NamedTextColor.GREEN));
         return true;
     }
@@ -103,7 +103,7 @@ public class Competitions {
                     SportsDay.getInstance().savePlayerConfig();
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     getPlayerDataList().remove(data);
-                    CompetitionGUI.PLAYER_LIST_GUI.update();
+                    PlayerListGUI.updateGUI();
                     if (player.isOnline()) {
                         Objects.requireNonNull(player.getPlayer()).sendMessage(Component.text("你已被從參賽選手名單上除名").color(NamedTextColor.YELLOW));
                     }
