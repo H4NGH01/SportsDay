@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +18,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class GUIButton {
-    public static final NamespacedKey ITEM_ID = new NamespacedKey(SportsDay.getInstance(), "item_id");
-    public static final NamespacedKey COMPETITION_ID = new NamespacedKey(SportsDay.getInstance(), "competition_id");
     public static final ItemStack COMPETITION_INFO = competitionInfo();
     public static final ItemStack PLAYER_LIST = playerlist();
     public static final ItemStack START_COMPETITION = startCompetition();
@@ -44,7 +41,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊查看比賽資訊").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition_info");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_info");
         });
         return stack;
     }
@@ -56,7 +53,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊查看參賽選手名單").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "player_list");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_list");
         });
         return stack;
     }
@@ -68,7 +65,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊查看可用比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "start_competition");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competition");
         });
         return stack;
     }
@@ -80,7 +77,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊結束當前比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "end_competition");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "end_competition");
         });
         return stack;
     }
@@ -92,7 +89,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊查看比賽設定").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition_settings");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_settings");
         });
         return stack;
     }
@@ -101,7 +98,7 @@ public class GUIButton {
         ItemStack version = new ItemStack(Material.OAK_SIGN);
         version.editMeta(meta -> {
             meta.displayName(Component.text("當前插件版本: " + SportsDay.getInstance().getDescription().getVersion()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "version");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "version");
         });
         return version;
     }
@@ -110,7 +107,7 @@ public class GUIButton {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
             meta.displayName(Component.text("下一頁").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "next_page");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "next_page");
         });
         return version;
     }
@@ -119,7 +116,7 @@ public class GUIButton {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
             meta.displayName(Component.text("上一頁").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "previous_page");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "previous_page");
         });
         return version;
     }
@@ -131,8 +128,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.ELYTRA_RACING.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ELYTRA_RACING.getID());
         });
         return stack;
     }
@@ -144,8 +141,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.ICE_BOAT_RACING.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ICE_BOAT_RACING.getID());
         });
         return stack;
     }
@@ -157,8 +154,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.JAVELIN_THROW.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.JAVELIN_THROW.getID());
         });
         return stack;
     }
@@ -170,8 +167,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.OBSTACLE_COURSE.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.OBSTACLE_COURSE.getID());
         });
         return stack;
     }
@@ -183,8 +180,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.PARKOUR.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.PARKOUR.getID());
         });
         return stack;
     }
@@ -196,8 +193,8 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊選擇該比賽").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(COMPETITION_ID, PersistentDataType.STRING, Competitions.SUMO.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.SUMO.getID());
         });
         return stack;
     }
@@ -217,8 +214,8 @@ public class GUIButton {
 
     public static boolean isSameButton(@NotNull ItemStack button, @NotNull ItemStack button2) {
         if (!button.hasItemMeta() || !button2.hasItemMeta()) return false;
-        String id1 = button.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
-        String id2 = button2.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
+        String id1 = button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
+        String id2 = button2.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id1, id2);
     }
 }

@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.gui;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class MenuGUI extends AbstractGUI {
     public MenuGUI() {
@@ -18,5 +19,10 @@ public class MenuGUI extends AbstractGUI {
 
     @Override
     public void update() {
+    }
+
+    @Override
+    public void onClick(InventoryClickEvent event) {
+
     }
 }

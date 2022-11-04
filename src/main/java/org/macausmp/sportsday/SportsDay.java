@@ -3,6 +3,7 @@ package org.macausmp.sportsday;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameRule;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
@@ -16,6 +17,8 @@ import org.macausmp.sportsday.gui.GUIListener;
 
 public final class SportsDay extends JavaPlugin {
     private static SportsDay instance;
+    public static NamespacedKey ITEM_ID;
+    public static NamespacedKey COMPETITION_ID;
     private PlayerConfig playerConfig;
     private CommandManager commandManager;
 
@@ -29,6 +32,7 @@ public final class SportsDay extends JavaPlugin {
         }
         playerConfig.setup();
         playerConfig.saveConfig();
+        registryNamespaceKey();
         if (commandManager == null) {
             commandManager = new CommandManager();
         }
@@ -42,6 +46,13 @@ public final class SportsDay extends JavaPlugin {
         registryTeam(scoreboard, "audience", Component.text("觀眾"), NamedTextColor.GRAY);
         getServer().getWorlds().forEach(w -> w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true));
         getServer().getConsoleSender().sendMessage("Macau SMP SportsDay plugin enabled");
+    }
+
+    private void registryNamespaceKey() {
+        if (ITEM_ID == null || COMPETITION_ID == null) {
+            ITEM_ID = new NamespacedKey(SportsDay.getInstance(), "item_id");
+            COMPETITION_ID = new NamespacedKey(SportsDay.getInstance(), "competition_id");
+        }
     }
 
     private void registryListener() {

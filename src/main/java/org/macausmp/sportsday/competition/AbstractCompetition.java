@@ -24,6 +24,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     private final Location location = SportsDay.getInstance().getConfig().getLocation(this.getID() + ".location");
     private final World world = Objects.requireNonNull(this.location).getWorld();
     private final List<BukkitTask> runnableList = new ArrayList<>();
+    protected static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
 
     @Override
     public Component getName() {
@@ -68,10 +69,10 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
             @Override
             public void run() {
                 if (i == 15 || i == 10 || (i <= 5 && i > 0)) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("§e比賽還有§a" + i + "秒§e開始")));
-                    if ((i <= 5 && i > 0)) {
-                        getOnlinePlayers().forEach(p -> p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 0.5f));
-                    }
+                    getOnlinePlayers().forEach(p -> {
+                        p.sendActionBar(Component.text("§e比賽還有§a" + i + "秒§e開始"));
+                        p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 0.5f);
+                    });
                 }
                 if (i-- == 0) {
                     this.cancel();
@@ -97,7 +98,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     public void end(boolean force) {
         Bukkit.getConsoleSender().sendMessage(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + (force ? "§c已強制結束" : "§c已結束"));
         setStage(Stage.ENDED);
-        Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this));
+        Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
         getLeaderboard().clear();
         Competitions.setCurrentlyCompetition(null);

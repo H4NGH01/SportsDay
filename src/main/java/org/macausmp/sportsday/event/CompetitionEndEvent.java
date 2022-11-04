@@ -8,9 +8,15 @@ import org.macausmp.sportsday.competition.ICompetition;
 public class CompetitionEndEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final ICompetition competition;
+    private final boolean force;
 
-    public CompetitionEndEvent(ICompetition competition) {
+    public CompetitionEndEvent(ICompetition competition, boolean force) {
         this.competition = competition;
+        this.force = force;
+    }
+
+    public boolean isForce() {
+        return this.force;
     }
 
     public ICompetition getCompetition() {

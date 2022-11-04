@@ -81,8 +81,12 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         int i = 0;
         for (PlayerResult result : getLeaderboard().getEntry()) {
             sb.append("第").append(++i).append("名 ").append(result.getPlayer().getName()).append(" 成績").append(result.getDistance()).append("米").append("\n");
+            if (i <= 3) {
+                Objects.requireNonNull(Competitions.getPlayerData(result.uuid)).addScore(4 - i);
+            }
+            Objects.requireNonNull(Competitions.getPlayerData(result.uuid)).addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(sb.substring(0, sb.length() - 1))));
+        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
     @EventHandler

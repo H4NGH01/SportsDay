@@ -9,11 +9,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.command.CompetitionGUICommand;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
+import org.macausmp.sportsday.gui.CompetitionGUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +25,6 @@ import java.util.UUID;
 
 public class CompetitionListener implements Listener {
     private static final List<UUID> SPAWNPOINT_LIST = new ArrayList<>();
-    public static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("death_block")));
 
@@ -31,20 +33,19 @@ public class CompetitionListener implements Listener {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.STARTED) return;
         Player p = e.getPlayer();
         if (p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
+        Competitions.getCurrentlyCompetition().onEvent(e);
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);
-        Competitions.getCurrentlyCompetition().onEvent(e);
         if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) {
             SPAWNPOINT_LIST.remove(p.getUniqueId());
         }
         if (loc.getWorld().getBlockAt(loc).getType() == DEATH) {
-            p.performCommand("kill");
+            p.setHealth(0);
         }
     }
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
         if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
-            player.performCommand("spawnpoint");
             player.setBedSpawnLocation(player.getLocation(), true);
             player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
             SPAWNPOINT_LIST.add(player.getUniqueId());
@@ -73,5 +74,13 @@ public class CompetitionListener implements Listener {
             if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.STARTED) return;
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onOpenBook(@NotNull PlayerInteractEvent e) {
+        if (e.getPlayer().isOp() && e.getItem() != null && e.getItem().equals(CompetitionGUICommand.book())) {
+            CompetitionGUI.MENU_GUI.openTo(e.getPlayer());
+        }
+
     }
 }

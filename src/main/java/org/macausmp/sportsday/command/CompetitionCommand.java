@@ -49,7 +49,7 @@ public class CompetitionCommand extends PluginCommand {
                         StringBuilder sb = new StringBuilder("(");
                         Competitions.COMPETITIONS.forEach(c -> sb.append(c.getID()).append("|"));
                         sb.replace(sb.length(), sb.length(), ")");
-                        sender.sendMessage(Component.translatable("/competition start " + sb));
+                        sender.sendMessage("/competition start " + sb);
                     }
                     break;
                 case "end":

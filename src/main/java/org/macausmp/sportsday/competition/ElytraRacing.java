@@ -17,11 +17,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
+import org.macausmp.sportsday.SportsDay;
 
 public class ElytraRacing extends AbstractCompetition {
     private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
+    private boolean ending = false;
 
     @Override
     public String getID() {
@@ -30,6 +33,7 @@ public class ElytraRacing extends AbstractCompetition {
 
     @Override
     public void onSetup() {
+        this.ending = false;
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         elytra.editMeta(meta -> {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
@@ -62,8 +66,12 @@ public class ElytraRacing extends AbstractCompetition {
         int i = 0;
         for (PlayerData data : getLeaderboard().getEntry()) {
             sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
+            if (i <= 3) {
+                data.addScore(4 - i);
+            }
+            data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(sb.substring(0, sb.length() - 1))));
+        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
     @EventHandler
@@ -92,13 +100,27 @@ public class ElytraRacing extends AbstractCompetition {
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
-            if (loc.getBlock().getType() == CompetitionListener.FINISH_LINE) {
+            if (loc.getBlock().getType() == FINISH_LINE) {
                 getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 player.setGameMode(GameMode.SPECTATOR);
                 getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
-                if (getLeaderboard().size() >= 3) {
-                    end(false);
+                if (getLeaderboard().size() >= 3 && !ending) {
+                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
+                    addRunnable(new BukkitRunnable() {
+                        int i = 30;
+                        @Override
+                        public void run() {
+                            if (i > 0) {
+                                getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("比賽將於" + i + "秒後結束").color(NamedTextColor.YELLOW)));
+                            }
+                            if (i-- == 0) {
+                                getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("比賽結束").color(NamedTextColor.YELLOW)));
+                                end(false);
+                                cancel();
+                            }
+                        }
+                    }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
                 }
             }
         }

@@ -1,7 +1,5 @@
 package org.macausmp.sportsday;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,9 +20,9 @@ public class PlayerConfig {
         if (!playerFile.exists()) {
             try {
                 playerFile.createNewFile();
-                Bukkit.getConsoleSender().sendMessage(Component.text("player.yml file has been created"));
+                Bukkit.getConsoleSender().sendMessage("player.yml file has been created");
             } catch (IOException e) {
-                Bukkit.getConsoleSender().sendMessage(Component.text("Could not create the player.yml file").color(NamedTextColor.RED));
+                Bukkit.getConsoleSender().sendMessage("§cCould not create the player.yml file");
             }
         }
         playerConfig = YamlConfiguration.loadConfiguration(playerFile);
@@ -38,7 +36,7 @@ public class PlayerConfig {
         try {
             playerConfig.save(playerFile);
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage(Component.text("Could not save the player.yml file").color(NamedTextColor.RED));
+            Bukkit.getConsoleSender().sendMessage("§cCould not save the player.yml file");
         }
     }
 }

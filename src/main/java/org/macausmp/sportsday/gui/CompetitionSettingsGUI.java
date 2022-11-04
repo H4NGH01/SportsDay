@@ -4,14 +4,20 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CompetitionSettingsGUI extends AbstractGUI {
     private static final ItemStack SELECTED = GUIButton.addEffect(GUIButton.competitionSettings());
@@ -45,13 +51,31 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         getInventory().setItem(32, enable(Competitions.SUMO));
     }
 
+    @Override
+    public void onClick(@NotNull InventoryClickEvent event) {
+        Player p = (Player) event.getWhoClicked();
+        ItemStack item = Objects.requireNonNull(event.getCurrentItem());
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "enable_switch")) {
+            for (ICompetition competition : Competitions.COMPETITIONS) {
+                if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
+                    SportsDay.getInstance().getConfig().set(competition.getID() + ".enable", !competition.isEnable());
+                    SportsDay.getInstance().saveConfig();
+                    CompetitionGUI.COMPETITION_SETTINGS_GUI.update();
+                    p.playSound(p, competition.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                    return;
+                }
+            }
+        }
+    }
+
     private @NotNull ItemStack enable(@NotNull ICompetition competition) {
         ItemStack stack = new ItemStack(competition.isEnable() ? Material.LIME_DYE : Material.BARRIER);
         stack.editMeta(meta -> {
             Component c = competition.isEnable() ? Component.text("是").color(NamedTextColor.YELLOW) : Component.text("否").color(NamedTextColor.RED);
             meta.displayName(Component.text("啟用: ").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW).append(c));
-            meta.getPersistentDataContainer().set(GUIButton.ITEM_ID, PersistentDataType.STRING, "enable_switch");
-            meta.getPersistentDataContainer().set(GUIButton.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "enable_switch");
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("點擊切換").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
             meta.lore(lore);

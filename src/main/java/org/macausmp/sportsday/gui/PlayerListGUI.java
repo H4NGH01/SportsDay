@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +49,18 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
                 break;
             }
             getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerDataList().get(i + getPage() * getSize()).getUUID()));
+        }
+    }
+
+    @Override
+    public void onClick(@NotNull InventoryClickEvent event) {
+        Player p = (Player) event.getWhoClicked();
+        ItemStack item = Objects.requireNonNull(event.getCurrentItem());
+        PlayerListGUI gui = (PlayerListGUI) CompetitionGUI.GUI_MAP.get(p);
+        if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
+            gui.nextPage();
+        } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
+            gui.previousPage();
         }
     }
 

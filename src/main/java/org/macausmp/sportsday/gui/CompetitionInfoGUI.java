@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
@@ -31,6 +32,11 @@ public class CompetitionInfoGUI extends AbstractGUI {
     public void update() {
         if (Competitions.getCurrentlyCompetition() == null) return;
         getInventory().setItem(18, status());
+    }
+
+    @Override
+    public void onClick(InventoryClickEvent event) {
+
     }
 
     private @NotNull ItemStack status() {
