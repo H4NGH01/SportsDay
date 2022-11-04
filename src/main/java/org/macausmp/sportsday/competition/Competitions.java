@@ -111,7 +111,7 @@ public class Competitions {
                     if (player.isOnline()) {
                         Objects.requireNonNull(player.getPlayer()).sendMessage(Component.text("你已被從參賽選手名單上除名").color(NamedTextColor.YELLOW));
                     }
-                    Bukkit.getPluginManager().callEvent(new CompetitionLeavePlayerEvent(Objects.requireNonNull(player.getPlayer())));
+                    Bukkit.getPluginManager().callEvent(new CompetitionLeavePlayerEvent(player));
                     return true;
                 }
             }

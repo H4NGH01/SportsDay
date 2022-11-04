@@ -154,7 +154,8 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
      * Add a runnable task to this competition
      * @param task runnable task to add
      */
-    protected void addRunnable(BukkitTask task) {
+    protected BukkitTask addRunnable(BukkitTask task) {
         runnableList.add(task);
+        return task;
     }
 }

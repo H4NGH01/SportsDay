@@ -18,6 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
@@ -92,6 +93,8 @@ public class ElytraRacing extends AbstractCompetition {
         }
     }
 
+    private BukkitTask task;
+
     @Override
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
@@ -104,10 +107,17 @@ public class ElytraRacing extends AbstractCompetition {
                 getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 player.setGameMode(GameMode.SPECTATOR);
-                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已完成了比賽").color(NamedTextColor.YELLOW)));
+                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了比賽").color(NamedTextColor.YELLOW)));
+                if (getLeaderboard().size() == getPlayerDataList().size()) {
+                    if (task != null) task.cancel();
+                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("所有選手已完成比賽，比賽結束").color(NamedTextColor.YELLOW)));
+                    end(false);
+                    return;
+                }
                 if (getLeaderboard().size() >= 3 && !ending) {
+                    ending = true;
                     getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已完成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
-                    addRunnable(new BukkitRunnable() {
+                    task = addRunnable(new BukkitRunnable() {
                         int i = 30;
                         @Override
                         public void run() {

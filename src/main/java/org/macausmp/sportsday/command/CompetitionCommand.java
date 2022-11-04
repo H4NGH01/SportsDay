@@ -16,6 +16,7 @@ import org.macausmp.sportsday.competition.ICompetition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CompetitionCommand extends PluginCommand {
     @Override
@@ -109,6 +110,35 @@ public class CompetitionCommand extends PluginCommand {
                         sender.sendMessage(Component.text("/competition leave <player>"));
                     }
                     break;
+                case "score":
+                    if (args.length >= 3) {
+                        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+                        if (p.getName() == null || p.getFirstPlayed() == 0L) {
+                            sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
+                            return;
+                        }
+                        if (Competitions.containPlayer(p)) {
+                            int score;
+                            try {
+                                score = Integer.parseInt(args[2]);
+                                if (score < 0) {
+                                    sender.sendMessage(Component.text("分數必須是正整數").color(NamedTextColor.RED));
+                                    return;
+                                }
+                            } catch (Exception e) {
+                                sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[2])).color(NamedTextColor.RED));
+                                return;
+                            }
+                            PlayerData data = Objects.requireNonNull(Competitions.getPlayerData(p.getUniqueId()));
+                            data.setScore(score);
+                            sender.sendMessage(Component.translatable("已為%s設置新的分數%s").args(Component.text(data.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
+                        } else {
+                            sender.sendMessage(Component.text("該玩家不在參賽選手名單上").color(NamedTextColor.RED));
+                        }
+                    } else {
+                        sender.sendMessage(Component.text("/competition score <player> <new_score>"));
+                    }
+                    break;
                 case "info":
                     sender.sendMessage(Component.text("比賽資訊"));
                     sender.sendMessage(Component.translatable("比賽狀態: %s").args(Component.text(Competitions.getCurrentlyCompetition() == null ? "未開始" : Competitions.getCurrentlyCompetition().getStage().name())));
@@ -129,7 +159,7 @@ public class CompetitionCommand extends PluginCommand {
                     break;
             }
         } else {
-            sender.sendMessage(Component.text("/competition (start|end|join|leave|info) <argument>"));
+            sender.sendMessage(Component.text("/competition (start|end|join|leave|score|info) <argument>"));
         }
     }
 
@@ -156,7 +186,11 @@ public class CompetitionCommand extends PluginCommand {
                 }
             } else if (args[0].equals("leave")) {
                 for (PlayerData data : Competitions.getPlayerDataList()) {
-                    l.add(Bukkit.getOfflinePlayer(data.getUUID()).getName());
+                    l.add(data.getName());
+                }
+            } else if (args[0].equals("score")) {
+                for (PlayerData data : Competitions.getPlayerDataList()) {
+                    l.add(data.getName());
                 }
             }
         } else {
@@ -164,6 +198,7 @@ public class CompetitionCommand extends PluginCommand {
             l.add("end");
             l.add("join");
             l.add("leave");
+            l.add("score");
             l.add("info");
         }
         return l;

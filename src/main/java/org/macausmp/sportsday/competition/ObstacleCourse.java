@@ -10,6 +10,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 
@@ -62,6 +63,8 @@ public class ObstacleCourse extends AbstractCompetition {
         getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
+    private BukkitTask task;
+
     @Override
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
@@ -76,14 +79,21 @@ public class ObstacleCourse extends AbstractCompetition {
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 player.teleport(getLocation());
                 if (lapMap.get(data) == 1) {
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了第一圈").color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了第一圈").color(NamedTextColor.YELLOW)));
                 } else if (lapMap.get(data) >= 2) {
                     getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了比賽").color(NamedTextColor.YELLOW)));
+                    if (getLeaderboard().size() == getPlayerDataList().size()) {
+                        if (task != null) task.cancel();
+                        getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("所有選手已完成比賽，比賽結束").color(NamedTextColor.YELLOW)));
+                        end(false);
+                        return;
+                    }
                     if (getLeaderboard().size() >= 3 && !ending) {
-                        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
-                        addRunnable(new BukkitRunnable() {
+                        ending = true;
+                        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已完成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
+                        task = addRunnable(new BukkitRunnable() {
                             int i = 30;
                             @Override
                             public void run() {

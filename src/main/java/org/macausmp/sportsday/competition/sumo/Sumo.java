@@ -21,8 +21,8 @@ import java.util.Random;
 
 public class Sumo extends AbstractCompetition implements IRoundGame {
     private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
-    private final List<PlayerData> queue = new ArrayList<>();
     private final List<PlayerData> alive = new ArrayList<>();
+    private final List<PlayerData> queue = new ArrayList<>();
     private SumoStage sumoStage = SumoStage.ELIMINATE;
     private final Player[] theFinal = new Player[2];
     private final Player[] thirdPlace = new Player[2];
@@ -93,7 +93,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         if (event instanceof PlayerMoveEvent e) {
             Player p = e.getPlayer();
             SumoRound round = getSumoStage().getCurrentRound();
-            if (!round.containPlayer(p)) return;
+            if (round == null || !round.containPlayer(p)) return;
             if (round.getStatus() == SumoRound.RoundStatus.COMING) {
                 e.setCancelled(true);
                 return;

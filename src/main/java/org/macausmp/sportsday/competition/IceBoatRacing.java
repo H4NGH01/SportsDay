@@ -13,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
@@ -65,6 +67,8 @@ public class IceBoatRacing extends AbstractCompetition {
         getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
     }
 
+    private BukkitTask task;
+
     @Override
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
@@ -77,20 +81,27 @@ public class IceBoatRacing extends AbstractCompetition {
                 PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
-                if (lapMap.get(data) == 1) {
+                if (lapMap.get(data) < 2) {
                     boatMap.get(player).remove();
                     boatMap.put(player, getWorld().spawn(getLocation(), Boat.class));
                     boatMap.get(player).addPassenger(player);
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了第一圈").color(NamedTextColor.YELLOW)));
-                } else if (lapMap.get(data) >= 2) {
+                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了第一圈").color(NamedTextColor.YELLOW)));
+                } else {
                     getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
                     boatMap.get(player).remove();
                     boatMap.remove(player);
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "已成了比賽").color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了比賽").color(NamedTextColor.YELLOW)));
+                    if (getLeaderboard().size() == getPlayerDataList().size()) {
+                        if (task != null) task.cancel();
+                        getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("所有選手已完成比賽，比賽結束").color(NamedTextColor.YELLOW)));
+                        end(false);
+                        return;
+                    }
                     if (getLeaderboard().size() >= 3 && !ending) {
-                        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
-                        addRunnable(new BukkitRunnable() {
+                        ending = true;
+                        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("前三名已完成了比賽，比賽將於30秒後結束").color(NamedTextColor.YELLOW)));
+                        task = addRunnable(new BukkitRunnable() {
                             int i = 30;
                             @Override
                             public void run() {
@@ -109,7 +120,7 @@ public class IceBoatRacing extends AbstractCompetition {
                 return;
             }
             if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) {
-                boatMap.get(player).getVelocity().setY(1.3f);
+                boatMap.get(player).setVelocity(new Vector(0f, 1.3f, 0f));
             }
         }
     }

@@ -85,7 +85,8 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             meta.displayName(Component.text(Objects.requireNonNull(player.getName())).decoration(TextDecoration.ITALIC, false));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("參賽號碼: " + Objects.requireNonNull(Competitions.getPlayerData(uuid)).getNumber()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(Component.translatable("參賽號碼: %s").args(Component.text(Objects.requireNonNull(Competitions.getPlayerData(uuid)).getNumber())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(Component.translatable("總體得分: %s").args(Component.text(Objects.requireNonNull(Competitions.getPlayerData(uuid)).getScore())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             meta.lore(lore);
         });
         return icon;

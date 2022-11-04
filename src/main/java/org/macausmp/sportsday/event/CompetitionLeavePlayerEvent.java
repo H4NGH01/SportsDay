@@ -1,15 +1,21 @@
 package org.macausmp.sportsday.event;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class CompetitionLeavePlayerEvent extends PlayerEvent {
+public class CompetitionLeavePlayerEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
-    public CompetitionLeavePlayerEvent(@NotNull Player who) {
-        super(who);
+    private final OfflinePlayer player;
+
+    public CompetitionLeavePlayerEvent(@NotNull OfflinePlayer who) {
+        this.player = who;
+    }
+
+    public final OfflinePlayer getPlayer() {
+        return player;
     }
 
     @Override
