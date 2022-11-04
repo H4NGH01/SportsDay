@@ -1,0 +1,91 @@
+finish_line_block: GOLD_BLOCK
+checkpoint_block: EMERALD_BLOCK
+death_block: RED_GLAZED_TERRACOTTA
+elytra_racing:
+  name: "§e飛行賽"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+ice_boat_racing:
+  name: "§b冰船賽"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+javelin_throw:
+  name: "§e擲標槍"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+obstacle_course:
+  name: "§e障礙賽"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+parkour:
+  name: "§e跑酷賽"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+sumo:
+  name: "§6相撲"
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+  p1-location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+  p2-location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
