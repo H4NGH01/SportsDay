@@ -10,3 +10,4 @@ Macau SMP SportsDay papermc plugin
 > * `info`
 * `/competitiongui`
 > Open competition GUI
+> * `book`
