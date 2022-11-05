@@ -6,7 +6,7 @@ authors: [ JJGP ]
 description: "The MacauSMP SportsDay plugin"
 commands:
   competition:
-    usage: "/competition (start|end|join|leave|info) <argument>"
+    usage: "/competition (start|end|join|leave|score|info) <argument>"
     description: "Competition hosting command"
     permission: op
   competitiongui:

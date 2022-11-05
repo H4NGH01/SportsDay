@@ -14,7 +14,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ObstacleCourse extends AbstractCompetition {
     private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
@@ -51,16 +53,16 @@ public class ObstacleCourse extends AbstractCompetition {
             }
         });
         if (force) return;
-        StringBuilder sb = new StringBuilder();
+        List<Component> cl = new ArrayList<>();
         int i = 0;
         for (PlayerData data : getLeaderboard().getEntry()) {
-            sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     private BukkitTask task;
@@ -78,9 +80,9 @@ public class ObstacleCourse extends AbstractCompetition {
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 player.teleport(getLocation());
-                if (lapMap.get(data) == 1) {
+                if (lapMap.get(data) < 2) {
                     getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了第一圈").color(NamedTextColor.YELLOW)));
-                } else if (lapMap.get(data) >= 2) {
+                } else {
                     getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
                     getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "完成了比賽").color(NamedTextColor.YELLOW)));

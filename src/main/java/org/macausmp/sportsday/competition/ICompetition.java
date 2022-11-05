@@ -89,9 +89,18 @@ public interface ICompetition {
      * Competition stage
      */
     enum Stage {
-        IDLE,
-        COMING,
-        STARTED,
-        ENDED
+        IDLE("待開始"),
+        COMING("即將開始"),
+        STARTED("開始中"),
+        ENDED("已結束");
+
+        private final String name;
+        Stage(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

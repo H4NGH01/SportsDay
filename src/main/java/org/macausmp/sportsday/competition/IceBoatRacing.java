@@ -21,7 +21,9 @@ import org.macausmp.sportsday.SportsDay;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class IceBoatRacing extends AbstractCompetition {
@@ -55,16 +57,16 @@ public class IceBoatRacing extends AbstractCompetition {
     @Override
     public void onEnd(boolean force) {
         if (force) return;
-        StringBuilder sb = new StringBuilder();
+        List<Component> cl = new ArrayList<>();
         int i = 0;
         for (PlayerData data : getLeaderboard().getEntry()) {
-            sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     private BukkitTask task;

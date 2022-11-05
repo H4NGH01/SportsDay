@@ -17,6 +17,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Parkour extends AbstractCompetition {
     private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
     private boolean ending = false;
@@ -54,16 +57,16 @@ public class Parkour extends AbstractCompetition {
             }
         });
         if (force) return;
-        StringBuilder sb = new StringBuilder();
+        List<Component> cl = new ArrayList<>();
         int i = 0;
         for (PlayerData data : getLeaderboard().getEntry()) {
-            sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     private BukkitTask task;
@@ -121,7 +124,7 @@ public class Parkour extends AbstractCompetition {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
                 cancel();
             }
-        }.runTaskTimer(SportsDay.getInstance(), 5L, 0L));
+        }.runTaskLater(SportsDay.getInstance(), 5L));
     }
 
     @Override

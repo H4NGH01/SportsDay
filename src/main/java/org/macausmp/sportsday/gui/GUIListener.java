@@ -2,15 +2,18 @@ package org.macausmp.sportsday.gui;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.competition.ICompetition;
 
 public class GUIListener implements Listener {
     @EventHandler
@@ -19,7 +22,8 @@ public class GUIListener implements Listener {
             if (CompetitionGUI.GUI_MAP.containsKey(player)) {
                 e.setCancelled(true);
                 ItemStack item = e.getCurrentItem();
-                if (item != null) {
+                if (item != null && !GUIButton.isSameButton(item, GUIButton.BOARD) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
+                    player.playSound(player, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                     if (GUIButton.isSameButton(item, GUIButton.COMPETITION_INFO)) {
                         if (Competitions.getCurrentlyCompetition() != null) {
                             CompetitionGUI.COMPETITION_INFO_GUI.openTo(player);
@@ -29,7 +33,7 @@ public class GUIListener implements Listener {
                     } else if (GUIButton.isSameButton(item, GUIButton.PLAYER_LIST)) {
                         new PlayerListGUI().openTo(player);
                     } else if (GUIButton.isSameButton(item, GUIButton.START_COMPETITION)) {
-                        if (Competitions.getCurrentlyCompetition() != null) {
+                        if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
                             player.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
                             return;
                         }

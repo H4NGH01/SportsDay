@@ -20,7 +20,7 @@ public class PlayerConfig {
         if (!playerFile.exists()) {
             try {
                 playerFile.createNewFile();
-                Bukkit.getConsoleSender().sendMessage("player.yml file has been created");
+                Bukkit.getConsoleSender().sendMessage("§aplayer.yml file has been created");
             } catch (IOException e) {
                 Bukkit.getConsoleSender().sendMessage("§cCould not create the player.yml file");
             }

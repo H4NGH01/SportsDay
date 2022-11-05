@@ -76,16 +76,16 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         if (force) return;
         getLeaderboard().getEntry().add(1, alive.get(1));
         getLeaderboard().getEntry().add(0, alive.get(0));
-        StringBuilder sb = new StringBuilder();
+        List<Component> cl = new ArrayList<>();
         int i = 0;
         for (PlayerData data : getLeaderboard().getEntry()) {
-            sb.append("第").append(++i).append("名 ").append(data.getName()).append("\n");
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     @Override

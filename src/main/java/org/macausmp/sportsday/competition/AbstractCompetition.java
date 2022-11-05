@@ -54,12 +54,15 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     @Override
     public void setup() {
         Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
+        getLeaderboard().clear();
         setStage(Stage.COMING);
         getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s§a將於15秒後開始").args(getName())));
         getPlayerDataList().forEach(data -> {
             if (data.isPlayerOnline()) {
                 data.getPlayer().setBedSpawnLocation(getLocation(), true);
-                data.getPlayer().getInventory().clear();
+                if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
+                    data.getPlayer().getInventory().clear();
+                }
                 data.getPlayer().teleport(getLocation());
                 data.getPlayer().setGameMode(GameMode.ADVENTURE);
             }
@@ -100,12 +103,18 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
         setStage(Stage.ENDED);
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
-        getLeaderboard().clear();
-        Competitions.setCurrentlyCompetition(null);
-        if (isEnable()) {
-            setStage(Stage.IDLE);
-            runnableList.forEach(BukkitTask::cancel);
-        }
+        runnableList.forEach(BukkitTask::cancel);
+        addRunnable(new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (getStage() == Stage.ENDED) {
+                    Competitions.setCurrentlyCompetition(null);
+                    if (isEnable()) {
+                        setStage(Stage.IDLE);
+                    }
+                }
+            }
+        }.runTaskLater(SportsDay.getInstance(), 100L));
     }
 
     /**

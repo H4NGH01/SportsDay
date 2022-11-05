@@ -1,16 +1,19 @@
 package org.macausmp.sportsday.competition;
 
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.command.CompetitionGUICommand;
@@ -27,6 +30,13 @@ public class CompetitionListener implements Listener {
     private static final List<UUID> SPAWNPOINT_LIST = new ArrayList<>();
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("death_block")));
+
+    @EventHandler
+    public void onJoin(@NotNull PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPlayedBefore()) return;
+        SportsDay.AUDIENCE.addPlayer(p);
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
@@ -78,9 +88,37 @@ public class CompetitionListener implements Listener {
 
     @EventHandler
     public void onOpenBook(@NotNull PlayerInteractEvent e) {
-        if (e.getPlayer().isOp() && e.getItem() != null && e.getItem().equals(CompetitionGUICommand.book())) {
-            CompetitionGUI.MENU_GUI.openTo(e.getPlayer());
+        if (e.getItem() != null && e.getItem().equals(CompetitionGUICommand.book())) {
+            e.setCancelled(true);
+            Player p = e.getPlayer();
+            if (p.isOp()) {
+                CompetitionGUI.MENU_GUI.openTo(e.getPlayer());
+                return;
+            }
+            // Easter egg, happen if player use the book without op permission
+            new BukkitRunnable() {
+                int i = 0;
+                @Override
+                public void run() {
+                    if (i >= 30 && i < 100) {
+                        p.spawnParticle(Particle.BLOCK_CRACK, p.getLocation(), 20, 0.2, 0.5, 0.2, Material.REDSTONE_BLOCK.createBlockData());
+                    }
+                    if (i == 0) {
+                        p.damage(5);
+                        p.sendMessage(Component.translatable("你以使用替身箭的方式使用了%s").args(e.getItem().displayName()));
+                    } else if (i == 60) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 2, false, false));
+                    } else if (i == 80) {
+                        p.sendMessage(Component.text("看來你並沒有成為替身使者的資格").color(NamedTextColor.RED));
+                    } if (i == 100) {
+                        p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+                        p.setHealth(0);
+                        p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+                        cancel();
+                    }
+                    i++;
+                }
+            }.runTaskTimer(SportsDay.getInstance(), 0L, 1L);
         }
-
     }
 }

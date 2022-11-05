@@ -77,7 +77,7 @@ public class PlayerData {
 
     /**
      * Sets the score of the player
-     * @param score new score to the player
+     * @param score new score set for the player
      */
     public void setScore(int score) {
         this.score = score;

@@ -76,17 +76,17 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             }
         }
         if (force) return;
-        getLeaderboard().getEntry().sort((o1, o2) -> Double.compare(o2.getDistance(), o1.getDistance()));
-        StringBuilder sb = new StringBuilder();
+        getLeaderboard().getEntry().sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
+        List<Component> cl = new ArrayList<>();
         int i = 0;
         for (PlayerResult result : getLeaderboard().getEntry()) {
-            sb.append("第").append(++i).append("名 ").append(result.getPlayer().getName()).append(" 成績").append(result.getDistance()).append("米").append("\n");
+            cl.add(Component.translatable("第%s名 %s 成績為%s米").args(Component.text(++i), Component.text(Competitions.getPlayerData(result.uuid).getName()), Component.text(result.getDistance())));
             if (i <= 3) {
-                Objects.requireNonNull(Competitions.getPlayerData(result.uuid)).addScore(4 - i);
+                Competitions.getPlayerData(result.uuid).addScore(4 - i);
             }
-            Objects.requireNonNull(Competitions.getPlayerData(result.uuid)).addScore(1);
+            Competitions.getPlayerData(result.uuid).addScore(1);
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     @EventHandler
@@ -98,7 +98,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 resultMap.put(p.getUniqueId(), new PlayerResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
-                trident.customName(Component.text(p.getName() + "的標槍"));
+                trident.customName(Component.translatable( "%s的標槍").args(Component.text(p.getName())));
             }
         }
     }
@@ -115,10 +115,10 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 }
                 result.setTridentLocation(trident);
                 getLeaderboard().add(result);
-                trident.customName(Component.text(player.getName() + "的標槍 " + result.getDistance()));
+                trident.customName(Component.translatable( "%s的標槍 %s").args(Component.text(player.getName()), Component.text(result.getDistance())));
                 resultMap.remove(player.getUniqueId());
                 getWorld().strikeLightningEffect(trident.getLocation());
-                getOnlinePlayers().forEach(p -> p.sendMessage(Component.text(player.getName() + "擲出了" + result.getDistance() + "米的成績")));
+                getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s擲出了%s米的成績").args(Component.text(player.getName()), Component.text(result.getDistance()))));
                 onRoundEnd();
             }
         }

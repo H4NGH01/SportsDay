@@ -8,7 +8,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
@@ -16,7 +15,6 @@ import org.macausmp.sportsday.competition.ICompetition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class CompetitionCommand extends PluginCommand {
     @Override
@@ -24,7 +22,7 @@ public class CompetitionCommand extends PluginCommand {
         if (args.length > 0) {
             switch (args[0]) {
                 case "start":
-                    if (Competitions.getCurrentlyCompetition() != null) {
+                    if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
                         sender.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
                         return;
                     }
@@ -129,7 +127,7 @@ public class CompetitionCommand extends PluginCommand {
                                 sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[2])).color(NamedTextColor.RED));
                                 return;
                             }
-                            PlayerData data = Objects.requireNonNull(Competitions.getPlayerData(p.getUniqueId()));
+                            PlayerData data = Competitions.getPlayerData(p.getUniqueId());
                             data.setScore(score);
                             sender.sendMessage(Component.translatable("已為%s設置新的分數%s").args(Component.text(data.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
                         } else {
@@ -146,13 +144,16 @@ public class CompetitionCommand extends PluginCommand {
                         sender.sendMessage(Component.translatable("當前比賽: %s").args(Component.text(Competitions.getCurrentlyCompetition().getID().toUpperCase())));
                     }
                     sender.sendMessage(Component.translatable("參賽人數: %s").args(Component.text(Competitions.getPlayerDataList().size())));
-                    List<String> l = new ArrayList<>();
+                    List<String> pl = new ArrayList<>();
+                    Competitions.getPlayerDataList().forEach(d -> pl.add(d.getName()));
+                    sender.sendMessage(Component.translatable("選手名單: %s").args(Component.text(Arrays.toString(pl.toArray()))));
+                    List<String> cl = new ArrayList<>();
                     for (ICompetition c : Competitions.COMPETITIONS) {
                         if (c.isEnable()) {
-                            l.add(c.getID().toUpperCase());
+                            cl.add(c.getID().toUpperCase());
                         }
                     }
-                    sender.sendMessage(Component.translatable("可用比賽: %s").args(Component.text(Arrays.toString(l.toArray()))));
+                    sender.sendMessage(Component.translatable("可用比賽: %s").args(Component.text(Arrays.toString(cl.toArray()))));
                     break;
                 default:
                     sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
@@ -169,37 +170,36 @@ public class CompetitionCommand extends PluginCommand {
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         List<String> l = new ArrayList<>();
-        if (args.length > 1) {
-            if (args.length == 2 && args[0].equals("start")) {
-                Competitions.COMPETITIONS.forEach(c -> {
-                    if (c.isEnable()) {
-                        l.add(c.getID());
-                    }
-                });
-            } else if (args[0].equals("join")) {
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (!Competitions.containPlayer(p)) {
-                        l.add(p.getName());
-                    }
-                }
-            } else if (args[0].equals("leave")) {
-                for (PlayerData data : Competitions.getPlayerDataList()) {
-                    l.add(data.getName());
-                }
-            } else if (args[0].equals("score")) {
-                for (PlayerData data : Competitions.getPlayerDataList()) {
-                    l.add(data.getName());
-                }
-            }
-        } else {
+        if (args.length == 1) {
             l.add("start");
             l.add("end");
             l.add("join");
             l.add("leave");
             l.add("score");
             l.add("info");
+        } else if (args.length == 2) {
+            switch (args[0]) {
+                case "start":
+                    Competitions.COMPETITIONS.forEach(c -> {
+                        if (c.isEnable()) {
+                            l.add(c.getID());
+                        }
+                    });
+                    break;
+                case "join":
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (!Competitions.containPlayer(p)) {
+                            l.add(p.getName());
+                        }
+                    }
+                    break;
+                case "leave":
+                case "score":
+                    Competitions.getPlayerDataList().forEach(d -> l.add(d.getName()));
+                    break;
+            }
         }
         return l;
     }

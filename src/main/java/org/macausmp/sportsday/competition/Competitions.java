@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
@@ -90,6 +89,7 @@ public class Competitions {
         Competitions.getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
         PlayerListGUI.updateGUI();
         player.sendMessage(Component.text("你已成功註冊為參賽選手，選手號碼為" + number).color(NamedTextColor.GREEN));
+        SportsDay.PLAYER.addPlayer(player);
         Bukkit.getPluginManager().callEvent(new CompetitionJoinPlayerEvent(player));
         return true;
     }
@@ -111,6 +111,7 @@ public class Competitions {
                     if (player.isOnline()) {
                         Objects.requireNonNull(player.getPlayer()).sendMessage(Component.text("你已被從參賽選手名單上除名").color(NamedTextColor.YELLOW));
                     }
+                    SportsDay.AUDIENCE.addPlayer(player);
                     Bukkit.getPluginManager().callEvent(new CompetitionLeavePlayerEvent(player));
                     return true;
                 }
@@ -159,10 +160,10 @@ public class Competitions {
      * @param uuid player uuid
      * @return player data
      */
-    public static @Nullable PlayerData getPlayerData(UUID uuid) {
+    public static @NotNull PlayerData getPlayerData(UUID uuid) {
         for (PlayerData data : PLAYERS) {
             if (data.getUUID().equals(uuid)) return data;
         }
-        return null;
+        throw new IllegalArgumentException("Player data list does not contain this data");
     }
 }
