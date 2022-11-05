@@ -7,6 +7,7 @@ Macau SMP SportsDay papermc plugin
 > * `end`
 > * `join <player> <number>`
 > * `leave | leave <player>`
+> * `score <player> <new_score>`
 > * `info`
 * `/competitiongui`
 > Open competition GUI
