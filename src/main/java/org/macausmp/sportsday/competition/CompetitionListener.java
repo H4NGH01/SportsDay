@@ -86,6 +86,8 @@ public class CompetitionListener implements Listener {
         }
     }
 
+    private static final List<UUID> EASTER_TRIGGER = new ArrayList<>();
+
     @EventHandler
     public void onOpenBook(@NotNull PlayerInteractEvent e) {
         if (e.getItem() != null && e.getItem().equals(CompetitionGUICommand.book())) {
@@ -96,29 +98,32 @@ public class CompetitionListener implements Listener {
                 return;
             }
             // Easter egg, happen if player use the book without op permission
+            if (EASTER_TRIGGER.contains(p.getUniqueId())) return;
+            EASTER_TRIGGER.add(p.getUniqueId());
             new BukkitRunnable() {
                 int i = 0;
                 @Override
                 public void run() {
-                    if (i >= 30 && i < 100) {
+                    if (i >= 3 && i < 10) {
                         p.spawnParticle(Particle.BLOCK_CRACK, p.getLocation(), 20, 0.2, 0.5, 0.2, Material.REDSTONE_BLOCK.createBlockData());
                     }
                     if (i == 0) {
                         p.damage(5);
                         p.sendMessage(Component.translatable("你以使用替身箭的方式使用了%s").args(e.getItem().displayName()));
-                    } else if (i == 60) {
+                    } else if (i == 6) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 2, false, false));
-                    } else if (i == 80) {
+                    } else if (i == 8) {
                         p.sendMessage(Component.text("看來你並沒有成為替身使者的資格").color(NamedTextColor.RED));
-                    } if (i == 100) {
+                    } if (i == 10) {
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
                         p.setHealth(0);
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+                        EASTER_TRIGGER.remove(p.getUniqueId());
                         cancel();
                     }
                     i++;
                 }
-            }.runTaskTimer(SportsDay.getInstance(), 0L, 1L);
+            }.runTaskTimer(SportsDay.getInstance(), 0L, 10L);
         }
     }
 }

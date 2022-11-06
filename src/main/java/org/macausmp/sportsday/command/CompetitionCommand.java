@@ -27,23 +27,7 @@ public class CompetitionCommand extends PluginCommand {
                         return;
                     }
                     if (args.length >= 2) {
-                        for (ICompetition competition : Competitions.COMPETITIONS) {
-                            if (competition.getID().equals(args[1])) {
-                                if (!competition.isEnable()) {
-                                    sender.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
-                                    return;
-                                }
-                                if (Competitions.getPlayerDataList().size() >= competition.getLeastPlayersRequired()) {
-                                    sender.sendMessage(Component.text("開始新一場比賽中..."));
-                                    Competitions.setCurrentlyCompetition(competition);
-                                    competition.setup();
-                                } else {
-                                    sender.sendMessage(Component.translatable("參賽選手人數不足，無法開始比賽，最少需要%s人開始比賽").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
-                                }
-                                return;
-                            }
-                        }
-                        sender.sendMessage(Component.text("未知的比賽項目").color(NamedTextColor.RED));
+                        Competitions.start(sender, args[1]);
                     } else {
                         StringBuilder sb = new StringBuilder("(");
                         Competitions.COMPETITIONS.forEach(c -> sb.append(c.getID()).append("|"));
@@ -52,12 +36,7 @@ public class CompetitionCommand extends PluginCommand {
                     }
                     break;
                 case "end":
-                    if (Competitions.getCurrentlyCompetition() != null) {
-                        Competitions.getCurrentlyCompetition().end(true);
-                        sender.sendMessage(Component.text("已強制結束一場比賽"));
-                    } else {
-                        sender.sendMessage(Component.text("現在沒有比賽進行中"));
-                    }
+                    Competitions.end(sender);
                     break;
                 case "join":
                     if (args.length >= 2) {
@@ -82,7 +61,7 @@ public class CompetitionCommand extends PluginCommand {
                             } else {
                                 number = Competitions.genNumber();
                             }
-                            sender.sendMessage(Competitions.join(p, number) ? Component.translatable("已添加%s為參賽選手，選手號碼為%s號").args(Component.text(p.getName()), Component.text(number)) : Component.translatable("添加失敗，編號為%s的選手號碼已經被使用了，請選擇其他號碼").args(Component.text(number)));
+                            sender.sendMessage(Competitions.join(p, number) ? Component.translatable("已添加%s為參賽選手，選手號碼為%s號").args(Component.text(p.getName()), Component.text(number)).color(NamedTextColor.GREEN) : Component.translatable("添加失敗，編號為%s的選手號碼已經被使用了，請選擇其他號碼").args(Component.text(number)).color(NamedTextColor.RED));
                         } else {
                             sender.sendMessage(Component.translatable("%s已經在參賽選手名單上").args(Component.text(p.getName())).color(NamedTextColor.RED));
                         }
@@ -97,7 +76,7 @@ public class CompetitionCommand extends PluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        sender.sendMessage(Competitions.leave(p) ? Component.translatable("已將%s從參賽選手名單中移除").args(Component.text(p.getName())) : Component.translatable( "%s不在參賽選手名單上").args(Component.text(p.getName())).color(NamedTextColor.RED));
+                        sender.sendMessage(Competitions.leave(p) ? Component.translatable("已將%s從參賽選手名單中移除").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Component.translatable( "%s不在參賽選手名單上").args(Component.text(p.getName())).color(NamedTextColor.RED));
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p)) {
@@ -139,21 +118,21 @@ public class CompetitionCommand extends PluginCommand {
                     break;
                 case "info":
                     sender.sendMessage(Component.text("比賽資訊"));
-                    sender.sendMessage(Component.translatable("比賽狀態: %s").args(Component.text(Competitions.getCurrentlyCompetition() == null ? "未開始" : Competitions.getCurrentlyCompetition().getStage().name())));
+                    sender.sendMessage(Component.translatable("比賽狀態: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition() == null ? Component.text("未開始").color(NamedTextColor.GRAY) : Competitions.getCurrentlyCompetition().getStage().getName()));
                     if (Competitions.getCurrentlyCompetition() != null) {
-                        sender.sendMessage(Component.translatable("當前比賽: %s").args(Component.text(Competitions.getCurrentlyCompetition().getID().toUpperCase())));
+                        sender.sendMessage(Component.translatable("當前比賽: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getName()));
                     }
-                    sender.sendMessage(Component.translatable("參賽人數: %s").args(Component.text(Competitions.getPlayerDataList().size())));
+                    sender.sendMessage(Component.translatable("參賽人數: %s").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerDataList().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
                     Competitions.getPlayerDataList().forEach(d -> pl.add(d.getName()));
-                    sender.sendMessage(Component.translatable("選手名單: %s").args(Component.text(Arrays.toString(pl.toArray()))));
+                    sender.sendMessage(Component.translatable("選手名單: %s").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
                     for (ICompetition c : Competitions.COMPETITIONS) {
                         if (c.isEnable()) {
                             cl.add(c.getID().toUpperCase());
                         }
                     }
-                    sender.sendMessage(Component.translatable("可用比賽: %s").args(Component.text(Arrays.toString(cl.toArray()))));
+                    sender.sendMessage(Component.translatable("可用比賽: %s").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
                     break;
                 default:
                     sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));

@@ -58,7 +58,6 @@ public class ElytraRacing extends AbstractCompetition {
         getPlayerDataList().forEach(data -> {
             if (data.isPlayerOnline()) {
                 Player p = data.getPlayer();
-                p.getInventory().setHeldItemSlot(0);
                 p.getInventory().setItem(EquipmentSlot.HAND, firework);
             }
         });

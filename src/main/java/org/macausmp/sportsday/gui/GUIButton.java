@@ -218,4 +218,8 @@ public class GUIButton {
         String id2 = button2.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id1, id2);
     }
+
+    public static boolean isButton(@NotNull ItemStack button) {
+        return button.hasItemMeta() && button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING) != null;
+    }
 }

@@ -42,10 +42,10 @@ public class CompetitionInfoGUI extends AbstractGUI {
     private @NotNull ItemStack status() {
         ItemStack status = new ItemStack(Material.BEACON);
         status.editMeta(meta -> {
-            meta.displayName(Component.text("當前比賽: ").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW).append(Competitions.getCurrentlyCompetition().getName()));
+            meta.displayName(Component.translatable("當前比賽: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getName()).decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("比賽階段: " + Competitions.getCurrentlyCompetition().getStage()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
-            lore.add(Component.text("參賽人數: " + Competitions.getPlayerDataList().size()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(Component.translatable("比賽階段: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()).decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.translatable("參賽人數: %s").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerDataList().size()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
             meta.lore(lore);
         });
         return status;

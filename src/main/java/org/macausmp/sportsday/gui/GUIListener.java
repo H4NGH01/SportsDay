@@ -18,39 +18,40 @@ import org.macausmp.sportsday.competition.ICompetition;
 public class GUIListener implements Listener {
     @EventHandler
     public void onClick(@NotNull InventoryClickEvent e) {
-        if (e.getWhoClicked() instanceof Player player) {
-            if (CompetitionGUI.GUI_MAP.containsKey(player)) {
+        if (e.getWhoClicked() instanceof Player p) {
+            if (CompetitionGUI.GUI_MAP.containsKey(p)) {
                 e.setCancelled(true);
                 ItemStack item = e.getCurrentItem();
-                if (item != null && !GUIButton.isSameButton(item, GUIButton.BOARD) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
-                    player.playSound(player, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                if (item != null && GUIButton.isButton(item) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
                     if (GUIButton.isSameButton(item, GUIButton.COMPETITION_INFO)) {
                         if (Competitions.getCurrentlyCompetition() != null) {
-                            CompetitionGUI.COMPETITION_INFO_GUI.openTo(player);
+                            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                            CompetitionGUI.COMPETITION_INFO_GUI.openTo(p);
                             return;
                         }
-                        player.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
+                        p.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
                     } else if (GUIButton.isSameButton(item, GUIButton.PLAYER_LIST)) {
-                        new PlayerListGUI().openTo(player);
+                        p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+                        new PlayerListGUI().openTo(p);
                     } else if (GUIButton.isSameButton(item, GUIButton.START_COMPETITION)) {
                         if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
-                            player.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
+                            p.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
+                            p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }
-                        CompetitionGUI.COMPETITION_START_GUI.openTo(player);
+                        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                        CompetitionGUI.COMPETITION_START_GUI.openTo(p);
                     } else if (GUIButton.isSameButton(item, GUIButton.END_COMPETITION)) {
-                        if (Competitions.getCurrentlyCompetition() != null) {
-                            Competitions.getCurrentlyCompetition().end(true);
-                            player.sendMessage(Component.text("已強制結束一場比賽"));
-                        } else {
-                            player.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
-                        }
+                        boolean b = Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.ENDED;
+                        p.playSound(p, b ? Sound.ENTITY_ENDERMAN_TELEPORT : Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                        Competitions.end(p);
                         return;
                     } else if (GUIButton.isSameButton(item, GUIButton.COMPETITION_SETTINGS)) {
-                        CompetitionGUI.COMPETITION_SETTINGS_GUI.openTo(player);
+                        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                        CompetitionGUI.COMPETITION_SETTINGS_GUI.openTo(p);
                         return;
                     }
-                    CompetitionGUI.GUI_MAP.get(player).onClick(e);
+                    CompetitionGUI.GUI_MAP.get(p).onClick(e);
                 }
             }
         }
@@ -58,8 +59,8 @@ public class GUIListener implements Listener {
 
     @EventHandler
     public void onClose(@NotNull InventoryCloseEvent e) {
-        if (e.getPlayer() instanceof Player player) {
-            CompetitionGUI.GUI_MAP.remove(player);
+        if (e.getPlayer() instanceof Player p) {
+            CompetitionGUI.GUI_MAP.remove(p);
         }
     }
 

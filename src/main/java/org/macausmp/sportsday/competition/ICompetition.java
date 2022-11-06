@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
@@ -89,17 +90,17 @@ public interface ICompetition {
      * Competition stage
      */
     enum Stage {
-        IDLE("待開始"),
-        COMING("即將開始"),
-        STARTED("開始中"),
-        ENDED("已結束");
+        IDLE(Component.text("待開始").color(NamedTextColor.GRAY)),
+        COMING(Component.text("即將開始").color(NamedTextColor.GREEN)),
+        STARTED(Component.text("開始中").color(NamedTextColor.YELLOW)),
+        ENDED(Component.text("已結束").color(NamedTextColor.RED));
 
-        private final String name;
-        Stage(String name) {
+        private final Component name;
+        Stage(Component name) {
             this.name = name;
         }
 
-        public String getName() {
+        public Component getName() {
             return name;
         }
     }

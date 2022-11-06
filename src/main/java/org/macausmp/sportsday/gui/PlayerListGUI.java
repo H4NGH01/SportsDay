@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -58,8 +59,10 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         ItemStack item = Objects.requireNonNull(event.getCurrentItem());
         PlayerListGUI gui = (PlayerListGUI) CompetitionGUI.GUI_MAP.get(p);
         if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
+            p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
             gui.nextPage();
         } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
+            p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
             gui.previousPage();
         }
     }

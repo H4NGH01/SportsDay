@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
@@ -59,7 +60,49 @@ public class Competitions {
     }
 
     /**
-     * Current competition
+     * Start a competition
+     * @param sender who host the competition
+     * @param id competition id
+     */
+    public static void start(CommandSender sender, String id) {
+        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
+            sender.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
+            return;
+        }
+        for (ICompetition competition : COMPETITIONS) {
+            if (competition.getID().equals(id)) {
+                if (!competition.isEnable()) {
+                    sender.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
+                    return;
+                }
+                if (getPlayerDataList().size() >= competition.getLeastPlayersRequired()) {
+                    sender.sendMessage(Component.text("開始新一場比賽中...").color(NamedTextColor.GREEN));
+                    setCurrentlyCompetition(competition);
+                    competition.setup();
+                } else {
+                    sender.sendMessage(Component.translatable("參賽選手人數不足，無法開始比賽，需要至少%s人開始比賽").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                }
+                return;
+            }
+        }
+        sender.sendMessage(Component.text("未知的比賽項目").color(NamedTextColor.RED));
+    }
+
+    /**
+     * Force end current competition
+     * @param sender who end the competition
+     */
+    public static void end(CommandSender sender) {
+        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
+            getCurrentlyCompetition().end(true);
+            sender.sendMessage(Component.text("已強制結束一場比賽").color(NamedTextColor.GREEN));
+        } else {
+            sender.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
+        }
+    }
+
+    /**
+     * Get current competition
      * @return current competition
      */
     public static ICompetition getCurrentlyCompetition() {
@@ -81,12 +124,12 @@ public class Competitions {
      * @return True if player successfully added to competition player list
      */
     public static boolean join(@NotNull Player player, int number) {
-        for (PlayerData data : Competitions.getPlayerDataList()) {
+        for (PlayerData data : getPlayerDataList()) {
             if (data.getNumber() == number) {
                 return false;
             }
         }
-        Competitions.getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
+        getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
         PlayerListGUI.updateGUI();
         player.sendMessage(Component.text("你已成功註冊為參賽選手，選手號碼為" + number).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
