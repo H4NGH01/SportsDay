@@ -23,7 +23,8 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
     private final int leastPlayersRequired = SportsDay.getInstance().getConfig().getInt(this.getID() + ".least_players_required");
     private final Location location = SportsDay.getInstance().getConfig().getLocation(this.getID() + ".location");
     private final World world = Objects.requireNonNull(this.location).getWorld();
-    private final List<BukkitTask> runnableList = new ArrayList<>();
+    private static final List<BukkitTask> COMPETITION_TASKS = new ArrayList<>();
+    private final List<PlayerData> players = new ArrayList<>();
     protected static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
 
     @Override
@@ -53,19 +54,21 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
 
     @Override
     public void setup() {
-        Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
+        COMPETITION_TASKS.forEach(BukkitTask::cancel);
+        getPlayerDataList().clear();
         getLeaderboard().clear();
+        Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
         setStage(Stage.COMING);
+        getPlayerDataList().addAll(Competitions.getPlayerDataList());
+        getPlayerDataList().removeIf(d -> !d.isPlayerOnline());
         getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s§a將於15秒後開始").args(getName())));
         getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().setBedSpawnLocation(getLocation(), true);
-                if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
-                    data.getPlayer().getInventory().clear();
-                }
-                data.getPlayer().teleport(getLocation());
-                data.getPlayer().setGameMode(GameMode.ADVENTURE);
+            data.getPlayer().setBedSpawnLocation(getLocation(), true);
+            if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
+                data.getPlayer().getInventory().clear();
             }
+            data.getPlayer().teleport(getLocation());
+            data.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
         addRunnable(new BukkitRunnable() {
             int i = 15;
@@ -103,7 +106,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
         setStage(Stage.ENDED);
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
-        runnableList.forEach(BukkitTask::cancel);
+        COMPETITION_TASKS.forEach(BukkitTask::cancel);
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
@@ -148,7 +151,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
      * @return player data list of competition
      */
     public List<PlayerData> getPlayerDataList() {
-        return Competitions.getPlayerDataList();
+        return players;
     }
 
     /**
@@ -164,7 +167,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
      * @param task runnable task to add
      */
     protected BukkitTask addRunnable(BukkitTask task) {
-        runnableList.add(task);
+        COMPETITION_TASKS.add(task);
         return task;
     }
 }

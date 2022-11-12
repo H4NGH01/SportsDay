@@ -38,14 +38,14 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         getQueue().clear();
         getQueue().addAll(getPlayerDataList());
         getQueue().removeIf(d -> !d.isPlayerOnline());
-        StringBuilder sb = new StringBuilder("出場順序\n");
-        int i = 0;
-        for (PlayerData data : getQueue()) {
-            sb.append("第").append(++i).append("位 ").append(data.getPlayer().getName()).append("\n");
+        List<Component> cl = new ArrayList<>();
+        cl.add(Component.text("出場順序"));
+        for (int i = 0; i < getQueue().size();) {
+            PlayerData data = getQueue().get(i++);
+            cl.add(Component.translatable("第%s位 %s").args(Component.text(i), Component.text(data.getName())));
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.toString()));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
         resultMap.clear();
-        getLeaderboard().clear();
     }
 
     @Override

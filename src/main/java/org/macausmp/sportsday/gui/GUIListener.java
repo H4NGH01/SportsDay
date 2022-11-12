@@ -24,12 +24,9 @@ public class GUIListener implements Listener {
                 ItemStack item = e.getCurrentItem();
                 if (item != null && GUIButton.isButton(item) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
                     if (GUIButton.isSameButton(item, GUIButton.COMPETITION_INFO)) {
-                        if (Competitions.getCurrentlyCompetition() != null) {
-                            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-                            CompetitionGUI.COMPETITION_INFO_GUI.openTo(p);
-                            return;
-                        }
-                        p.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
+                        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+                        CompetitionGUI.COMPETITION_INFO_GUI.openTo(p);
+                        return;
                     } else if (GUIButton.isSameButton(item, GUIButton.PLAYER_LIST)) {
                         p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                         new PlayerListGUI().openTo(p);
@@ -67,5 +64,9 @@ public class GUIListener implements Listener {
     @EventHandler
     public void onLeave(@NotNull PlayerQuitEvent e) {
         CompetitionGUI.GUI_MAP.remove(e.getPlayer());
+        if (Competitions.containPlayer(e.getPlayer())) {
+            CompetitionGUI.COMPETITION_INFO_GUI.update();
+            PlayerListGUI.updateGUI();
+        }
     }
 }

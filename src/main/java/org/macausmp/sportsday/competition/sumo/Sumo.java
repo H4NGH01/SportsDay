@@ -37,9 +37,9 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     public void onSetup() {
         alive.clear();
         alive.addAll(getPlayerDataList());
-        alive.removeIf(d -> !d.isPlayerOnline());
         getQueue().clear();
         getQueue().addAll(alive);
+        getSumoStage().resetStage();
         getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("相撲流程\n淘汰賽->四分之一決賽(八強)->半決賽(四強)->季軍賽->決賽")));
         int stageRound;
         if (getQueue().size() <= 4) {
@@ -58,12 +58,13 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     }
 
     private void stageSetup() {
-        StringBuilder sb = new StringBuilder("現階段為" + getSumoStage().getName() + "\n");
-        for (int i = 0; i < getSumoStage().getRoundList().size(); i++) {
-            SumoRound r = getSumoStage().getRoundList().get(i);
-            sb.append("第").append(i + 1).append("場由").append(r.getPlayers().get(0).getName()).append("對戰").append(r.getPlayers().get(1).getName()).append("\n");
+        List<Component> cl = new ArrayList<>();
+        cl.add(Component.translatable("現階段為%s").args(Component.text(getSumoStage().getName())));
+        for (int i = 0; i < getSumoStage().getRoundList().size();) {
+            SumoRound r = getSumoStage().getRoundList().get(i++);
+            cl.add(Component.translatable("第%s場由%s對戰%s").args(Component.text(i), Component.text(r.getPlayers().get(0).getName()), Component.text(r.getPlayers().get(1).getName())));
         }
-        getOnlinePlayers().forEach(p -> p.sendMessage(sb.substring(0, sb.length() - 1)));
+        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
 
     @Override
@@ -77,9 +78,9 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         getLeaderboard().getEntry().add(1, alive.get(1));
         getLeaderboard().getEntry().add(0, alive.get(0));
         List<Component> cl = new ArrayList<>();
-        int i = 0;
-        for (PlayerData data : getLeaderboard().getEntry()) {
-            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
+        for (int i = 0; i < getLeaderboard().size();) {
+            PlayerData data = getLeaderboard().getEntry().get(i++);
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
@@ -112,6 +113,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onRoundStart() {
+        if (getSumoStage().getCurrentRound() != null) getSumoStage().getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
         getSumoStage().nextRound();
         getSumoStage().getCurrentRound().setStatus(SumoRound.RoundStatus.COMING);
         List<Player> pl = getSumoStage().getCurrentRound().getPlayers();
@@ -176,7 +178,6 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             public void run() {
                 getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後進行下一場比賽").color(NamedTextColor.YELLOW)));
                 if (i-- == 0) {
-                    getSumoStage().getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
                     onRoundStart();
                     this.cancel();
                 }
@@ -208,13 +209,14 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         }
         stageSetup();
         addRunnable(new BukkitRunnable() {
-            int i = 15;
+            int i = 10;
             @Override
             public void run() {
                 if (i == 10 || (i <= 5 && i > 0)) {
                     getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後進入下一場階段").color(NamedTextColor.YELLOW)));
                 }
                 if (i-- == 0) {
+                    nextRound();
                     this.cancel();
                 }
             }

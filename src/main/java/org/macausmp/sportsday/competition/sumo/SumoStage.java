@@ -52,4 +52,10 @@ public class SumoStage {
     public SumoRound getCurrentRound() {
         return currentRound;
     }
+
+    public void resetStage() {
+        roundList.clear();
+        currentRound = null;
+        roundIndex = 0;
+    }
 }

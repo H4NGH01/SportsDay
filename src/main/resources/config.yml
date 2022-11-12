@@ -1,3 +1,4 @@
+server_ip: macausmp.hopto.org
 finish_line_block: GOLD_BLOCK
 checkpoint_block: EMERALD_BLOCK
 death_block: RED_GLAZED_TERRACOTTA

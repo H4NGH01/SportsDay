@@ -67,9 +67,9 @@ public class ElytraRacing extends AbstractCompetition {
     public void onEnd(boolean force) {
         if (force) return;
         List<Component> cl = new ArrayList<>();
-        int i = 0;
-        for (PlayerData data : getLeaderboard().getEntry()) {
-            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
+        for (int i = 0; i < getLeaderboard().size();) {
+            PlayerData data = getLeaderboard().getEntry().get(i++);
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }

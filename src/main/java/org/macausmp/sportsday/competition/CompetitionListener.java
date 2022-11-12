@@ -2,14 +2,16 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -32,13 +34,6 @@ public class CompetitionListener implements Listener {
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("death_block")));
 
     @EventHandler
-    public void onJoin(@NotNull PlayerJoinEvent e) {
-        Player p = e.getPlayer();
-        if (p.hasPlayedBefore()) return;
-        SportsDay.AUDIENCE.addPlayer(p);
-    }
-
-    @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.STARTED) return;
         Player p = e.getPlayer();
@@ -56,9 +51,10 @@ public class CompetitionListener implements Listener {
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
         if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
+            SPAWNPOINT_LIST.add(player.getUniqueId());
             player.setBedSpawnLocation(player.getLocation(), true);
             player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
-            SPAWNPOINT_LIST.add(player.getUniqueId());
+            player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
         }
     }
 
@@ -84,6 +80,18 @@ public class CompetitionListener implements Listener {
             if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.STARTED) return;
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onPlace(@NotNull BlockPlaceEvent e) {
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(e.getPlayer())) return;
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBreak(@NotNull BlockBreakEvent e) {
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(e.getPlayer())) return;
+        e.setCancelled(true);
     }
 
     private static final List<UUID> EASTER_TRIGGER = new ArrayList<>();

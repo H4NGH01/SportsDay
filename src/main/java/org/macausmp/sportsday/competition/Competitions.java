@@ -12,6 +12,7 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.event.CompetitionJoinPlayerEvent;
 import org.macausmp.sportsday.event.CompetitionLeavePlayerEvent;
+import org.macausmp.sportsday.gui.CompetitionGUI;
 import org.macausmp.sportsday.gui.PlayerListGUI;
 
 import java.util.*;
@@ -75,7 +76,11 @@ public class Competitions {
                     sender.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
                     return;
                 }
-                if (getPlayerDataList().size() >= competition.getLeastPlayersRequired()) {
+                int i = 0;
+                for (PlayerData d : getPlayerDataList()) {
+                    if (d.isPlayerOnline()) i++;
+                }
+                if (i >= competition.getLeastPlayersRequired()) {
                     sender.sendMessage(Component.text("開始新一場比賽中...").color(NamedTextColor.GREEN));
                     setCurrentlyCompetition(competition);
                     competition.setup();
@@ -130,6 +135,7 @@ public class Competitions {
             }
         }
         getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
+        CompetitionGUI.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
         player.sendMessage(Component.text("你已成功註冊為參賽選手，選手號碼為" + number).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
@@ -150,6 +156,7 @@ public class Competitions {
                     SportsDay.getInstance().savePlayerConfig();
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     getPlayerDataList().remove(data);
+                    CompetitionGUI.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();
                     if (player.isOnline()) {
                         Objects.requireNonNull(player.getPlayer()).sendMessage(Component.text("你已被從參賽選手名單上除名").color(NamedTextColor.YELLOW));

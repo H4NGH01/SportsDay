@@ -11,7 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 
 import java.util.ArrayList;
@@ -58,6 +61,12 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         Player p = (Player) event.getWhoClicked();
         ItemStack item = Objects.requireNonNull(event.getCurrentItem());
         PlayerListGUI gui = (PlayerListGUI) CompetitionGUI.GUI_MAP.get(p);
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "player_icon")) {
+            SkullMeta meta = (SkullMeta) item.getItemMeta();
+            new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).openTo(p);
+            return;
+        }
         if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
             p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
             gui.nextPage();
@@ -85,12 +94,16 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            meta.displayName(Component.text(Objects.requireNonNull(player.getName())).decoration(TextDecoration.ITALIC, false));
+            Component online = player.isOnline() ? Component.text("在線").color(NamedTextColor.YELLOW) : Component.text("離線").color(NamedTextColor.RED);
+            meta.displayName(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online).decoration(TextDecoration.ITALIC, false));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
             lore.add(Component.translatable("參賽號碼: %s").args(Component.text(Competitions.getPlayerData(uuid).getNumber())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             lore.add(Component.translatable("總體得分: %s").args(Component.text(Competitions.getPlayerData(uuid).getScore())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(Component.text(""));
+            lore.add(Component.translatable("點擊打開%s的個人檔案").args(Component.text(player.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });
         return icon;
     }

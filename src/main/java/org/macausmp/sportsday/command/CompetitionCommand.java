@@ -118,7 +118,7 @@ public class CompetitionCommand extends PluginCommand {
                     break;
                 case "info":
                     sender.sendMessage(Component.text("比賽資訊"));
-                    sender.sendMessage(Component.translatable("比賽狀態: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition() == null ? Component.text("未開始").color(NamedTextColor.GRAY) : Competitions.getCurrentlyCompetition().getStage().getName()));
+                    sender.sendMessage(Component.translatable("比賽狀態: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition() == null ? ICompetition.Stage.IDLE.getName() : Competitions.getCurrentlyCompetition().getStage().getName()));
                     if (Competitions.getCurrentlyCompetition() != null) {
                         sender.sendMessage(Component.translatable("當前比賽: %s").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getName()));
                     }

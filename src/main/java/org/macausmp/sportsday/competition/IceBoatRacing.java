@@ -58,9 +58,9 @@ public class IceBoatRacing extends AbstractCompetition {
     public void onEnd(boolean force) {
         if (force) return;
         List<Component> cl = new ArrayList<>();
-        int i = 0;
-        for (PlayerData data : getLeaderboard().getEntry()) {
-            cl.add(Component.translatable("第%s名 %s").args(Component.text(++i), Component.text(data.getName())));
+        for (int i = 0; i < getLeaderboard().size();) {
+            PlayerData data = getLeaderboard().getEntry().get(i++);
+            cl.add(Component.translatable("第%s名 %s").args(Component.text(i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
@@ -75,7 +75,7 @@ public class IceBoatRacing extends AbstractCompetition {
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
             Player player = e.getPlayer();
-            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
+            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId())) || boatMap.get(player) == null) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
