@@ -6,10 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 /**
  * New config file for storing player plugin data
@@ -26,9 +23,8 @@ public class ConfigManager {
             SportsDay.getInstance().getDataFolder().mkdir();
         }
         playerFile = new File(SportsDay.getInstance().getDataFolder(), "player.yml");
-        langFile = new File(SportsDay.getInstance().getDataFolder(), "lang.yml");
+        langFile = new File(SportsDay.getInstance().getDataFolder(), "lang.json");
         playerConfig = loadFile(playerFile, "player.yml");
-        langConfig = loadFile(langFile, "lang.yml");
         loadLang();
     }
 
@@ -45,18 +41,33 @@ public class ConfigManager {
         return YamlConfiguration.loadConfiguration(file);
     }
 
+    @SuppressWarnings("all")
     private void loadLang() {
-        final InputStream defConfigStream = SportsDay.getInstance().getResource("lang.yml");
-        if (defConfigStream == null) {
-            return;
+        if (!langFile.exists()) {
+            try {
+                langFile.createNewFile();
+                Bukkit.getConsoleSender().sendMessage("§a" + langFile.getName() + " file has been created");
+                final InputStream defLangStream = SportsDay.getInstance().getResource("lang.json");
+                if (defLangStream == null) {
+                    return;
+                }
+                StringBuilder defaults = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(defLangStream))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        defaults.append(line).append("\n");
+                    }
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(langFile, Charsets.UTF_8));
+                    writer.write(defaults.toString());
+                    writer.close();
+                } catch (IOException e) {
+                    Bukkit.getConsoleSender().sendMessage("§cCould not write the lang.json file");
+                }
+            } catch (IOException e) {
+                Bukkit.getConsoleSender().sendMessage("§cCould not create the " + langFile.getName() + " file");
+            }
         }
-        langConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, Charsets.UTF_8)));
-        langConfig.options().copyDefaults(true);
-        try {
-            langConfig.save(langFile);
-        } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage("§cCould not save the lang.yml file");
-        }
+        langConfig = YamlConfiguration.loadConfiguration(langFile);
     }
 
     public FileConfiguration getPlayerConfig() {
