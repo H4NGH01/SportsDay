@@ -22,4 +22,9 @@ public class CompetitionLeavePlayerEvent extends Event {
     public @NotNull HandlerList getHandlers() {
         return handlers;
     }
+
+    @NotNull
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 }

@@ -10,7 +10,7 @@ public abstract class AbstractGUI implements IPluginGUI {
     private final Inventory inventory;
 
     public AbstractGUI(int size, Component title) {
-        this.inventory = Bukkit.createInventory(null, size, title);
+        inventory = Bukkit.createInventory(null, size, title);
         update();
     }
 
@@ -21,7 +21,7 @@ public abstract class AbstractGUI implements IPluginGUI {
 
     @Override
     public void openTo(@NotNull Player player) {
-        player.openInventory(this.inventory);
+        player.openInventory(inventory);
         CompetitionGUI.GUI_MAP.put(player, this);
     }
 }

@@ -66,6 +66,7 @@ sumo:
   name: "§6相撲"
   enable: true
   least_players_required: 8
+  enable_weapon: true
   location:
     ==: org.bukkit.Location
     world: world

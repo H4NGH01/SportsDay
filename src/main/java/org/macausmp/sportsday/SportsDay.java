@@ -31,7 +31,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
     public static NamespacedKey ITEM_ID;
     public static NamespacedKey COMPETITION_ID;
-    private PlayerConfig playerConfig;
+    private ConfigManager configManager;
     private CommandManager commandManager;
     public static Team PLAYER;
     public static Team REFEREE;
@@ -47,11 +47,11 @@ public final class SportsDay extends JavaPlugin implements Listener {
         instance = this;
         getConfig().options().copyDefaults(true);
         saveConfig();
-        if (playerConfig == null) {
-            playerConfig = new PlayerConfig();
+        if (configManager == null) {
+            configManager = new ConfigManager();
         }
-        playerConfig.setup();
-        playerConfig.saveConfig();
+        configManager.setup();
+        configManager.saveConfig();
         ITEM_ID = registryNamespaceKey("item_id");
         COMPETITION_ID = registryNamespaceKey("competition_id");
         Competitions.load();
@@ -116,12 +116,17 @@ public final class SportsDay extends JavaPlugin implements Listener {
         runnableTasks.forEach(BukkitTask::cancel);
         getServer().getConsoleSender().sendMessage("Macau SMP SportsDay plugin disabled");
     }
+
     public FileConfiguration getPlayerConfig() {
-        return this.playerConfig.getPlayerConfig();
+        return configManager.getPlayerConfig();
+    }
+
+    public FileConfiguration getLangConfig() {
+        return configManager.getLangConfig();
     }
 
     public void savePlayerConfig() {
-        this.playerConfig.saveConfig();
+        configManager.saveConfig();
     }
 
     private void sendPackets() {

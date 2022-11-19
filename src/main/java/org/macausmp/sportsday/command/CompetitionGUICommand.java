@@ -16,7 +16,7 @@ import org.macausmp.sportsday.gui.CompetitionGUI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionGUICommand extends PluginCommand {
+public class CompetitionGUICommand implements IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {

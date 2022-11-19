@@ -77,7 +77,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     }
 
     public static void updateGUI() {
-        for (AbstractGUI gui : CompetitionGUI.GUI_MAP.values()) {
+        for (IPluginGUI gui : CompetitionGUI.GUI_MAP.values()) {
             if (gui instanceof PlayerListGUI) {
                 gui.update();
             }

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SumoStage {
-    public static final SumoStage FINAL = new SumoStage("決賽", null);
-    public static final SumoStage THIRD_PLACE = new SumoStage("季軍賽", FINAL);
-    public static final SumoStage SEMI_FINAL = new SumoStage("四強", THIRD_PLACE);
-    public static final SumoStage QUARTER_FINAL = new SumoStage("八強", SEMI_FINAL);
-    public static final SumoStage ELIMINATE = new SumoStage("淘汰賽", QUARTER_FINAL);
+    public static final SumoStage FINAL = new SumoStage("§6決賽", null);
+    public static final SumoStage THIRD_PLACE = new SumoStage("§a季軍賽", FINAL);
+    public static final SumoStage SEMI_FINAL = new SumoStage("§a四強", THIRD_PLACE);
+    public static final SumoStage QUARTER_FINAL = new SumoStage("§e八強", SEMI_FINAL);
+    public static final SumoStage ELIMINATE = new SumoStage("§c淘汰賽", QUARTER_FINAL);
 
     private final List<SumoRound> roundList = new ArrayList<>();
     private final String name;

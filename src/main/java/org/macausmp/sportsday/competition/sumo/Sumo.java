@@ -3,9 +3,12 @@ package org.macausmp.sportsday.competition.sumo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
@@ -13,6 +16,7 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.IRoundGame;
 import org.macausmp.sportsday.competition.Leaderboard;
+import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     private final Player[] theFinal = new Player[2];
     private final Player[] thirdPlace = new Player[2];
     private final Player[] semiFinal = new Player[4];
+    private final boolean weapon = SportsDay.getInstance().getConfig().getBoolean(getID() + ".enable_weapon");
 
     @Override
     public String getID() {
@@ -40,7 +45,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         getQueue().clear();
         getQueue().addAll(alive);
         getSumoStage().resetStage();
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("相撲流程\n淘汰賽->四分之一決賽(八強)->半決賽(四強)->季軍賽->決賽")));
+        getOnlinePlayers().forEach(p -> p.sendMessage(Component.text("相撲流程: 淘汰賽→四分之一決賽(八強)→半決賽(四強)→季軍賽→決賽")));
         int stageRound;
         if (getQueue().size() <= 4) {
             setSumoStage(SumoStage.SEMI_FINAL);
@@ -49,6 +54,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             setSumoStage(SumoStage.QUARTER_FINAL);
             stageRound = getQueue().size() - 4;
         } else {
+            setSumoStage(SumoStage.ELIMINATE);
             stageRound = getQueue().size() - 8;
         }
         for (int i = 0; i < stageRound; i++) {
@@ -59,10 +65,10 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     private void stageSetup() {
         List<Component> cl = new ArrayList<>();
-        cl.add(Component.translatable("現階段為%s").args(Component.text(getSumoStage().getName())));
+        cl.add(Translation.translatable("competition.sumo.current_stage").args(Component.text(getSumoStage().getName())));
         for (int i = 0; i < getSumoStage().getRoundList().size();) {
             SumoRound r = getSumoStage().getRoundList().get(i++);
-            cl.add(Component.translatable("第%s場由%s對戰%s").args(Component.text(i), Component.text(r.getPlayers().get(0).getName()), Component.text(r.getPlayers().get(1).getName())));
+            cl.add(Translation.translatable("competition.sumo.queue").args(Component.text(i), r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
         }
         getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
     }
@@ -75,12 +81,12 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     @Override
     public void onEnd(boolean force) {
         if (force) return;
-        getLeaderboard().getEntry().add(1, alive.get(1));
-        getLeaderboard().getEntry().add(0, alive.get(0));
+        getLeaderboard().add(1, alive.get(1));
+        getLeaderboard().add(0, alive.get(0));
         List<Component> cl = new ArrayList<>();
         for (int i = 0; i < getLeaderboard().size();) {
-            PlayerData data = getLeaderboard().getEntry().get(i++);
-            cl.add(Component.translatable("第%s名 %s").args(Component.text(i), Component.text(data.getName())));
+            PlayerData data = getLeaderboard().get(i++);
+            cl.add(Translation.translatable("competition.rank").args(Component.text(i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
@@ -119,20 +125,55 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         List<Player> pl = getSumoStage().getCurrentRound().getPlayers();
         pl.get(0).teleport(Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".p1-location")));
         pl.get(1).teleport(Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".p2-location")));
+        pl.forEach(p -> p.getInventory().clear());
         addRunnable(new BukkitRunnable() {
             int i = 5;
             @Override
             public void run() {
                 if (i != 0) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後開始").color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
                 }
                 if (i-- == 0) {
                     getSumoStage().getCurrentRound().setStatus(SumoRound.RoundStatus.STARTED);
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text("回合開始").color(NamedTextColor.YELLOW)));
-                    this.cancel();
+                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start")));
+                    giveWeapon();
+                    cancel();
                 }
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+    }
+
+    private void giveWeapon() {
+        if (weapon) {
+            addRunnable(new BukkitRunnable() {
+                int i = 30;
+                @Override
+                public void run() {
+                    if (getSumoStage().getCurrentRound().getStatus() == SumoRound.RoundStatus.END) {
+                        cancel();
+                        return;
+                    }
+                    if (i <= 15 && i % 5 == 0 && i > 0) {
+                        getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                    }
+                    if (i-- == 0) {
+                        getSumoStage().getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon()));
+                        getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given")));
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+        }
+    }
+
+    private @NotNull ItemStack weapon() {
+        ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
+        weapon.editMeta(meta -> {
+            meta.displayName(Component.text("§e擊退小棒棒"));
+            meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+        });
+        return weapon;
     }
 
     @Override
@@ -140,13 +181,13 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         SumoRound round = getSumoStage().getCurrentRound();
         getWorld().strikeLightningEffect(round.getLoser().getLocation());
         getOnlinePlayers().forEach(p -> {
-            p.sendActionBar(Component.text("回合結束").color(NamedTextColor.YELLOW));
-            p.sendMessage(Component.translatable("%s獲得了本場勝利").args(Component.text(round.getWinner().getName())).color(NamedTextColor.YELLOW));
+            p.sendActionBar(Translation.translatable("competition.sumo.round_end"));
+            p.sendMessage(Translation.translatable("competition.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
         });
         if (getSumoStage() != SumoStage.SEMI_FINAL) {
             for (PlayerData data : alive) {
                 if (data.getUUID().equals(round.getLoser().getUniqueId())) {
-                    getLeaderboard().getEntry().add(0, data);
+                    getLeaderboard().add(0, data);
                     alive.remove(data);
                     break;
                 }
@@ -176,10 +217,10 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             int i = 5;
             @Override
             public void run() {
-                getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後進行下一場比賽").color(NamedTextColor.YELLOW)));
+                getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_round_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
                 if (i-- == 0) {
                     onRoundStart();
-                    this.cancel();
+                    cancel();
                 }
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
@@ -212,12 +253,12 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             int i = 10;
             @Override
             public void run() {
-                if (i == 10 || (i <= 5 && i > 0)) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後進入下一場階段").color(NamedTextColor.YELLOW)));
+                if (i == 7 || (i <= 5 && i > 0)) {
+                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_stage_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
                 }
                 if (i-- == 0) {
                     nextRound();
-                    this.cancel();
+                    cancel();
                 }
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));

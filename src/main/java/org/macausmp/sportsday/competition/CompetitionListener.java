@@ -35,7 +35,7 @@ public class CompetitionListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.STARTED) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
         Competitions.getCurrentlyCompetition().onEvent(e);
@@ -77,7 +77,7 @@ public class CompetitionListener implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.STARTED) return;
+            if (Competitions.getCurrentlyCompetition() == null || !Competitions.containPlayer(player) || Competitions.getCurrentlyCompetition().getStage() == Stage.STARTED) return;
             e.setCancelled(true);
         }
     }

@@ -1,15 +1,15 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
 
 /**
- * Competition base
+ * Competition interface
  */
-public interface ICompetition {
+public interface ICompetition extends Listener {
     /**
      * Get the competition's id from the config file
      * @return Competition id
@@ -85,23 +85,4 @@ public interface ICompetition {
      * @return leaderboard of competition
      */
     Leaderboard<?> getLeaderboard();
-
-    /**
-     * Competition stage
-     */
-    enum Stage {
-        IDLE(Component.text("待開始").color(NamedTextColor.GRAY)),
-        COMING(Component.text("即將開始").color(NamedTextColor.GREEN)),
-        STARTED(Component.text("開始中").color(NamedTextColor.YELLOW)),
-        ENDED(Component.text("已結束").color(NamedTextColor.RED));
-
-        private final Component name;
-        Stage(Component name) {
-            this.name = name;
-        }
-
-        public Component getName() {
-            return name;
-        }
-    }
 }

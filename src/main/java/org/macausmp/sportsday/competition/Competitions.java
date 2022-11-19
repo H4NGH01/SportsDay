@@ -12,19 +12,21 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.event.CompetitionJoinPlayerEvent;
 import org.macausmp.sportsday.event.CompetitionLeavePlayerEvent;
+import org.macausmp.sportsday.event.CompetitionSetupEvent;
 import org.macausmp.sportsday.gui.CompetitionGUI;
 import org.macausmp.sportsday.gui.PlayerListGUI;
+import org.macausmp.sportsday.util.Translation;
 
 import java.util.*;
 
 public class Competitions {
-    public static final List<AbstractCompetition> COMPETITIONS = new ArrayList<>();
-    public static final AbstractCompetition ELYTRA_RACING = registry(new ElytraRacing());
-    public static final AbstractCompetition ICE_BOAT_RACING = registry(new IceBoatRacing());
-    public static final AbstractCompetition JAVELIN_THROW = registry(new JavelinThrow());
-    public static final AbstractCompetition OBSTACLE_COURSE = registry(new ObstacleCourse());
-    public static final AbstractCompetition PARKOUR = registry(new Parkour());
-    public static final AbstractCompetition SUMO = registry(new Sumo());
+    public static final List<ICompetition> COMPETITIONS = new ArrayList<>();
+    public static final ICompetition ELYTRA_RACING = registry(new ElytraRacing());
+    public static final ICompetition ICE_BOAT_RACING = registry(new IceBoatRacing());
+    public static final ICompetition JAVELIN_THROW = registry(new JavelinThrow());
+    public static final ICompetition OBSTACLE_COURSE = registry(new ObstacleCourse());
+    public static final ICompetition PARKOUR = registry(new Parkour());
+    public static final ICompetition SUMO = registry(new Sumo());
     private static final List<PlayerData> PLAYERS = new ArrayList<>();
     private static ICompetition CURRENTLY_COMPETITION;
     private static int NUMBER = 1;
@@ -35,7 +37,7 @@ public class Competitions {
      * @param competition competition to registry
      * @return competition after registered
      */
-    private static <T extends AbstractCompetition> T registry(T competition) {
+    private static <T extends ICompetition> T registry(T competition) {
         COMPETITIONS.add(competition);
         return competition;
     }
@@ -66,14 +68,14 @@ public class Competitions {
      * @param id competition id
      */
     public static void start(CommandSender sender, String id) {
-        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
-            sender.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
+        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
+            sender.sendMessage(Translation.translatable("competition.already_in_progress"));
             return;
         }
         for (ICompetition competition : COMPETITIONS) {
             if (competition.getID().equals(id)) {
                 if (!competition.isEnable()) {
-                    sender.sendMessage(Component.text("該比賽項目已被禁用").color(NamedTextColor.RED));
+                    sender.sendMessage(Translation.translatable("competition.disabled"));
                     return;
                 }
                 int i = 0;
@@ -81,28 +83,29 @@ public class Competitions {
                     if (d.isPlayerOnline()) i++;
                 }
                 if (i >= competition.getLeastPlayersRequired()) {
-                    sender.sendMessage(Component.text("開始新一場比賽中...").color(NamedTextColor.GREEN));
+                    sender.sendMessage(Translation.translatable("competition.setting_up"));
                     setCurrentlyCompetition(competition);
                     competition.setup();
+                    Bukkit.getPluginManager().callEvent(new CompetitionSetupEvent(competition));
                 } else {
-                    sender.sendMessage(Component.translatable("參賽選手人數不足，無法開始比賽，需要至少%s人開始比賽").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                    sender.sendMessage(Translation.translatable("competition.no_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
                 }
                 return;
             }
         }
-        sender.sendMessage(Component.text("未知的比賽項目").color(NamedTextColor.RED));
+        sender.sendMessage(Translation.translatable("competition.unknown"));
     }
 
     /**
      * Force end current competition
      * @param sender who end the competition
      */
-    public static void end(CommandSender sender) {
-        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
+    public static void forceEnd(CommandSender sender) {
+        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
             getCurrentlyCompetition().end(true);
-            sender.sendMessage(Component.text("已強制結束一場比賽").color(NamedTextColor.GREEN));
+            sender.sendMessage(Translation.translatable("competition.force_end"));
         } else {
-            sender.sendMessage(Component.text("現在沒有比賽進行中").color(NamedTextColor.RED));
+            sender.sendMessage(Translation.translatable("competition.no_in_progress"));
         }
     }
 
@@ -137,7 +140,7 @@ public class Competitions {
         getPlayerDataList().add(new PlayerData(player.getUniqueId(), number));
         CompetitionGUI.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        player.sendMessage(Component.text("你已成功註冊為參賽選手，選手號碼為" + number).color(NamedTextColor.GREEN));
+        player.sendMessage(Translation.translatable("player.registry_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
         Bukkit.getPluginManager().callEvent(new CompetitionJoinPlayerEvent(player));
         return true;
@@ -159,7 +162,7 @@ public class Competitions {
                     CompetitionGUI.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();
                     if (player.isOnline()) {
-                        Objects.requireNonNull(player.getPlayer()).sendMessage(Component.text("你已被從參賽選手名單上除名").color(NamedTextColor.YELLOW));
+                        Objects.requireNonNull(player.getPlayer()).sendMessage(Translation.translatable("player.leave_message"));
                     }
                     SportsDay.AUDIENCE.addPlayer(player);
                     Bukkit.getPluginManager().callEvent(new CompetitionLeavePlayerEvent(player));

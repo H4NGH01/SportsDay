@@ -20,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.util.Translation;
 
 import java.util.*;
 
@@ -35,17 +36,16 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onSetup() {
+        resultMap.clear();
         getQueue().clear();
         getQueue().addAll(getPlayerDataList());
-        getQueue().removeIf(d -> !d.isPlayerOnline());
         List<Component> cl = new ArrayList<>();
-        cl.add(Component.text("出場順序"));
+        cl.add(Translation.translatable("competition.queue_text"));
         for (int i = 0; i < getQueue().size();) {
             PlayerData data = getQueue().get(i++);
-            cl.add(Component.translatable("第%s位 %s").args(Component.text(i), Component.text(data.getName())));
+            cl.add(Translation.translatable("competition.queue").args(Component.text(i), Component.text(data.getName())));
         }
         getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
-        resultMap.clear();
     }
 
     @Override
@@ -76,11 +76,11 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             }
         }
         if (force) return;
-        getLeaderboard().getEntry().sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
+        getLeaderboard().sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
         List<Component> cl = new ArrayList<>();
-        int i = 0;
-        for (PlayerResult result : getLeaderboard().getEntry()) {
-            cl.add(Component.translatable("第%s名 %s 成績為%s米").args(Component.text(++i), Component.text(Competitions.getPlayerData(result.uuid).getName()), Component.text(result.getDistance())));
+        for (int i = 0; i < getLeaderboard().size();) {
+            PlayerResult result = getLeaderboard().get(i++);
+            cl.add(Translation.translatable("competition.javelin.rank").args(Component.text(i), Component.text(Competitions.getPlayerData(result.uuid).getName()), Component.text(result.getDistance())));
             if (i <= 3) {
                 Competitions.getPlayerData(result.uuid).addScore(4 - i);
             }
@@ -98,7 +98,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 resultMap.put(p.getUniqueId(), new PlayerResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
-                trident.customName(Component.translatable( "%s的標槍").args(Component.text(p.getName())));
+                trident.customName(Translation.translatable( "competition.javelin.javelin_name").args(p.displayName()));
             }
         }
     }
@@ -115,10 +115,10 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 }
                 result.setTridentLocation(trident);
                 getLeaderboard().add(result);
-                trident.customName(Component.translatable( "%s的標槍 %s").args(Component.text(player.getName()), Component.text(result.getDistance())));
+                trident.customName(Translation.translatable( "competition.javelin.javelin_name").args(player.displayName(), Component.text(result.getDistance())));
                 resultMap.remove(player.getUniqueId());
                 getWorld().strikeLightningEffect(trident.getLocation());
-                getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s擲出了%s米的成績").args(Component.text(player.getName()), Component.text(result.getDistance()))));
+                getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.javelin.result").args(player.displayName(), Component.text(result.getDistance()))));
                 onRoundEnd();
             }
         }
@@ -159,7 +159,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             @Override
             public void run() {
                 if (i > 0) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Component.text(i + "秒後輪到下一位選手").color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.javelin.next_round_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
                 }
                 if (i-- == 0) {
                     onRoundStart();
@@ -174,7 +174,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         return this.queue;
     }
 
-    public static class PlayerResult {
+    private static class PlayerResult {
         private final UUID uuid;
         private final Location loc;
         private double distance;
@@ -192,7 +192,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             return this.distance;
         }
 
-        public OfflinePlayer getPlayer() {
+        public @NotNull OfflinePlayer getPlayer() {
             return Bukkit.getOfflinePlayer(this.uuid);
         }
     }

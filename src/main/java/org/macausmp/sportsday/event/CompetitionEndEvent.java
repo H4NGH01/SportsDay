@@ -16,15 +16,20 @@ public class CompetitionEndEvent extends Event {
     }
 
     public boolean isForce() {
-        return this.force;
+        return force;
     }
 
     public ICompetition getCompetition() {
-        return this.competition;
+        return competition;
     }
 
     @Override
     public @NotNull HandlerList getHandlers() {
+        return handlers;
+    }
+
+    @NotNull
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

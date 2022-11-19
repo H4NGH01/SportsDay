@@ -1,15 +1,20 @@
 package org.macausmp.sportsday.event;
 
-import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.competition.ICompetition;
 
-public class CompetitionJoinPlayerEvent extends PlayerEvent {
+public class CompetitionSetupEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
+    private final ICompetition competition;
 
-    public CompetitionJoinPlayerEvent(@NotNull Player who) {
-        super(who);
+    public CompetitionSetupEvent(ICompetition competition) {
+        this.competition = competition;
+    }
+
+    public ICompetition getCompetition() {
+        return competition;
     }
 
     @Override

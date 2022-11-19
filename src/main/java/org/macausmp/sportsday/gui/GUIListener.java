@@ -1,7 +1,5 @@
 package org.macausmp.sportsday.gui;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +11,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.Stage;
+import org.macausmp.sportsday.util.Translation;
 
 public class GUIListener implements Listener {
     @EventHandler
@@ -31,17 +30,17 @@ public class GUIListener implements Listener {
                         p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                         new PlayerListGUI().openTo(p);
                     } else if (GUIButton.isSameButton(item, GUIButton.START_COMPETITION)) {
-                        if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != ICompetition.Stage.ENDED) {
-                            p.sendMessage(Component.text("已經有一場比賽正在進行中...").color(NamedTextColor.RED));
+                        if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != Stage.ENDED) {
+                            p.sendMessage(Translation.translatable("competition.already_in_progress"));
                             p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }
                         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                         CompetitionGUI.COMPETITION_START_GUI.openTo(p);
                     } else if (GUIButton.isSameButton(item, GUIButton.END_COMPETITION)) {
-                        boolean b = Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() == ICompetition.Stage.ENDED;
+                        boolean b = Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() == Stage.ENDED;
                         p.playSound(p, b ? Sound.ENTITY_ENDERMAN_TELEPORT : Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-                        Competitions.end(p);
+                        Competitions.forceEnd(p);
                         return;
                     } else if (GUIButton.isSameButton(item, GUIButton.COMPETITION_SETTINGS)) {
                         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);

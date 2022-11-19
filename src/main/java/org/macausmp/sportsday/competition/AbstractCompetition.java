@@ -4,52 +4,50 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
-import org.macausmp.sportsday.event.CompetitionStartEvent;
 import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractCompetition implements ICompetition, Listener {
+public abstract class AbstractCompetition implements ICompetition {
     private Stage stage = Stage.IDLE;
-    private final int leastPlayersRequired = SportsDay.getInstance().getConfig().getInt(this.getID() + ".least_players_required");
-    private final Location location = SportsDay.getInstance().getConfig().getLocation(this.getID() + ".location");
-    private final World world = Objects.requireNonNull(this.location).getWorld();
+    private final int leastPlayersRequired = SportsDay.getInstance().getConfig().getInt(getID() + ".least_players_required");
+    private final Location location = SportsDay.getInstance().getConfig().getLocation(getID() + ".location");
+    private final World world = Objects.requireNonNull(location).getWorld();
     private static final List<BukkitTask> COMPETITION_TASKS = new ArrayList<>();
     private final List<PlayerData> players = new ArrayList<>();
-    protected static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
 
     @Override
     public Component getName() {
-        return Component.text(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")));
+        return Component.text(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(getID() + ".name")));
     }
 
     @Override
     public int getLeastPlayersRequired() {
-        return this.leastPlayersRequired;
+        return leastPlayersRequired;
     }
 
     @Override
     public Location getLocation() {
-        return this.location;
+        return location;
     }
 
     @Override
     public World getWorld() {
-        return this.world;
+        return world;
     }
 
     @Override
     public boolean isEnable() {
-        return SportsDay.getInstance().getConfig().getBoolean(this.getID() + ".enable");
+        return SportsDay.getInstance().getConfig().getBoolean(getID() + ".enable");
     }
 
     @Override
@@ -57,11 +55,10 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
         COMPETITION_TASKS.forEach(BukkitTask::cancel);
         getPlayerDataList().clear();
         getLeaderboard().clear();
-        Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + "§a即將開始");
         setStage(Stage.COMING);
         getPlayerDataList().addAll(Competitions.getPlayerDataList());
         getPlayerDataList().removeIf(d -> !d.isPlayerOnline());
-        getOnlinePlayers().forEach(p -> p.sendMessage(Component.translatable("%s§a將於15秒後開始").args(getName())));
+        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.start_in_15sec").args(getName())));
         getPlayerDataList().forEach(data -> {
             data.getPlayer().setBedSpawnLocation(getLocation(), true);
             if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
@@ -76,7 +73,7 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
             public void run() {
                 if (i == 15 || i == 10 || (i <= 5 && i > 0)) {
                     getOnlinePlayers().forEach(p -> {
-                        p.sendActionBar(Component.text("§e比賽還有§a" + i + "秒§e開始"));
+                        p.sendActionBar(Translation.translatable("competition.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 0.5f);
                     });
                 }
@@ -84,25 +81,24 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
                     this.cancel();
                     start();
                     getOnlinePlayers().forEach(p -> {
-                        p.sendActionBar(Component.text("比賽開始").color(NamedTextColor.YELLOW));
+                        p.sendActionBar(Translation.translatable("competition.start"));
                         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                     });
                 }
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
         onSetup();
+        Bukkit.getConsoleSender().sendMessage("§a一場" + Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(getID() + ".name")) + "§a即將開始");
     }
 
     @Override
     public void start() {
         setStage(Stage.STARTED);
-        Bukkit.getPluginManager().callEvent(new CompetitionStartEvent(this));
         onStart();
     }
 
     @Override
     public void end(boolean force) {
-        Bukkit.getConsoleSender().sendMessage(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(this.getID() + ".name")) + (force ? "§c已強制結束" : "§c已結束"));
         setStage(Stage.ENDED);
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
@@ -118,26 +114,27 @@ public abstract class AbstractCompetition implements ICompetition, Listener {
                 }
             }
         }.runTaskLater(SportsDay.getInstance(), 100L));
+        Bukkit.getConsoleSender().sendMessage(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString(getID() + ".name")) + (force ? "§c已強制結束" : "§c已結束"));
     }
 
     /**
-     * extra event on {@link AbstractCompetition#setup()}
+     * extra event on {@link ICompetition#setup()}
      */
     protected abstract void onSetup();
 
     /**
-     * extra event on {@link AbstractCompetition#start()}
+     * extra event on {@link ICompetition#start()}
      */
     protected abstract void onStart();
 
     /**
-     * extra event on {@link AbstractCompetition#end(boolean)}}
+     * extra event on {@link ICompetition#end(boolean)}}
      */
     protected abstract void onEnd(boolean force);
 
     @Override
     public Stage getStage() {
-        return this.stage;
+        return stage;
     }
 
     @Override

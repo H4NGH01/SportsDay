@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class CompetitionInfoGUI extends AbstractGUI {
             boolean b = Competitions.getCurrentlyCompetition() != null;
             meta.displayName(Component.translatable("當前比賽: %s").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.text("無").color(NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.translatable("比賽階段: %s").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : ICompetition.Stage.IDLE.getName()).decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.translatable("比賽階段: %s").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName()).decoration(TextDecoration.ITALIC, false));
             meta.lore(lore);
         });
         return status;
