@@ -1,0 +1,97 @@
+# 想要顯示出來的伺服器IP
+server_ip: §esample.server.ip
+# 判斷玩家到達終點或完成圈數的方塊
+finish_line_block: GOLD_BLOCK
+# 判斷玩家到達檢查點的方塊
+checkpoint_block: EMERALD_BLOCK
+# 判斷玩家離開賽道的方塊
+death_block: RED_GLAZED_TERRACOTTA
+# 飛行賽
+elytra_racing:
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+# 冰船賽
+ice_boat_racing:
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+# 擲標槍
+javelin_throw:
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+# 障礙賽
+obstacle_course:
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+# 跑酷賽
+parkour:
+  enable: true
+  least_players_required: 8
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+# 相撲
+sumo:
+  enable: true
+  least_players_required: 8
+  enable_weapon: true
+  location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+  p1-location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
+  p2-location:
+    ==: org.bukkit.Location
+    world: world
+    x: 0
+    y: 0
+    z: 0
+    pitch: 0
+    yaw: 0
