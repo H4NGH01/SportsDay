@@ -26,9 +26,4 @@ public class ObstacleCourse extends AbstractTrackCompetition {
             }
         });
     }
-
-    @Override
-    public int getMaxLaps() {
-        return 2;
-    }
 }

@@ -103,9 +103,4 @@ public class IceBoatRacing extends AbstractTrackCompetition {
         boatMap.put(p, getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class));
         boatMap.get(p).addPassenger(p);
     }
-
-    @Override
-    public int getMaxLaps() {
-        return 2;
-    }
 }

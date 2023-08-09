@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 public class CastleKrusader extends AbstractCompetition implements IRoundGame {
-    private final Leaderboard<PlayerTeam> leaderboard = new Leaderboard<>();
+    private final List<PlayerTeam> leaderboard = new ArrayList<>();
     private final List<PlayerTeam> queue = new ArrayList<>();
 
     public CastleKrusader() {
@@ -55,7 +55,7 @@ public class CastleKrusader extends AbstractCompetition implements IRoundGame {
     }
 
     @Override
-    public Leaderboard<PlayerTeam> getLeaderboard() {
+    public List<PlayerTeam> getLeaderboard() {
         return leaderboard;
     }
 

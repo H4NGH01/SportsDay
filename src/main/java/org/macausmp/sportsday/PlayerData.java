@@ -10,19 +10,16 @@ import java.util.UUID;
  */
 public class PlayerData {
     private final UUID uuid;
-    private final String name;
     private final int number;
     private int score = 0;
 
     public PlayerData(UUID uuid, int number) {
         this.uuid = uuid;
-        this.name = Bukkit.getOfflinePlayer(uuid).getName();
         this.number = number;
     }
 
     public PlayerData(UUID uuid, int number, int score) {
         this.uuid = uuid;
-        this.name = Bukkit.getOfflinePlayer(uuid).getName();
         this.number = number;
         this.score = score;
     }
@@ -40,7 +37,7 @@ public class PlayerData {
      * @return Player name
      */
     public String getName() {
-        return name;
+        return Bukkit.getOfflinePlayer(uuid).getName();
     }
 
     /**

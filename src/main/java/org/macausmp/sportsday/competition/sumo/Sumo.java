@@ -15,7 +15,6 @@ import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.IRoundGame;
-import org.macausmp.sportsday.competition.Leaderboard;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Sumo extends AbstractCompetition implements IRoundGame {
-    private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
+    private final List<PlayerData> leaderboard = new ArrayList<>();
     private final List<PlayerData> alive = new ArrayList<>();
     private final List<PlayerData> queue = new ArrayList<>();
     private SumoStage sumoStage = SumoStage.ELIMINATE;
@@ -272,7 +271,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     }
 
     @Override
-    public Leaderboard<PlayerData> getLeaderboard() {
+    public List<PlayerData> getLeaderboard() {
         return leaderboard;
     }
 

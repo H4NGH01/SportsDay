@@ -21,15 +21,17 @@ import java.util.Objects;
 
 public abstract class AbstractTrackCompetition extends AbstractCompetition implements ITrackCompetition {
     private static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
-    private final Leaderboard<PlayerData> leaderboard = new Leaderboard<>();
+    private final List<PlayerData> leaderboard = new ArrayList<>();
     private final HashMap<PlayerData, Integer> lapMap = new HashMap<>();
     private final HashMap<PlayerData, Float> record = new HashMap<>();
+    private final int laps;
     private float time = 0f;
     private boolean endCountdown = false;
     private BukkitTask task;
 
     public AbstractTrackCompetition(String id) {
         super(id);
+        this.laps = SportsDay.getInstance().getConfig().getInt(getID() + ".laps");
     }
 
     @Override
@@ -62,8 +64,8 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
         super.end(force);
         if (force) return;
         List<Component> cl = new ArrayList<>();
-        for (int i = 0; i < getLeaderboard().size();) {
-            PlayerData data = getLeaderboard().get(i++);
+        for (int i = 0; i < leaderboard.size();) {
+            PlayerData data = leaderboard.get(i++);
             cl.add(Translation.translatable("competition.rank").args(Component.text(i), Component.text(data.getName()), Component.text(record.get(data))));
             if (i <= 3) {
                 data.addScore(4 - i);
@@ -77,7 +79,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
             Player player = e.getPlayer();
-            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId()))) return;
+            if (leaderboard.contains(Competitions.getPlayerData(player.getUniqueId()))) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
@@ -86,21 +88,23 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 if (lapMap.get(data) < getMaxLaps()) {
+                    player.setBedSpawnLocation(getLocation(), true);
+                    player.teleport(getLocation());
                     Bukkit.getPluginManager().callEvent(new PlayerFinishLapEvent(player, this));
                     getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW)));
                 } else {
                     record.put(data, time / 20f);
-                    getLeaderboard().add(Competitions.getPlayerData(player.getUniqueId()));
+                    leaderboard.add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
                     Bukkit.getPluginManager().callEvent(new PlayerFinishCompetitionEvent(player, this));
                     getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW)));
-                    if (getLeaderboard().size() == getPlayerDataList().size()) {
+                    if (leaderboard.size() == getPlayerDataList().size()) {
                         if (task != null && !task.isCancelled()) task.cancel();
                         getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.all_player_finished")));
                         end(false);
                         return;
                     }
-                    if (getLeaderboard().size() >= 3 && !endCountdown) {
+                    if (leaderboard.size() >= 3 && !endCountdown) {
                         endCountdown = true;
                         getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.third_player_finished")));
                         task = addRunnable(new BukkitRunnable() {
@@ -124,7 +128,12 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
     }
 
     @Override
-    public final Leaderboard<PlayerData> getLeaderboard() {
+    public int getMaxLaps() {
+        return laps;
+    }
+
+    @Override
+    public final List<PlayerData> getLeaderboard() {
         return leaderboard;
     }
 }

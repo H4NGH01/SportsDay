@@ -6,6 +6,8 @@ import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 
+import java.util.List;
+
 /**
  * Competition interface
  */
@@ -84,5 +86,5 @@ public interface ICompetition extends Listener {
      * Get the leaderboard of competition
      * @return leaderboard of competition
      */
-    Leaderboard<?> getLeaderboard();
+    List<?> getLeaderboard();
 }

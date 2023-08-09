@@ -10,6 +10,7 @@ death_block: RED_GLAZED_TERRACOTTA
 elytra_racing:
   enable: true
   least_players_required: 8
+  laps: 1
   location:
     ==: org.bukkit.Location
     world: world
@@ -22,6 +23,7 @@ elytra_racing:
 ice_boat_racing:
   enable: true
   least_players_required: 8
+  laps: 2
   location:
     ==: org.bukkit.Location
     world: world
@@ -46,6 +48,7 @@ javelin_throw:
 obstacle_course:
   enable: true
   least_players_required: 8
+  laps: 2
   location:
     ==: org.bukkit.Location
     world: world
@@ -58,6 +61,7 @@ obstacle_course:
 parkour:
   enable: true
   least_players_required: 8
+  laps: 1
   location:
     ==: org.bukkit.Location
     world: world

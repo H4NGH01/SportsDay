@@ -122,7 +122,7 @@ public abstract class AbstractCompetition implements ICompetition {
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
-                if (getStage() == Stage.ENDED) {
+                if (stage == Stage.ENDED) {
                     Competitions.setCurrentlyCompetition(null);
                     if (isEnable()) {
                         setStage(Stage.IDLE);

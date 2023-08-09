@@ -58,9 +58,4 @@ public class Parkour extends AbstractTrackCompetition {
             }
         }.runTaskLater(SportsDay.getInstance(), 5L));
     }
-
-    @Override
-    public int getMaxLaps() {
-        return 1;
-    }
 }
