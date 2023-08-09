@@ -81,9 +81,4 @@ public class ElytraRacing extends AbstractTrackCompetition {
             e.setCancelled(true);
         }
     }
-
-    @Override
-    public int getMaxLaps() {
-        return 1;
-    }
 }

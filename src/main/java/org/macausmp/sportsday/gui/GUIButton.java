@@ -69,7 +69,7 @@ public class GUIButton {
             List<Component> lore = new ArrayList<>();
             lore.add(Translation.translatable("gui.title.start_lore"));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competition");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competitions");
         });
         return stack;
     }
@@ -130,9 +130,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.ELYTRA);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.ELYTRA_RACING.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ELYTRA_RACING.getID());
         });
@@ -143,9 +140,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.OAK_BOAT);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.ICE_BOAT_RACING.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ICE_BOAT_RACING.getID());
         });
@@ -156,9 +150,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.TRIDENT);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.JAVELIN_THROW.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.JAVELIN_THROW.getID());
         });
@@ -169,9 +160,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.OAK_FENCE_GATE);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.OBSTACLE_COURSE.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.OBSTACLE_COURSE.getID());
         });
@@ -182,9 +170,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.LEATHER_BOOTS);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.PARKOUR.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.PARKOUR.getID());
         });
@@ -195,9 +180,6 @@ public class GUIButton {
         ItemStack stack = new ItemStack(Material.COD);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.SUMO.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select_competition"));
-            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.SUMO.getID());
         });

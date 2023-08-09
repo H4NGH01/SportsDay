@@ -66,17 +66,18 @@ public class Competitions {
      * Start a competition
      * @param sender who host the competition
      * @param id competition id
+     * @return True if competition successfully started
      */
-    public static void start(CommandSender sender, String id) {
+    public static boolean start(CommandSender sender, String id) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
             sender.sendMessage(Translation.translatable("competition.already_in_progress"));
-            return;
+            return false;
         }
         for (ICompetition competition : COMPETITIONS) {
             if (competition.getID().equals(id)) {
                 if (!competition.isEnable()) {
                     sender.sendMessage(Translation.translatable("competition.disabled"));
-                    return;
+                    return false;
                 }
                 int i = 0;
                 for (PlayerData d : PLAYERS) {
@@ -87,13 +88,15 @@ public class Competitions {
                     setCurrentlyCompetition(competition);
                     competition.setup();
                     Bukkit.getPluginManager().callEvent(new CompetitionSetupEvent(competition));
+                    return true;
                 } else {
                     sender.sendMessage(Translation.translatable("competition.no_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                    return false;
                 }
-                return;
             }
         }
         sender.sendMessage(Translation.translatable("competition.unknown"));
+        return false;
     }
 
     /**
