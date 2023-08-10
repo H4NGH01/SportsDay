@@ -14,10 +14,16 @@ public class CommandManager implements CommandExecutor {
     private static final List<IPluginCommand> COMMANDS = new ArrayList<>();
     private static final IPluginCommand COMPETITION = new CompetitionCommand();
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
+    private static final IPluginCommand REGISTER = new RegisterCommand();
+    private static final IPluginCommand UNREGISTER = new UnregisterCommand();
+    private static final IPluginCommand PING = new PingCommand();
 
-    public void registry() {
+    public void register() {
         COMMANDS.add(COMPETITION);
         COMMANDS.add(COMPETITIONGUI);
+        COMMANDS.add(REGISTER);
+        COMMANDS.add(UNREGISTER);
+        COMMANDS.add(PING);
         for (IPluginCommand command : COMMANDS) {
             Objects.requireNonNull(SportsDay.getInstance().getCommand(command.name())).setExecutor(this);
             Objects.requireNonNull(SportsDay.getInstance().getCommand(command.name())).setTabCompleter(command);

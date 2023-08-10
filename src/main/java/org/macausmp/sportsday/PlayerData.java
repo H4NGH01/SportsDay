@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 /**
- * Player extra data for the plugin
+ * {@link Player} extra data for the plugin
  */
 public class PlayerData {
     private final UUID uuid;
@@ -25,64 +25,64 @@ public class PlayerData {
     }
 
     /**
-     * Returns the UUID of the player
-     * @return Player UUID
+     * Returns the UUID of the {@link Player}
+     * @return {@link Player#getUniqueId()}
      */
     public UUID getUUID() {
         return uuid;
     }
 
     /**
-     * Returns the name of the player
-     * @return Player name
+     * Returns the name of the {@link Player}
+     * @return {@link Player#getName()} ()}
      */
     public String getName() {
         return Bukkit.getOfflinePlayer(uuid).getName();
     }
 
     /**
-     * Returns the player of this data
-     * @return Player of this data
+     * Returns the {@link Player} of this data
+     * @return {@link Player}
      */
     public Player getPlayer() {
         return Bukkit.getOfflinePlayer(uuid).getPlayer();
     }
 
     /**
-     * Checks if this player is currently online
-     * @return True if the player is online
+     * Checks if {@link Player} is currently online
+     * @return {@link Player#isOnline()}
      */
     public boolean isPlayerOnline() {
         return Bukkit.getOfflinePlayer(uuid).isOnline();
     }
 
     /**
-     * Returns the number of the player
-     * @return Player number
+     * Returns the {@link #number} of the {@link Player}
+     * @return {@link Player} {@link #number}
      */
     public int getNumber() {
         return number;
     }
 
     /**
-     * Returns the score of the player
-     * @return Player score
+     * Returns the {@link #score} of the {@link Player}
+     * @return {@link Player} {@link #score}
      */
     public int getScore() {
         return score;
     }
 
     /**
-     * Sets the score of the player
-     * @param score new score set for the player
+     * Sets the {@link #score} of the {@link Player}
+     * @param score new {@link #score} set for the {@link Player}
      */
     public void setScore(int score) {
         this.score = score;
     }
 
     /**
-     * Add the value of the score
-     * @param score value to increase of the score
+     * Add the value of the {@link #score}
+     * @param score value to increase of the {@link #score}
      */
     public void addScore(int score) {
         this.score += score;

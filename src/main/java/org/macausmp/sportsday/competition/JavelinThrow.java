@@ -4,7 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -166,11 +168,6 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 }
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
-    }
-
-    @Override
-    public List<PlayerData> getQueue() {
-        return this.queue;
     }
 
     private static class PlayerResult {

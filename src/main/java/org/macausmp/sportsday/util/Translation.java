@@ -12,6 +12,6 @@ public class Translation {
     private static final FileConfiguration LANGUAGE_CONFIG = SportsDay.getInstance().getLanguageConfig();
 
     public static @NotNull TranslatableComponent translatable(String key) {
-        return LANGUAGE_CONFIG.getString(key) != null ? Component.translatable(Objects.requireNonNull(LANGUAGE_CONFIG.getString(key))) : Component.translatable(key);
+        return Component.translatable(LANGUAGE_CONFIG.getString(key) != null ? Objects.requireNonNull(LANGUAGE_CONFIG.getString(key)) : key);
     }
 }

@@ -50,7 +50,7 @@ public class CompetitionCommand implements IPluginCommand {
                                 try {
                                     number = Integer.parseInt(args[2]);
                                     if (number < 0) {
-                                        sender.sendMessage(Translation.translatable("argument.registry.negative"));
+                                        sender.sendMessage(Translation.translatable("argument.register.negative"));
                                         return;
                                     }
                                 } catch (Exception e) {
@@ -60,9 +60,9 @@ public class CompetitionCommand implements IPluginCommand {
                             } else {
                                 number = Competitions.genNumber();
                             }
-                            sender.sendMessage(Competitions.join(p, number) ? Translation.translatable("player.registry_success").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Translation.translatable("player.registry_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
+                            sender.sendMessage(Competitions.join(p, number) ? Translation.translatable("player.register_success").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Translation.translatable("player.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
                         } else {
-                            sender.sendMessage(Translation.translatable("player.already_joined").args(p.displayName()).color(NamedTextColor.RED));
+                            sender.sendMessage(Translation.translatable("player.registered").args(p.displayName()).color(NamedTextColor.RED));
                         }
                     } else {
                         sender.sendMessage(Component.text("/competition join <player>"));
@@ -75,11 +75,11 @@ public class CompetitionCommand implements IPluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        sender.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable("player.not_even").args(Component.text(p.getName())).color(NamedTextColor.RED));
+                        sender.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable("player.unregistered").args(Component.text(p.getName())).color(NamedTextColor.RED));
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p)) {
-                                sender.sendMessage(Translation.translatable("player.not_even_self"));
+                                sender.sendMessage(Translation.translatable("player.unregistered_message"));
                             }
                             return;
                         }
@@ -109,7 +109,7 @@ public class CompetitionCommand implements IPluginCommand {
                             data.setScore(score);
                             sender.sendMessage(Translation.translatable("score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
                         } else {
-                            sender.sendMessage(Translation.translatable("player.not_even").args(Component.text(p.getName())));
+                            sender.sendMessage(Translation.translatable("player.unregistered").args(Component.text(p.getName())));
                         }
                     } else {
                         sender.sendMessage(Component.text("/competition score <player> <new_score>"));

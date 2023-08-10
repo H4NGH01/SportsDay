@@ -11,6 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class SkullTextureUtil {
+    /**
+     * Get custom texture player head
+     * @param value Profile textures value
+     * @return Player head with custom texture
+     */
     public static @NotNull ItemStack getSkull(String value) {
         ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
         if (value == null || value.isEmpty()) return stack;

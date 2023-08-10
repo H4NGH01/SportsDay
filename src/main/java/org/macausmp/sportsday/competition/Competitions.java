@@ -21,23 +21,23 @@ import java.util.*;
 
 public class Competitions {
     public static final List<ICompetition> COMPETITIONS = new ArrayList<>();
-    public static final ICompetition ELYTRA_RACING = registry(new ElytraRacing());
-    public static final ICompetition ICE_BOAT_RACING = registry(new IceBoatRacing());
-    public static final ICompetition JAVELIN_THROW = registry(new JavelinThrow());
-    public static final ICompetition OBSTACLE_COURSE = registry(new ObstacleCourse());
-    public static final ICompetition PARKOUR = registry(new Parkour());
-    public static final ICompetition SUMO = registry(new Sumo());
+    public static final ICompetition ELYTRA_RACING = register(new ElytraRacing());
+    public static final ICompetition ICE_BOAT_RACING = register(new IceBoatRacing());
+    public static final ICompetition JAVELIN_THROW = register(new JavelinThrow());
+    public static final ICompetition OBSTACLE_COURSE = register(new ObstacleCourse());
+    public static final ICompetition PARKOUR = register(new Parkour());
+    public static final ICompetition SUMO = register(new Sumo());
     private static final List<PlayerData> PLAYERS = new ArrayList<>();
     private static ICompetition CURRENTLY_COMPETITION;
     private static int NUMBER = 1;
     private static final List<Integer> REGISTERED_NUMBER_LIST = new ArrayList<>();
 
     /**
-     * Registry competition
-     * @param competition competition to registry
+     * Register competition
+     * @param competition competition to register
      * @return competition after registered
      */
-    private static <T extends ICompetition> T registry(T competition) {
+    private static <T extends ICompetition> T register(T competition) {
         COMPETITIONS.add(competition);
         return competition;
     }
@@ -108,7 +108,7 @@ public class Competitions {
             getCurrentlyCompetition().end(true);
             sender.sendMessage(Translation.translatable("competition.force_end"));
         } else {
-            sender.sendMessage(Translation.translatable("competition.no_in_progress"));
+            sender.sendMessage(Translation.translatable("competition.not_in_progress"));
         }
     }
 
@@ -143,7 +143,7 @@ public class Competitions {
         PLAYERS.add(new PlayerData(player.getUniqueId(), number));
         CompetitionGUI.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        player.sendMessage(Translation.translatable("player.registry_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
+        player.sendMessage(Translation.translatable("player.register_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
         Bukkit.getPluginManager().callEvent(new CompetitionJoinPlayerEvent(player));
         return true;

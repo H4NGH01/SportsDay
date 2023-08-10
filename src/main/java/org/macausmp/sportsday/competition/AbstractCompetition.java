@@ -11,6 +11,7 @@ import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
 import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.util.ColorTextUtil;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -21,16 +22,16 @@ import java.util.Objects;
 public abstract class AbstractCompetition implements ICompetition {
     private static final List<BukkitTask> COMPETITION_TASKS = new ArrayList<>();
     private final String id;
-    private Stage stage = Stage.IDLE;
     private final Component name;
     private final int least;
     private final Location location;
     private final World world;
+    private Stage stage = Stage.IDLE;
     private final List<PlayerData> players = new ArrayList<>();
 
     public AbstractCompetition(String id) {
         this.id = id;
-        this.name = Translation.translatable("competition.name." + getID());
+        this.name = ColorTextUtil.convert(Objects.requireNonNull(SportsDay.getInstance().getLanguageConfig().getString("competition.name." + getID())));
         this.least = SportsDay.getInstance().getConfig().getInt(getID() + ".least_players_required");
         this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".location"));
         this.world = location.getWorld();
@@ -104,7 +105,7 @@ public abstract class AbstractCompetition implements ICompetition {
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
         onSetup();
-        Bukkit.getConsoleSender().sendMessage(Translation.translatable("console.competition.coming").color(NamedTextColor.GREEN).args(getName()));
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(getName()));
     }
 
     @Override
@@ -130,7 +131,7 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskLater(SportsDay.getInstance(), 100L));
-        Bukkit.getConsoleSender().sendMessage(Translation.translatable("console.competition." + (force ? "force_end" : "end")).color(NamedTextColor.RED).args(getName()));
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(getName()));
     }
 
     /**

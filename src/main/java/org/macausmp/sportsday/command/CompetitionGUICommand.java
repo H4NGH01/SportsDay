@@ -48,9 +48,11 @@ public class CompetitionGUICommand implements IPluginCommand {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         List<String> list = new ArrayList<>();
-        list.add("book");
+        if (args.length == 1) {
+            list.add("book");
+        }
         return list;
     }
 }

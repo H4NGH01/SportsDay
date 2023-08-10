@@ -19,13 +19,13 @@ public class CastleKrusader extends AbstractCompetition implements IRoundGame {
 
     @Override
     protected void onSetup() {
-        getQueue().clear();
+        queue.clear();
         PlayerTeam.reset();
         List<PlayerData> temp = new ArrayList<>(getPlayerDataList());
         List<Component> cl = new ArrayList<>();
         for (int i = 0; i < getPlayerDataList().size() / 3 + (getPlayerDataList().size() % 3 == 0 ? 0 : 1); i++) {
             PlayerTeam team = new PlayerTeam(getFromList(temp), getFromList(temp), getFromList(temp));
-            getQueue().add(team);
+            queue.add(team);
             StringBuilder b = new StringBuilder();
             team.getList().forEach(d -> b.append(d.getName()));
             cl.add(Component.translatable("Team ID: %s Members: %s").args(Component.text(team.getID()), Component.text(b.toString())));
@@ -72,11 +72,6 @@ public class CastleKrusader extends AbstractCompetition implements IRoundGame {
     @Override
     public void nextRound() {
 
-    }
-
-    @Override
-    public List<PlayerTeam> getQueue() {
-        return queue;
     }
 
     public static class PlayerTeam {

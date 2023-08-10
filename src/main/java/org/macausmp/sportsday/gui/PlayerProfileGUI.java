@@ -38,7 +38,7 @@ public class PlayerProfileGUI extends AbstractGUI {
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(5, GUIButton.VERSION);
         getInventory().setItem(18, icon(data.getUUID()));
-        getInventory().setItem(19, kick(data));
+        getInventory().setItem(19, unregister(data));
     }
 
     @Override
@@ -60,22 +60,22 @@ public class PlayerProfileGUI extends AbstractGUI {
         return icon;
     }
 
-    private @NotNull ItemStack kick(PlayerData data) {
+    private @NotNull ItemStack unregister(PlayerData data) {
         ItemStack stack = new ItemStack(Material.RED_CONCRETE);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.player.remove").args(Component.text(data.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.RED));
+            meta.displayName(Translation.translatable("gui.player.unregister").args(Component.text(data.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.RED));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.player.remove_lore"));
+            lore.add(Translation.translatable("gui.player.unregister_lore"));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "kick");
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "unregister");
         });
         return stack;
     }
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, kick(data))) {
-            p.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable( "player.not_even").args(Component.text(p.getName())).color(NamedTextColor.RED));
+        if (GUIButton.isSameButton(item, unregister(data))) {
+            p.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable( "player.unregistered").args(Component.text(p.getName())).color(NamedTextColor.RED));
             p.closeInventory();
         }
     }

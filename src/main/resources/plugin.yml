@@ -13,3 +13,12 @@ commands:
     usage: "/competitiongui"
     description: "Open competition gui"
     permission: op
+  register:
+    usage: "/register <number>"
+    description: "Register as a player"
+  unregister:
+    usage: "/register"
+    description: "Unregister as a player"
+  ping:
+    usage: "/ping <player>"
+    description: "Ping"
