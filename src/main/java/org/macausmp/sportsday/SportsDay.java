@@ -59,12 +59,12 @@ public final class SportsDay extends JavaPlugin implements Listener {
         Competitions.load();
         ScoreboardManager manager = getServer().getScoreboardManager();
         Scoreboard scoreboard = manager.getMainScoreboard();
-        PLAYER = registryTeam(scoreboard, "player", Translation.translatable("role.player"), NamedTextColor.GREEN);
-        REFEREE = registryTeam(scoreboard, "referee", Translation.translatable("role.referee"), NamedTextColor.GOLD);
-        AUDIENCE = registryTeam(scoreboard, "audience", Translation.translatable("role.audience"), NamedTextColor.GRAY);
+        PLAYER = registerTeam(scoreboard, "player", Translation.translatable("role.player"), NamedTextColor.GREEN);
+        REFEREE = registerTeam(scoreboard, "referee", Translation.translatable("role.referee"), NamedTextColor.GOLD);
+        AUDIENCE = registerTeam(scoreboard, "audience", Translation.translatable("role.audience"), NamedTextColor.GRAY);
         BOSSBAR = getServer().createBossBar(getLanguageConfig().getString("bar.title"), BarColor.YELLOW, BarStyle.SOLID);
         getServer().getWorlds().forEach(w -> {
-            w.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, true);
+            w.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, false);
             w.setGameRule(GameRule.DO_ENTITY_DROPS, false);
             w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
             w.setGameRule(GameRule.DO_INSOMNIA, false);
@@ -72,8 +72,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
             w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
             w.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
         });
-        registryCommand();
-        registryListener();
+        registerCommand();
+        registerListener();
         sendPackets();
         if (so == null) {
             so = new ScoreboardObjects();
@@ -81,14 +81,14 @@ public final class SportsDay extends JavaPlugin implements Listener {
         getServer().getOnlinePlayers().forEach(this::sendPackets);
     }
 
-    private void registryCommand() {
+    private void registerCommand() {
         if (commandManager == null) {
             commandManager = new CommandManager();
         }
-        commandManager.registry();
+        commandManager.register();
     }
 
-    private void registryListener() {
+    private void registerListener() {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new CompetitionListener(), this);
         getServer().getPluginManager().registerEvents(Competitions.ELYTRA_RACING, this);
@@ -100,7 +100,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
     }
 
-    private Team registryTeam(@NotNull Scoreboard scoreboard, String name, Component display, NamedTextColor color) {
+    private Team registerTeam(@NotNull Scoreboard scoreboard, String name, Component display, NamedTextColor color) {
         if (scoreboard.getTeam(name) == null) {
             Team team = scoreboard.registerNewTeam(name);
             team.displayName(display);
@@ -150,7 +150,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                         header = header.append(competition);
                         time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                         for (Player p : getServer().getOnlinePlayers()) {
-                            Component ping = Translation.translatable("bar.delay").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+                            Component ping = Translation.translatable("bar.ping").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
                             footer = Translation.translatable("bar.local_time").args(time).color(NamedTextColor.GREEN).append(ping);
                             p.sendPlayerListHeaderAndFooter(header, footer);
                             p.playerListName(p.teamDisplayName());

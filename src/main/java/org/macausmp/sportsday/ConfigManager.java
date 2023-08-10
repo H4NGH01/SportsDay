@@ -1,6 +1,5 @@
 package org.macausmp.sportsday;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,7 @@ public class ConfigManager {
     public void setup() {
         if (!SportsDay.getInstance().getDataFolder().exists()) {
             if (SportsDay.getInstance().getDataFolder().mkdir()) {
-                Bukkit.getLogger().log(Level.INFO, "Data folder created");
+                SportsDay.getInstance().getLogger().log(Level.INFO, "Data folder created");
             }
         }
         playerFile = new File(SportsDay.getInstance().getDataFolder(), "player.yml");
@@ -34,10 +33,10 @@ public class ConfigManager {
         if (!file.exists()) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().log(Level.INFO, name + " file has been created");
+                    SportsDay.getInstance().getLogger().log(Level.INFO, name + " file has been created");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "Could not create the " + name + " file");
+                SportsDay.getInstance().getLogger().log(Level.SEVERE, "Could not create the " + name + " file");
             }
         }
         return YamlConfiguration.loadConfiguration(file);
@@ -47,7 +46,7 @@ public class ConfigManager {
         if (!languageFile.exists()) {
             try {
                 if (languageFile.createNewFile()) {
-                    Bukkit.getLogger().log(Level.INFO, "lang.json file has been created");
+                    SportsDay.getInstance().getLogger().log(Level.INFO, "lang.json file has been created");
                     final InputStream defLangStream = SportsDay.getInstance().getResource("lang.json");
                     if (defLangStream == null) {
                         return;
@@ -62,11 +61,11 @@ public class ConfigManager {
                         writer.write(defaults.toString());
                         writer.close();
                     } catch (IOException e) {
-                        Bukkit.getLogger().log(Level.SEVERE, "Could not write the lang.json file");
+                        SportsDay.getInstance().getLogger().log(Level.SEVERE, "Could not write the lang.json file", e);
                     }
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "Could not create the lang.json file", e);
+                SportsDay.getInstance().getLogger().log(Level.SEVERE, "Could not create the lang.json file", e);
             }
         }
         languageConfig = YamlConfiguration.loadConfiguration(languageFile);
@@ -80,7 +79,7 @@ public class ConfigManager {
         try {
             playerConfig.save(playerFile);
         } catch (IOException e) {
-            Bukkit.getLogger().log(Level.SEVERE, "Could not save the player.yml file", e);
+            SportsDay.getInstance().getLogger().log(Level.SEVERE, "Could not save the player.yml file", e);
         }
     }
 
