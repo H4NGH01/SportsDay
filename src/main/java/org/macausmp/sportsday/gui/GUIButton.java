@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.util.SkullTextureUtil;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class GUIButton {
     }
 
     public static @NotNull ItemStack startCompetition() {
-        ItemStack stack = new ItemStack(Material.GREEN_CONCRETE);
+        @SuppressWarnings("SpellCheckingInspection") ItemStack stack = SkullTextureUtil.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=");
         stack.editMeta(meta -> {
             meta.displayName(Translation.translatable("gui.title.start").decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();

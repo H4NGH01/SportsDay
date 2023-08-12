@@ -31,9 +31,9 @@ public abstract class AbstractCompetition implements ICompetition {
 
     public AbstractCompetition(String id) {
         this.id = id;
-        this.name = ColorTextUtil.convert(Objects.requireNonNull(SportsDay.getInstance().getLanguageConfig().getString("competition.name." + getID())));
-        this.least = SportsDay.getInstance().getConfig().getInt(getID() + ".least_players_required");
-        this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".location"));
+        this.name = ColorTextUtil.convert(Translation.translatable("competition.name." + id));
+        this.least = SportsDay.getInstance().getConfig().getInt(id + ".least_players_required");
+        this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractCompetition implements ICompetition {
 
     @Override
     public final boolean isEnable() {
-        return SportsDay.getInstance().getConfig().getBoolean(getID() + ".enable");
+        return SportsDay.getInstance().getConfig().getBoolean(id + ".enable");
     }
 
     @Override
@@ -75,13 +75,13 @@ public abstract class AbstractCompetition implements ICompetition {
         setStage(Stage.COMING);
         players.addAll(Competitions.getPlayerDataList());
         players.removeIf(d -> !d.isPlayerOnline());
-        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.start_in_15sec").args(getName())));
+        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.start_in_15sec").args(name)));
         players.forEach(data -> {
-            data.getPlayer().setBedSpawnLocation(getLocation(), true);
+            data.getPlayer().setBedSpawnLocation(location, true);
             if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
                 data.getPlayer().getInventory().clear();
             }
-            data.getPlayer().teleport(getLocation());
+            data.getPlayer().teleport(location);
             data.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
         addRunnable(new BukkitRunnable() {
@@ -105,7 +105,7 @@ public abstract class AbstractCompetition implements ICompetition {
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
         onSetup();
-        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(getName()));
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
     }
 
     @Override
@@ -125,13 +125,18 @@ public abstract class AbstractCompetition implements ICompetition {
             public void run() {
                 if (stage == Stage.ENDED) {
                     Competitions.setCurrentlyCompetition(null);
-                    if (isEnable()) {
-                        setStage(Stage.IDLE);
-                    }
+                    setStage(Stage.IDLE);
+                    getOnlinePlayers().forEach(p -> {
+                        p.teleport(location);
+                        p.setGameMode(GameMode.ADVENTURE);
+                    });
+                    getPlayerDataList().forEach(d -> {
+                        if (d.isPlayerOnline()) d.getPlayer().getInventory().clear();
+                    });
                 }
             }
         }.runTaskLater(SportsDay.getInstance(), 100L));
-        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(getName()));
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
     }
 
     /**
@@ -161,8 +166,8 @@ public abstract class AbstractCompetition implements ICompetition {
     }
 
     /**
-     * Get the player data list of competition
-     * @return player data list of competition
+     * Get the {@link PlayerData} list of competition
+     * @return {@link PlayerData} list of competition
      */
     public final List<PlayerData> getPlayerDataList() {
         return players;
@@ -177,8 +182,8 @@ public abstract class AbstractCompetition implements ICompetition {
     }
 
     /**
-     * Add a runnable task to this competition
-     * @param task runnable task to add
+     * Add a {@link BukkitTask} to this competition
+     * @param task {@link BukkitTask} to add
      */
     protected BukkitTask addRunnable(BukkitTask task) {
         COMPETITION_TASKS.add(task);

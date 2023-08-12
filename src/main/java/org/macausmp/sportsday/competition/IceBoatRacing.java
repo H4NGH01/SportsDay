@@ -28,11 +28,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
 
     @Override
     public void onSetup() {
-        getPlayerDataList().forEach(data -> {
-            Boat boat = getWorld().spawn(getLocation(), Boat.class);
-            boat.addPassenger(data.getPlayer());
-            boatMap.put(data.getPlayer(), boat);
-        });
+        getPlayerDataList().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
     }
 
     @Override
@@ -64,8 +60,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
         if (e.getCompetition() != this) return;
         Player p = e.getPlayer();
         boatMap.get(p).remove();
-        boatMap.put(p, getWorld().spawn(getLocation(), Boat.class));
-        boatMap.get(p).addPassenger(p);
+        boatMap.put(p, boat(p));
     }
 
     @EventHandler
@@ -100,7 +95,13 @@ public class IceBoatRacing extends AbstractTrackCompetition {
         Player p = e.getPlayer();
         if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || boatMap.get(p) == null) return;
         boatMap.get(p).remove();
-        boatMap.put(p, getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class));
-        boatMap.get(p).addPassenger(p);
+        boatMap.put(p, boat(p));
+    }
+
+    private @NotNull Boat boat(@NotNull Player p) {
+        Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
+        boat.setInvulnerable(true);
+        boat.addPassenger(p);
+        return boat;
     }
 }

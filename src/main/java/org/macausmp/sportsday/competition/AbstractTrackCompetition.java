@@ -87,7 +87,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
                 PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
-                if (lapMap.get(data) < getMaxLaps()) {
+                if (lapMap.get(data) < laps) {
                     player.setBedSpawnLocation(getLocation(), true);
                     player.teleport(getLocation());
                     Bukkit.getPluginManager().callEvent(new PlayerFinishLapEvent(player, this));
