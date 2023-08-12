@@ -75,7 +75,11 @@ public class PlayerProfileGUI extends AbstractGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, ItemStack item) {
         if (GUIButton.isSameButton(item, unregister(data))) {
+<<<<<<< HEAD
             p.sendMessage(Competitions.leave(data.getPlayer()) ? Translation.translatable("player.leave").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Translation.translatable( "player.unregistered").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
+=======
+            p.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable( "player.unregistered").args(Component.text(p.getName())).color(NamedTextColor.RED));
+>>>>>>> dcdbd7911177a6fc22c18a4a0094c1c4aa88d1ad
             p.closeInventory();
         }
     }

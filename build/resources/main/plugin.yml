@@ -1,0 +1,24 @@
+name: SportsDay
+version: '2.1-BETA'
+main: org.macausmp.sportsday.SportsDay
+api-version: '1.20'
+authors: [ JJGP ]
+description: "The MacauSMP SportsDay plugin"
+commands:
+  competition:
+    usage: "/competition (start|end|join|leave|score|info) <argument>"
+    description: "Competition hosting command"
+    permission: op
+  competitiongui:
+    usage: "/competitiongui"
+    description: "Open competition gui"
+    permission: op
+  register:
+    usage: "/register <number>"
+    description: "Register as a player"
+  unregister:
+    usage: "/register"
+    description: "Unregister as a player"
+  ping:
+    usage: "/ping <player>"
+    description: "Ping"

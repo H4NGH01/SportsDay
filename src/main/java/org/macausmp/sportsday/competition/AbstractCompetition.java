@@ -31,9 +31,15 @@ public abstract class AbstractCompetition implements ICompetition {
 
     public AbstractCompetition(String id) {
         this.id = id;
+<<<<<<< HEAD
         this.name = ColorTextUtil.convert(Translation.translatable("competition.name." + id));
         this.least = SportsDay.getInstance().getConfig().getInt(id + ".least_players_required");
         this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(id + ".location"));
+=======
+        this.name = ColorTextUtil.convert(Objects.requireNonNull(SportsDay.getInstance().getLanguageConfig().getString("competition.name." + getID())));
+        this.least = SportsDay.getInstance().getConfig().getInt(getID() + ".least_players_required");
+        this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".location"));
+>>>>>>> dcdbd7911177a6fc22c18a4a0094c1c4aa88d1ad
         this.world = location.getWorld();
     }
 
@@ -105,7 +111,11 @@ public abstract class AbstractCompetition implements ICompetition {
             }
         }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
         onSetup();
+<<<<<<< HEAD
         SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
+=======
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(getName()));
+>>>>>>> dcdbd7911177a6fc22c18a4a0094c1c4aa88d1ad
     }
 
     @Override
@@ -136,7 +146,11 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskLater(SportsDay.getInstance(), 100L));
+<<<<<<< HEAD
         SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
+=======
+        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(getName()));
+>>>>>>> dcdbd7911177a6fc22c18a4a0094c1c4aa88d1ad
     }
 
     /**
