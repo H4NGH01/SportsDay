@@ -14,13 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.AbstractCompetition;
+import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IRoundGame;
 import org.macausmp.sportsday.util.Translation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class Sumo extends AbstractCompetition implements IRoundGame {
     private final List<PlayerData> leaderboard = new ArrayList<>();
@@ -62,6 +60,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     }
 
     private void stageSetup() {
+        sumoStage.resetRoundIndex();
         List<Component> cl = new ArrayList<>();
         cl.add(Translation.translatable("competition.sumo.current_stage").args(sumoStage.getName()));
         for (int i = 0; i < sumoStage.getRoundList().size();) {
@@ -79,12 +78,10 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     @Override
     public void onEnd(boolean force) {
         if (force) return;
-        leaderboard.add(1, alive.get(1));
-        leaderboard.add(0, alive.get(0));
         List<Component> cl = new ArrayList<>();
         for (int i = 0; i < leaderboard.size();) {
             PlayerData data = leaderboard.get(i++);
-            cl.add(Translation.translatable("competition.rank").args(Component.text(i), Component.text(data.getName())));
+            cl.add(Translation.translatable("competition.sumo.rank").args(Component.text(i), Component.text(data.getName())));
             if (i <= 3) {
                 data.addScore(4 - i);
             }
@@ -147,7 +144,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                 int i = 30;
                 @Override
                 public void run() {
-                    if (sumoStage.getCurrentRound().getStatus() == SumoRound.RoundStatus.END) {
+                    if (sumoStage.getCurrentRound() == null || sumoStage.getCurrentRound().getStatus() == SumoRound.RoundStatus.END) {
                         cancel();
                         return;
                     }
@@ -182,6 +179,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             p.sendActionBar(Translation.translatable("competition.sumo.round_end"));
             p.sendMessage(Translation.translatable("competition.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
         });
+        round.getPlayers().forEach(p -> p.getInventory().clear());
         if (sumoStage != SumoStage.SEMI_FINAL) {
             for (PlayerData data : alive) {
                 if (data.getUUID().equals(round.getLoser().getUniqueId())) {
@@ -192,13 +190,19 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             }
         }
         // After sumo stage
-        if (sumoStage == SumoStage.SEMI_FINAL) {
+        if (sumoStage == SumoStage.FINAL) {
+            leaderboard.add(0, Competitions.getPlayerData(round.getWinner().getUniqueId()));
+        } else if (sumoStage == SumoStage.THIRD_PLACE) {
+            leaderboard.add(0, Competitions.getPlayerData(round.getWinner().getUniqueId()));
+        } else if (sumoStage == SumoStage.SEMI_FINAL) {
             grandFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
             thirdPlace[sumoStage.getRoundIndex() - 1] = round.getLoser();
         } else if (sumoStage == SumoStage.QUARTER_FINAL) {
             semiFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
         }
         if (sumoStage.getRoundRemaining() != 0) {
+            SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
+            getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName())));
             nextRound();
         } else {
             if (sumoStage != SumoStage.FINAL) {
@@ -225,6 +229,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     }
 
     private void nextSumoStage() {
+        if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
         if (alive.size() <= 8 && sumoStage.hasNextStage()) {
             sumoStage = sumoStage.getNextStage();
         }
@@ -234,11 +239,13 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         } else if (sumoStage == SumoStage.THIRD_PLACE) {
             sumoStage.getRoundList().add(new SumoRound(thirdPlace[0], thirdPlace[1]));
         } else if (sumoStage == SumoStage.SEMI_FINAL) {
-            for (int i = 0; i < alive.size(); i++) {
-                sumoStage.getRoundList().add(new SumoRound(semiFinal[i * 2], semiFinal[i * 2 + 1]));
+            for (int i = 0; i < 2; i++) {
+                Player p1 = semiFinal[i] != null ? semiFinal[i] : getFromQueue();
+                Player p2 = semiFinal[i + 1] != null ? semiFinal[i + 1] : getFromQueue();
+                sumoStage.getRoundList().add(new SumoRound(p1, p2));
             }
         } else if (sumoStage == SumoStage.QUARTER_FINAL) {
-            for (int i = 0; i < alive.size(); i++) {
+            for (int i = 0; i < alive.size() / 2; i++) {
                 sumoStage.getRoundList().add(new SumoRound(getFromQueue(), getFromQueue()));
             }
         } else {

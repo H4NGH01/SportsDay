@@ -5,7 +5,7 @@ finish_line_block: GOLD_BLOCK
 # 判斷玩家到達檢查點的方塊
 checkpoint_block: EMERALD_BLOCK
 # 判斷玩家離開賽道的方塊
-death_block: RED_GLAZED_TERRACOTTA
+death_block: RED_TERRACOTTA
 # 飛行賽
 elytra_racing:
   enable: true

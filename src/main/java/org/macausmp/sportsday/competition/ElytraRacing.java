@@ -32,6 +32,7 @@ public class ElytraRacing extends AbstractTrackCompetition {
             }
         });
     }
+
     @Override
     public void onStart() {
         ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);

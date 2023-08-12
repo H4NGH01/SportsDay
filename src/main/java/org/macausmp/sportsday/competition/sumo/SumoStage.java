@@ -40,6 +40,10 @@ public class SumoStage {
         return roundIndex;
     }
 
+    public void resetRoundIndex() {
+        roundIndex = 0;
+    }
+
     public Component getName() {
         return name;
     }

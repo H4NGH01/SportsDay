@@ -226,7 +226,13 @@ public final class SportsDay extends JavaPlugin implements Listener {
                             o.getScore(so.stage).resetScore();
                             o.getScore(" ").resetScore();
                         }
-                        tList.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getPlayerDataList().size()), Component.text(getServer().getOfflinePlayers().length)));
+                        int i = 0;
+                        for (PlayerData d : Competitions.getPlayerDataList())  {
+                            if (d.isPlayerOnline()) {
+                                i++;
+                            }
+                        }
+                        tList.suffix(Component.translatable("%s/%s").args(Component.text(i), Component.text(getServer().getOnlinePlayers().size())));
                         time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                         tTime.suffix(time);
                         tPing.suffix(Component.text(p.getPing()));

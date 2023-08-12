@@ -3,6 +3,7 @@ package org.macausmp.sportsday.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -37,13 +38,13 @@ public class ColorTextUtil {
     }
 
     /**
-     * Convert {@link java.lang.String} with '§' to {@link net.kyori.adventure.text.Component}
-     * @param text String input
-     * @return Component with color or style
+     * Convert {@link Component} with '§' to {@link Component} with {@link net.kyori.adventure.text.format.TextColor}
+     * @param origin Origin component
+     * @return Component with color and style
      */
-    public static @NotNull Component convert(@NotNull String text) {
+    public static @NotNull Component convert(@NotNull Component origin) {
         Component component = Component.text().decoration(TextDecoration.ITALIC, false).build();
-        String[] sa = text.split("§");
+        String[] sa = LegacyComponentSerializer.legacyAmpersand().serialize(origin).split("§");
         NamedTextColor color = null;
         TextDecoration decoration = null;
         for (String s : sa) {
