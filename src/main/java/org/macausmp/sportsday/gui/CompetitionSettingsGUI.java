@@ -54,8 +54,8 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "status_toggle")) {
             for (ICompetition competition : Competitions.COMPETITIONS) {
                 if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
-                    SportsDay.getInstance().getConfig().set(competition.getID() + ".enable", !competition.isEnable());
-                    SportsDay.getInstance().saveConfig();
+                    plugin.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
+                    plugin.saveConfig();
                     CompetitionGUI.COMPETITION_SETTINGS_GUI.update();
                     p.playSound(p, competition.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     return;

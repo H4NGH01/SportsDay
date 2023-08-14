@@ -2,11 +2,11 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
@@ -15,11 +15,12 @@ import org.macausmp.sportsday.util.ColorTextUtil;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public abstract class AbstractCompetition implements ICompetition {
+    protected static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final List<BukkitTask> COMPETITION_TASKS = new ArrayList<>();
     private final String id;
     private final Component name;
@@ -32,8 +33,8 @@ public abstract class AbstractCompetition implements ICompetition {
     public AbstractCompetition(String id) {
         this.id = id;
         this.name = ColorTextUtil.convert(Translation.translatable("competition.name." + id));
-        this.least = SportsDay.getInstance().getConfig().getInt(id + ".least_players_required");
-        this.location = Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(id + ".location"));
+        this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
+        this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
     }
 
@@ -64,7 +65,7 @@ public abstract class AbstractCompetition implements ICompetition {
 
     @Override
     public final boolean isEnable() {
-        return SportsDay.getInstance().getConfig().getBoolean(id + ".enable");
+        return PLUGIN.getConfig().getBoolean(id + ".enable");
     }
 
     @Override
@@ -73,9 +74,9 @@ public abstract class AbstractCompetition implements ICompetition {
         players.clear();
         getLeaderboard().clear();
         setStage(Stage.COMING);
-        players.addAll(Competitions.getPlayerDataList());
-        players.removeIf(d -> !d.isPlayerOnline());
-        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.start_in_15sec").args(name)));
+        players.addAll(Competitions.getOnlinePlayers());
+        int i = PLUGIN.getConfig().getInt("ready_time");
+        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.start_message").args(name, Component.text(i)).color(NamedTextColor.GREEN)));
         players.forEach(data -> {
             data.getPlayer().setBedSpawnLocation(location, true);
             if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
@@ -85,11 +86,11 @@ public abstract class AbstractCompetition implements ICompetition {
             data.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
         addRunnable(new BukkitRunnable() {
-            int i = 15;
+            int i = PLUGIN.getConfig().getInt("ready_time");
             @Override
             public void run() {
-                if (i == 15 || i == 10 || (i <= 5 && i > 0)) {
-                    getOnlinePlayers().forEach(p -> {
+                if (i % 5 == 0 || (i <= 5 && i > 0)) {
+                    getOnlinePlayers(p -> {
                         p.sendActionBar(Translation.translatable("competition.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 0.5f);
                     });
@@ -97,15 +98,15 @@ public abstract class AbstractCompetition implements ICompetition {
                 if (i-- == 0) {
                     this.cancel();
                     start();
-                    getOnlinePlayers().forEach(p -> {
+                    getOnlinePlayers(p -> {
                         p.sendActionBar(Translation.translatable("competition.start"));
                         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                     });
                 }
             }
-        }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+        }.runTaskTimer(PLUGIN, 0L, 20L));
         onSetup();
-        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
+        PLUGIN.getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
     }
 
     @Override
@@ -120,23 +121,22 @@ public abstract class AbstractCompetition implements ICompetition {
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
         COMPETITION_TASKS.forEach(BukkitTask::cancel);
+        getOnlinePlayers(p -> p.showTitle(Title.title(Translation.translatable("competition.end"), Component.text(""))));
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
                 if (stage == Stage.ENDED) {
                     Competitions.setCurrentlyCompetition(null);
                     setStage(Stage.IDLE);
-                    getOnlinePlayers().forEach(p -> {
+                    getOnlinePlayers(p -> {
                         p.teleport(location);
                         p.setGameMode(GameMode.ADVENTURE);
                     });
-                    getPlayerDataList().forEach(d -> {
-                        if (d.isPlayerOnline()) d.getPlayer().getInventory().clear();
-                    });
+                    Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().clear());
                 }
             }
-        }.runTaskLater(SportsDay.getInstance(), 100L));
-        SportsDay.getInstance().getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
+        }.runTaskLater(PLUGIN, 100L));
+        PLUGIN.getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
     }
 
     /**
@@ -174,11 +174,10 @@ public abstract class AbstractCompetition implements ICompetition {
     }
 
     /**
-     * Get the online players of server
-     * @return online players of server
+     * Get the online players of server and apply action
      */
-    protected final @NotNull Collection<? extends Player> getOnlinePlayers() {
-        return Bukkit.getOnlinePlayers();
+    protected void getOnlinePlayers(Consumer<? super Player> action) {
+        Bukkit.getOnlinePlayers().forEach(action);
     }
 
     /**

@@ -20,6 +20,7 @@ import org.macausmp.sportsday.util.Translation;
 import java.util.*;
 
 public class Competitions {
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
     public static final List<ICompetition> COMPETITIONS = new ArrayList<>();
     public static final ICompetition ELYTRA_RACING = register(new ElytraRacing());
     public static final ICompetition ICE_BOAT_RACING = register(new IceBoatRacing());
@@ -44,22 +45,22 @@ public class Competitions {
 
     public static void load() {
         PLAYERS.clear();
-        Set<String> keys = SportsDay.getInstance().getPlayerConfig().getKeys(false);
+        Set<String> keys = PLUGIN.getPlayerConfig().getKeys(false);
         for (String s : keys) {
             UUID uuid = UUID.fromString(s);
-            int number = SportsDay.getInstance().getPlayerConfig().getInt(s + ".number");
-            int score = SportsDay.getInstance().getPlayerConfig().getInt((s + ".score"));
+            int number = PLUGIN.getPlayerConfig().getInt(s + ".number");
+            int score = PLUGIN.getPlayerConfig().getInt((s + ".score"));
             PLAYERS.add(new PlayerData(uuid, number, score));
         }
     }
 
     public static void save() {
         for (PlayerData data : PLAYERS) {
-            SportsDay.getInstance().getPlayerConfig().set(data.getUUID() + ".name", data.getName());
-            SportsDay.getInstance().getPlayerConfig().set(data.getUUID() + ".number", data.getNumber());
-            SportsDay.getInstance().getPlayerConfig().set(data.getUUID() + ".score", data.getScore());
+            PLUGIN.getPlayerConfig().set(data.getUUID() + ".name", data.getName());
+            PLUGIN.getPlayerConfig().set(data.getUUID() + ".number", data.getNumber());
+            PLUGIN.getPlayerConfig().set(data.getUUID() + ".score", data.getScore());
         }
-        SportsDay.getInstance().savePlayerConfig();
+        PLUGIN.savePlayerConfig();
     }
 
     /**
@@ -70,32 +71,29 @@ public class Competitions {
      */
     public static boolean start(CommandSender sender, String id) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
-            sender.sendMessage(Translation.translatable("competition.already_in_progress"));
+            sender.sendMessage(Translation.translatable("competition.already_in_progress").color(NamedTextColor.RED));
             return false;
         }
         for (ICompetition competition : COMPETITIONS) {
             if (competition.getID().equals(id)) {
                 if (!competition.isEnable()) {
-                    sender.sendMessage(Translation.translatable("competition.disabled"));
+                    sender.sendMessage(Translation.translatable("competition.disabled").color(NamedTextColor.RED));
                     return false;
                 }
-                int i = 0;
-                for (PlayerData d : PLAYERS) {
-                    if (d.isPlayerOnline()) i++;
-                }
+                int i = getOnlinePlayers().size();
                 if (i >= competition.getLeastPlayersRequired()) {
-                    sender.sendMessage(Translation.translatable("competition.setting_up"));
+                    sender.sendMessage(Translation.translatable("competition.setting_up").color(NamedTextColor.GREEN));
                     setCurrentlyCompetition(competition);
                     competition.setup();
                     Bukkit.getPluginManager().callEvent(new CompetitionSetupEvent(competition));
                     return true;
                 } else {
-                    sender.sendMessage(Translation.translatable("competition.no_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                    sender.sendMessage(Translation.translatable("competition.not_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
                     return false;
                 }
             }
         }
-        sender.sendMessage(Translation.translatable("competition.unknown"));
+        sender.sendMessage(Translation.translatable("competition.unknown").color(NamedTextColor.RED));
         return false;
     }
 
@@ -106,9 +104,9 @@ public class Competitions {
     public static void forceEnd(CommandSender sender) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
             getCurrentlyCompetition().end(true);
-            sender.sendMessage(Translation.translatable("competition.force_end"));
+            sender.sendMessage(Translation.translatable("competition.force_end").color(NamedTextColor.GREEN));
         } else {
-            sender.sendMessage(Translation.translatable("competition.not_in_progress"));
+            sender.sendMessage(Translation.translatable("competition.not_in_progress").color(NamedTextColor.RED));
         }
     }
 
@@ -158,8 +156,8 @@ public class Competitions {
         if (containPlayer(player)) {
             for (PlayerData data : PLAYERS) {
                 if (data.getUUID().equals(player.getUniqueId())) {
-                    SportsDay.getInstance().getPlayerConfig().set(data.getUUID().toString(), null);
-                    SportsDay.getInstance().savePlayerConfig();
+                    PLUGIN.getPlayerConfig().set(data.getUUID().toString(), null);
+                    PLUGIN.savePlayerConfig();
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     PLAYERS.remove(data);
                     CompetitionGUI.COMPETITION_INFO_GUI.update();
@@ -192,11 +190,25 @@ public class Competitions {
     }
 
     /**
-     * Get registered player data list of competitions
-     * @return player data list
+     * Get list of registered player data
+     * @return list of registered player data
      */
-    public static List<PlayerData> getPlayerDataList() {
+    public static List<PlayerData> getPlayerData() {
         return PLAYERS;
+    }
+
+    /**
+     * Get list of online registered player data
+     * @return list of online registered player data
+     */
+    public static @NotNull List<PlayerData> getOnlinePlayers() {
+        List<PlayerData> list = new ArrayList<>();
+        for (PlayerData d : PLAYERS) {
+            if (d.isPlayerOnline()) {
+                list.add(d);
+            }
+        }
+        return list;
     }
 
     /**

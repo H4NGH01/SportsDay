@@ -18,7 +18,7 @@ public class UnregisterCommand implements IPluginCommand {
     public void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {
             if (!Competitions.leave(p)) {
-                sender.sendMessage(Translation.translatable("player.unregistered_message"));
+                sender.sendMessage(Translation.translatable("player.unregistered_message").color(NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));

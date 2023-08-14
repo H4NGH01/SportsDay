@@ -19,11 +19,9 @@ public class ObstacleCourse extends AbstractTrackCompetition {
 
     @Override
     public void onEnd(boolean force) {
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().setCollidable(true);
-                data.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
-            }
+        Competitions.getOnlinePlayers().forEach(d -> {
+            d.getPlayer().setCollidable(true);
+            d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });
     }
 }

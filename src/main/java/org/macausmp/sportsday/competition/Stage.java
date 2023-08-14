@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
+import org.macausmp.sportsday.util.ColorTextUtil;
 import org.macausmp.sportsday.util.Translation;
 
 /**
@@ -15,7 +16,7 @@ public enum Stage {
     private final Component name;
 
     Stage() {
-        this.name = Translation.translatable("competition.status." + name().toLowerCase());
+        this.name = ColorTextUtil.convert(Translation.translatable("competition.status." + name().toLowerCase()));
     }
 
     public Component getName() {

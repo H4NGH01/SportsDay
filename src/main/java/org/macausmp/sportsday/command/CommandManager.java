@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class CommandManager implements CommandExecutor {
+    private final SportsDay plugin = SportsDay.getInstance();
     private static final List<IPluginCommand> COMMANDS = new ArrayList<>();
     private static final IPluginCommand COMPETITION = new CompetitionCommand();
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
@@ -25,8 +26,8 @@ public class CommandManager implements CommandExecutor {
         COMMANDS.add(UNREGISTER);
         COMMANDS.add(PING);
         for (IPluginCommand command : COMMANDS) {
-            Objects.requireNonNull(SportsDay.getInstance().getCommand(command.name())).setExecutor(this);
-            Objects.requireNonNull(SportsDay.getInstance().getCommand(command.name())).setTabCompleter(command);
+            Objects.requireNonNull(plugin.getCommand(command.name())).setExecutor(this);
+            Objects.requireNonNull(plugin.getCommand(command.name())).setTabCompleter(command);
         }
     }
 

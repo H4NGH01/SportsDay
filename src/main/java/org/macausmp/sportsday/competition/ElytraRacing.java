@@ -1,7 +1,6 @@
 package org.macausmp.sportsday.competition;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -26,11 +25,7 @@ public class ElytraRacing extends AbstractTrackCompetition {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
             meta.setUnbreakable(true);
         });
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytra);
-            }
-        });
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytra));
     }
 
     @Override
@@ -38,28 +33,19 @@ public class ElytraRacing extends AbstractTrackCompetition {
         ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
         firework.setAmount(64);
         firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                Player p = data.getPlayer();
-                p.getInventory().setItem(EquipmentSlot.HAND, firework);
-            }
-        });
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.HAND, firework));
     }
 
     @Override
     protected void onEnd(boolean force) {
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, null);
-            }
-        });
+
     }
 
     @EventHandler
     public void onElytraBoost(@NotNull PlayerElytraBoostEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p) || p.getGameMode() != GameMode.ADVENTURE) return;
+        if (!Competitions.containPlayer(p)) return;
         e.setShouldConsume(false);
     }
 
@@ -67,7 +53,7 @@ public class ElytraRacing extends AbstractTrackCompetition {
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p) || p.getGameMode() != GameMode.ADVENTURE) return;
+        if (!Competitions.containPlayer(p)) return;
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) {
             e.setCancelled(true);
         }
@@ -75,9 +61,9 @@ public class ElytraRacing extends AbstractTrackCompetition {
 
     @EventHandler
     public void onDropFirework(@NotNull PlayerDropItemEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p) || p.getGameMode() != GameMode.ADVENTURE) return;
+        if (!Competitions.containPlayer(p)) return;
         if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) {
             e.setCancelled(true);
         }

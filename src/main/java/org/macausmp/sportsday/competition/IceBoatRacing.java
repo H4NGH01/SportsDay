@@ -1,6 +1,5 @@
 package org.macausmp.sportsday.competition;
 
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
@@ -75,7 +74,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
+            if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || !Competitions.containPlayer(p)) return;
             e.setCancelled(true);
         }
     }

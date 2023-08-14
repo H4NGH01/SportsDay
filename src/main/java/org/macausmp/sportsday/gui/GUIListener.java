@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.gui;
 
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,7 +33,7 @@ public class GUIListener implements Listener {
                         return;
                     } else if (GUIButton.isSameButton(item, GUIButton.START_COMPETITION)) {
                         if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != Stage.ENDED) {
-                            p.sendMessage(Translation.translatable("competition.already_in_progress"));
+                            p.sendMessage(Translation.translatable("competition.already_in_progress").color(NamedTextColor.RED));
                             p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }

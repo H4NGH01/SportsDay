@@ -49,10 +49,10 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             getInventory().setItem(i, null);
         }
         for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getPlayerDataList().size()) {
+            if (i >= Competitions.getPlayerData().size()) {
                 break;
             }
-            getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerDataList().get(i + getPage() * getSize()).getUUID()));
+            getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerData().get(i + getPage() * getSize()).getUUID()));
         }
     }
 
@@ -123,7 +123,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
 
     @Override
     public int getMaxPage() throws ArithmeticException {
-        return Competitions.getPlayerDataList().isEmpty() ? 1 : Competitions.getPlayerDataList().size() % getSize() == 0 ? Competitions.getPlayerDataList().size() / getSize() : Competitions.getPlayerDataList().size() / getSize() + 1;
+        return Competitions.getPlayerData().isEmpty() ? 1 : Competitions.getPlayerData().size() % getSize() == 0 ? Competitions.getPlayerData().size() / getSize() : Competitions.getPlayerData().size() / getSize() + 1;
     }
 
     @Override

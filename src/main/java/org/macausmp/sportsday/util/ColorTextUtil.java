@@ -44,10 +44,10 @@ public class ColorTextUtil {
      */
     public static @NotNull Component convert(@NotNull Component origin) {
         Component component = Component.text().decoration(TextDecoration.ITALIC, false).build();
-        String[] sa = LegacyComponentSerializer.legacyAmpersand().serialize(origin).split("§");
+        String[] splits = LegacyComponentSerializer.legacyAmpersand().serialize(origin).split("§");
         NamedTextColor color = null;
         TextDecoration decoration = null;
-        for (String s : sa) {
+        for (String s : splits) {
             char code = s.charAt(1);
             if (code == 'r') {
                 color = null;
