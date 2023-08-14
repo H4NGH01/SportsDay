@@ -7,18 +7,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IRoundGame;
 import org.macausmp.sportsday.util.Translation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 public class Sumo extends AbstractCompetition implements IRoundGame {
     private final List<PlayerData> leaderboard = new ArrayList<>();
@@ -28,7 +31,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     private final Player[] grandFinal = new Player[2];
     private final Player[] thirdPlace = new Player[2];
     private final Player[] semiFinal = new Player[4];
-    private final boolean weapon = SportsDay.getInstance().getConfig().getBoolean(getID() + ".enable_weapon");
+    private final boolean weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
 
     public Sumo() {
         super("sumo");
@@ -40,8 +43,12 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         alive.addAll(getPlayerDataList());
         queue.clear();
         queue.addAll(alive);
-        sumoStage.resetStage();
-        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.sumo.rule")));
+        SumoStage.FINAL.resetStage();
+        SumoStage.THIRD_PLACE.resetStage();
+        SumoStage.SEMI_FINAL.resetStage();
+        SumoStage.QUARTER_FINAL.resetStage();
+        SumoStage.ELIMINATE.resetStage();
+        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.sumo.rule")));
         int stageRound;
         if (queue.size() <= 4) {
             sumoStage = SumoStage.SEMI_FINAL;
@@ -67,7 +74,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             SumoRound r = sumoStage.getRoundList().get(i++);
             cl.add(Translation.translatable("competition.sumo.queue").args(Component.text(i), r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
         }
-        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
+        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
     }
 
     @Override
@@ -87,22 +94,33 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
+        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
     }
 
     @Override
     public <T extends Event> void onEvent(T event) {
+        SumoRound round = sumoStage.getCurrentRound();
         if (event instanceof PlayerMoveEvent e) {
             Player p = e.getPlayer();
-            SumoRound round = sumoStage.getCurrentRound();
             if (round == null || !round.containPlayer(p)) return;
             if (round.getStatus() == SumoRound.RoundStatus.COMING) {
                 e.setCancelled(true);
                 return;
             }
-            if (p.getLocation().getBlock().getType() != Material.WATER || round.getStatus() != SumoRound.RoundStatus.STARTED) return;
-            round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
-            onRoundEnd();
+            if (p.getLocation().getBlock().getType() == Material.WATER && round.getStatus() == SumoRound.RoundStatus.STARTED) {
+                round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
+                onRoundEnd();
+            }
+            return;
+        }
+        if (event instanceof PlayerQuitEvent e) {
+            Player p = e.getPlayer();
+            PlayerData d = Competitions.getPlayerData(p.getUniqueId());
+            if (!alive.contains(d)) return;
+            if (round != null && round.containPlayer(p)) {
+                round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
+                onRoundEnd();
+            }
         }
     }
 
@@ -114,32 +132,47 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onRoundStart() {
-        if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
+        SumoRound round = sumoStage.getCurrentRound();
+        if (round != null) round.getPlayers().forEach(p -> p.teleport(getLocation()));
         sumoStage.nextRound();
-        sumoStage.getCurrentRound().setStatus(SumoRound.RoundStatus.COMING);
+        assert round != null;
+        round.setStatus(SumoRound.RoundStatus.COMING);
         List<Player> pl = sumoStage.getCurrentRound().getPlayers();
-        pl.get(0).teleport(Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".p1-location")));
-        pl.get(1).teleport(Objects.requireNonNull(SportsDay.getInstance().getConfig().getLocation(getID() + ".p2-location")));
-        pl.forEach(p -> p.getInventory().clear());
-        addRunnable(new BukkitRunnable() {
-            int i = 5;
-            @Override
-            public void run() {
-                if (i != 0) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+        Player p1 = pl.get(0);
+        Player p2 = pl.get(1);
+        if (p1.isOnline() && p2.isOnline()) {
+            p1.teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p1-location")));
+            p2.teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p2-location")));
+            pl.forEach(p -> p.getInventory().clear());
+            addRunnable(new BukkitRunnable() {
+                int i = 5;
+                @Override
+                public void run() {
+                    if (i != 0) {
+                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                    }
+                    if (i-- == 0) {
+                        sumoStage.getCurrentRound().setStatus(SumoRound.RoundStatus.STARTED);
+                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start")));
+                        giveWeapon();
+                        cancel();
+                    }
                 }
-                if (i-- == 0) {
-                    sumoStage.getCurrentRound().setStatus(SumoRound.RoundStatus.STARTED);
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start")));
-                    giveWeapon();
-                    cancel();
-                }
-            }
-        }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+            }.runTaskTimer(PLUGIN, 0L, 20L));
+            return;
+        }
+        round.setResult(p1.isOnline() ? p1 : p2, p1.isOnline() ? p2 : p1);
+        onRoundEnd();
     }
 
     private void giveWeapon() {
         if (weapon) {
+            ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
+            weapon.editMeta(meta -> {
+                meta.displayName(Translation.translatable("item.sportsday.kb_stick"));
+                meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
+                meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+            });
             addRunnable(new BukkitRunnable() {
                 int i = 30;
                 @Override
@@ -149,37 +182,30 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                         return;
                     }
                     if (i <= 15 && i % 5 == 0 && i > 0) {
-                        getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
                     }
                     if (i-- == 0) {
-                        sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon()));
-                        getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given")));
+                        sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon));
+                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given")));
                         cancel();
                     }
                 }
-            }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+            }.runTaskTimer(PLUGIN, 0L, 20L));
         }
-    }
-
-    private @NotNull ItemStack weapon() {
-        ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
-        weapon.editMeta(meta -> {
-            meta.displayName(Translation.translatable("item.sportsday.kb_stick"));
-            meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-        });
-        return weapon;
     }
 
     @Override
     public void onRoundEnd() {
         SumoRound round = sumoStage.getCurrentRound();
-        getWorld().strikeLightningEffect(round.getLoser().getLocation());
-        getOnlinePlayers().forEach(p -> {
+        if (round.getLoser().isOnline()) {
+            getWorld().strikeLightningEffect(round.getLoser().getLocation());
+        }
+        getOnlinePlayers(p -> {
             p.sendActionBar(Translation.translatable("competition.sumo.round_end"));
             p.sendMessage(Translation.translatable("competition.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
         });
         round.getPlayers().forEach(p -> p.getInventory().clear());
+        // eliminate loser
         if (sumoStage != SumoStage.SEMI_FINAL) {
             for (PlayerData data : alive) {
                 if (data.getUUID().equals(round.getLoser().getUniqueId())) {
@@ -189,7 +215,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                 }
             }
         }
-        // After sumo stage
+        // Pre-assign players to next round
         if (sumoStage == SumoStage.FINAL) {
             leaderboard.add(0, Competitions.getPlayerData(round.getWinner().getUniqueId()));
         } else if (sumoStage == SumoStage.THIRD_PLACE) {
@@ -200,9 +226,10 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         } else if (sumoStage == SumoStage.QUARTER_FINAL) {
             semiFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
         }
+        // if there are still rounds left in this stage
         if (sumoStage.getRoundRemaining() != 0) {
             SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
-            getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName())));
+            getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName())));
             nextRound();
         } else {
             if (sumoStage != SumoStage.FINAL) {
@@ -219,27 +246,28 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             int i = 5;
             @Override
             public void run() {
-                getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_round_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_round_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
                 if (i-- == 0) {
                     onRoundStart();
                     cancel();
                 }
             }
-        }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+        }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
     private void nextSumoStage() {
         if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
+        // if the number of players is less than 8 go to the next stage
         if (alive.size() <= 8 && sumoStage.hasNextStage()) {
             sumoStage = sumoStage.getNextStage();
         }
-        // Before sumo stage
+        // Assign players to their round
         if (sumoStage == SumoStage.FINAL) {
             sumoStage.getRoundList().add(new SumoRound(grandFinal[0], grandFinal[1]));
         } else if (sumoStage == SumoStage.THIRD_PLACE) {
             sumoStage.getRoundList().add(new SumoRound(thirdPlace[0], thirdPlace[1]));
         } else if (sumoStage == SumoStage.SEMI_FINAL) {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < alive.size() / 2; i++) {
                 Player p1 = semiFinal[i] != null ? semiFinal[i] : getFromQueue();
                 Player p2 = semiFinal[i + 1] != null ? semiFinal[i + 1] : getFromQueue();
                 sumoStage.getRoundList().add(new SumoRound(p1, p2));
@@ -255,18 +283,18 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         }
         stageSetup();
         addRunnable(new BukkitRunnable() {
-            int i = 10;
+            int i = 7;
             @Override
             public void run() {
-                if (i == 7 || (i <= 5 && i > 0)) {
-                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_stage_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                if (i <= 5 && i > 0) {
+                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_stage_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
                 }
                 if (i-- == 0) {
                     nextRound();
                     cancel();
                 }
             }
-        }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+        }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
     public SumoStage getSumoStage() {

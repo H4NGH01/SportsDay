@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
-import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -24,10 +23,6 @@ public class CompetitionCommand implements IPluginCommand {
         if (args.length > 0) {
             switch (args[0]) {
                 case "start" -> {
-                    if (Competitions.getCurrentlyCompetition() != null && Competitions.getCurrentlyCompetition().getStage() != Stage.ENDED) {
-                        sender.sendMessage(Translation.translatable("competition.already_in_progress"));
-                        return;
-                    }
                     if (args.length >= 2) {
                         Competitions.start(sender, args[1]);
                     } else {
@@ -50,7 +45,7 @@ public class CompetitionCommand implements IPluginCommand {
                                 try {
                                     number = Integer.parseInt(args[2]);
                                     if (number < 0) {
-                                        sender.sendMessage(Translation.translatable("argument.register.negative"));
+                                        sender.sendMessage(Translation.translatable("argument.register.negative").color(NamedTextColor.RED));
                                         return;
                                     }
                                 } catch (Exception e) {
@@ -79,7 +74,7 @@ public class CompetitionCommand implements IPluginCommand {
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p)) {
-                                sender.sendMessage(Translation.translatable("player.unregistered_message"));
+                                sender.sendMessage(Translation.translatable("player.unregistered_message").color(NamedTextColor.RED));
                             }
                             return;
                         }
@@ -87,13 +82,17 @@ public class CompetitionCommand implements IPluginCommand {
                     }
                 }
                 case "score" -> {
-                    if (args.length >= 3) {
+                    if (args.length >= 2) {
                         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
                         if (p.getName() == null || p.getFirstPlayed() == 0L) {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
                         if (Competitions.containPlayer(p)) {
+                            if (args.length == 2) {
+                                sender.sendMessage(Translation.translatable("score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
+                                return;
+                            }
                             int score;
                             try {
                                 score = Integer.parseInt(args[2]);
@@ -118,21 +117,21 @@ public class CompetitionCommand implements IPluginCommand {
                 case "info" -> {
                     sender.sendMessage(Translation.translatable("gui.title.info"));
                     boolean b = Competitions.getCurrentlyCompetition() != null;
-                    sender.sendMessage(Translation.translatable("competition.current").args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
+                    sender.sendMessage(Translation.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
                     if (b) {
-                        sender.sendMessage(Translation.translatable("competition.stage").args(Competitions.getCurrentlyCompetition().getStage().getName()));
+                        sender.sendMessage(Translation.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
                     }
-                    sender.sendMessage(Translation.translatable("competition.players").args(Component.text(Competitions.getPlayerDataList().size()).color(NamedTextColor.YELLOW)));
+                    sender.sendMessage(Translation.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
-                    Competitions.getPlayerDataList().forEach(d -> pl.add(d.getName()));
-                    sender.sendMessage(Translation.translatable("competition.players_name").args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
+                    Competitions.getPlayerData().forEach(d -> pl.add(d.getName()));
+                    sender.sendMessage(Translation.translatable("competition.players_name").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
                     for (ICompetition c : Competitions.COMPETITIONS) {
                         if (c.isEnable()) {
                             cl.add(c.getID().toUpperCase());
                         }
                     }
-                    sender.sendMessage(Translation.translatable("competition.enabled").args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
+                    sender.sendMessage(Translation.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
                 }
                 default ->
                         sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
@@ -171,7 +170,7 @@ public class CompetitionCommand implements IPluginCommand {
                         }
                     }
                 }
-                case "leave", "score" -> Competitions.getPlayerDataList().forEach(d -> l.add(d.getName()));
+                case "leave", "score" -> Competitions.getPlayerData().forEach(d -> l.add(d.getName()));
             }
         }
         return l;

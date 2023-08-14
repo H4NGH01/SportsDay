@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.util.Translation;
@@ -45,9 +44,9 @@ public class CompetitionInfoGUI extends AbstractGUI {
         ItemStack status = new ItemStack(Material.BEACON);
         status.editMeta(meta -> {
             boolean b = Competitions.getCurrentlyCompetition() != null;
-            meta.displayName(Translation.translatable("competition.current").args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
+            meta.displayName(Translation.translatable("competition.current").color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false).args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("competition.stage").args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName()));
+            lore.add(Translation.translatable("competition.stage").color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName()));
             meta.lore(lore);
         });
         return status;
@@ -56,13 +55,9 @@ public class CompetitionInfoGUI extends AbstractGUI {
     private @NotNull ItemStack player() {
         ItemStack stack = new ItemStack(Material.PAPER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("competition.players").args(Component.text(Competitions.getPlayerDataList().size()).color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false)));
-            int i = 0;
-            for (PlayerData d : Competitions.getPlayerDataList()) {
-                if (d.isPlayerOnline()) i++;
-            }
+            meta.displayName(Translation.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("competition.online_players").args(Component.text(i).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
+            lore.add(Translation.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
             meta.lore(lore);
         });
         return stack;

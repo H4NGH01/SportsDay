@@ -11,7 +11,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 
 public class Parkour extends AbstractTrackCompetition {
@@ -31,21 +30,17 @@ public class Parkour extends AbstractTrackCompetition {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
             meta.setUnbreakable(true);
         });
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
-                data.getPlayer().getInventory().setItem(EquipmentSlot.FEET, boots);
-            }
+        Competitions.getOnlinePlayers().forEach(d -> {
+            d.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+            d.getPlayer().getInventory().setItem(EquipmentSlot.FEET, boots);
         });
     }
 
     @Override
     public void onEnd(boolean force) {
-        getPlayerDataList().forEach(data -> {
-            if (data.isPlayerOnline()) {
-                data.getPlayer().setCollidable(true);
-                data.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
-            }
+        Competitions.getOnlinePlayers().forEach(d -> {
+            d.getPlayer().setCollidable(true);
+            d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });
     }
 
@@ -66,6 +61,6 @@ public class Parkour extends AbstractTrackCompetition {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
                 cancel();
             }
-        }.runTaskLater(SportsDay.getInstance(), 5L));
+        }.runTaskLater(PLUGIN, 5L));
     }
 }

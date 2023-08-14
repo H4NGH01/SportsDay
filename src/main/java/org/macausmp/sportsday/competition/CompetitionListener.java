@@ -12,7 +12,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,15 +32,32 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class CompetitionListener implements Listener {
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final List<UUID> SPAWNPOINT_LIST = new ArrayList<>();
-    public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("checkpoint_block")));
-    public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("death_block")));
+    public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
+    public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
+        Player p = e.getPlayer();
+        if (!Competitions.containPlayer(p)) return;
+        Competitions.getCurrentlyCompetition().onEvent(e);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
+        Player p = e.getPlayer();
+        if (!Competitions.containPlayer(p)) return;
+        Competitions.getCurrentlyCompetition().onEvent(e);
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (p.getGameMode() != GameMode.ADVENTURE || !Competitions.containPlayer(p)) return;
+        if (!Competitions.containPlayer(p)) return;
         Competitions.getCurrentlyCompetition().onEvent(e);
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);
@@ -132,7 +151,7 @@ public class CompetitionListener implements Listener {
                     }
                     i++;
                 }
-            }.runTaskTimer(SportsDay.getInstance(), 0L, 10L);
+            }.runTaskTimer(PLUGIN, 0L, 10L);
         }
     }
 }

@@ -23,7 +23,7 @@ public class RegisterCommand implements IPluginCommand {
                     try {
                         number = Integer.parseInt(args[0]);
                         if (number < 0) {
-                            sender.sendMessage(Translation.translatable("argument.register.negative"));
+                            sender.sendMessage(Translation.translatable("argument.register.negative").color(NamedTextColor.RED));
                             return;
                         }
                     } catch (Exception e) {

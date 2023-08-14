@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.macausmp.sportsday.PlayerData;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 import org.macausmp.sportsday.event.PlayerFinishLapEvent;
 import org.macausmp.sportsday.util.Translation;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractTrackCompetition extends AbstractCompetition implements ITrackCompetition {
-    private static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(SportsDay.getInstance().getConfig().getString("finish_line_block")));
+    private static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("finish_line_block")));
     private final List<PlayerData> leaderboard = new ArrayList<>();
     private final HashMap<PlayerData, Integer> lapMap = new HashMap<>();
     private final HashMap<PlayerData, Float> record = new HashMap<>();
@@ -31,7 +30,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
 
     public AbstractTrackCompetition(String id) {
         super(id);
-        this.laps = SportsDay.getInstance().getConfig().getInt(getID() + ".laps");
+        this.laps = PLUGIN.getConfig().getInt(getID() + ".laps");
     }
 
     @Override
@@ -41,6 +40,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
         endCountdown = false;
         super.setup();
         getPlayerDataList().forEach(data -> lapMap.put(data, 0));
+        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.laps").args(Component.text(laps)).color(NamedTextColor.GREEN)));
     }
 
     @Override
@@ -56,7 +56,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
                 }
                 time++;
             }
-        }.runTaskTimer(SportsDay.getInstance(), 1L, 1L));
+        }.runTaskTimer(PLUGIN, 1L, 1L));
     }
 
     @Override
@@ -72,7 +72,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
             }
             data.addScore(1);
         }
-        getOnlinePlayers().forEach(p -> cl.forEach(p::sendMessage));
+        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
     }
 
     @Override
@@ -91,36 +91,36 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
                     player.setBedSpawnLocation(getLocation(), true);
                     player.teleport(getLocation());
                     Bukkit.getPluginManager().callEvent(new PlayerFinishLapEvent(player, this));
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW)));
                 } else {
                     record.put(data, time / 20f);
                     leaderboard.add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
                     Bukkit.getPluginManager().callEvent(new PlayerFinishCompetitionEvent(player, this));
-                    getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW)));
+                    getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW)));
                     if (leaderboard.size() == getPlayerDataList().size()) {
                         if (task != null && !task.isCancelled()) task.cancel();
-                        getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.all_player_finished")));
+                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.all_player_finished")));
                         end(false);
                         return;
                     }
                     if (leaderboard.size() >= 3 && !endCountdown) {
                         endCountdown = true;
-                        getOnlinePlayers().forEach(p -> p.sendMessage(Translation.translatable("competition.third_player_finished")));
+                        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.third_player_finished")));
                         task = addRunnable(new BukkitRunnable() {
                             int i = 30;
                             @Override
                             public void run() {
                                 if (i > 0) {
-                                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
                                 }
                                 if (i-- == 0) {
-                                    getOnlinePlayers().forEach(p -> p.sendActionBar(Translation.translatable("competition.end")));
+                                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.end")));
                                     end(false);
                                     cancel();
                                 }
                             }
-                        }.runTaskTimer(SportsDay.getInstance(), 0L, 20L));
+                        }.runTaskTimer(PLUGIN, 0L, 20L));
                     }
                 }
             }
