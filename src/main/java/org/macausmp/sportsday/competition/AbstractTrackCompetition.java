@@ -40,7 +40,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
         endCountdown = false;
         super.setup();
         getPlayerDataList().forEach(data -> lapMap.put(data, 0));
-        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.laps").args(Component.text(laps)).color(NamedTextColor.GREEN)));
+        Bukkit.broadcast(Translation.translatable("competition.laps").args(Component.text(laps)).color(NamedTextColor.GREEN));
     }
 
     @Override
@@ -63,59 +63,62 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
     public void end(boolean force) {
         super.end(force);
         if (force) return;
-        List<Component> cl = new ArrayList<>();
+        Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
             PlayerData data = leaderboard.get(i++);
-            cl.add(Translation.translatable("competition.rank").args(Component.text(i), Component.text(data.getName()), Component.text(record.get(data))));
+            c = c.append(Translation.translatable("competition.rank").args(Component.text(i), Component.text(data.getName()), Component.text(record.get(data))));
+            if (i < leaderboard.size()) {
+                c = c.appendNewline();
+            }
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
+        Bukkit.broadcast(c);
     }
 
     @Override
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
             Player player = e.getPlayer();
-            if (leaderboard.contains(Competitions.getPlayerData(player.getUniqueId()))) return;
+            PlayerData data = Competitions.getPlayerData(player.getUniqueId());
+            if (leaderboard.contains(data) || !lapMap.containsKey(data)) return;
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             CompetitionListener.spawnpoint(player, loc);
             if (loc.getBlock().getType() == FINISH_LINE) {
-                PlayerData data = Competitions.getPlayerData(player.getUniqueId());
                 lapMap.put(data, lapMap.get(data) + 1);
                 player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 if (lapMap.get(data) < laps) {
                     player.setBedSpawnLocation(getLocation(), true);
                     player.teleport(getLocation());
                     Bukkit.getPluginManager().callEvent(new PlayerFinishLapEvent(player, this));
-                    getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW)));
+                    Bukkit.broadcast(Translation.translatable("competition.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW));
                 } else {
                     record.put(data, time / 20f);
                     leaderboard.add(Competitions.getPlayerData(player.getUniqueId()));
                     player.setGameMode(GameMode.SPECTATOR);
                     Bukkit.getPluginManager().callEvent(new PlayerFinishCompetitionEvent(player, this));
-                    getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW)));
+                    Bukkit.broadcast(Translation.translatable("competition.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
                     if (leaderboard.size() == getPlayerDataList().size()) {
                         if (task != null && !task.isCancelled()) task.cancel();
-                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.all_player_finished")));
+                        PLUGIN.getServer().sendActionBar(Translation.translatable("competition.all_player_finished"));
                         end(false);
                         return;
                     }
                     if (leaderboard.size() >= 3 && !endCountdown) {
                         endCountdown = true;
-                        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.third_player_finished")));
+                        Bukkit.broadcast(Translation.translatable("competition.third_player_finished"));
                         task = addRunnable(new BukkitRunnable() {
                             int i = 30;
                             @Override
                             public void run() {
                                 if (i > 0) {
-                                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                                    PLUGIN.getServer().sendActionBar(Translation.translatable("competition.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                                 }
                                 if (i-- == 0) {
-                                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.end")));
+                                    PLUGIN.getServer().sendActionBar(Translation.translatable("competition.end"));
                                     end(false);
                                     cancel();
                                 }

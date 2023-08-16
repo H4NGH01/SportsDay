@@ -57,7 +57,7 @@ public class CompetitionListener implements Listener {
     public void onMove(PlayerMoveEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
+        if (!Competitions.containPlayer(p) || !p.getGameMode().equals(GameMode.ADVENTURE)) return;
         Competitions.getCurrentlyCompetition().onEvent(e);
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);

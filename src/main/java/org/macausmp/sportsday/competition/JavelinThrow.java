@@ -4,9 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -31,8 +29,8 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
     private final List<PlayerResult> leaderboard = new ArrayList<>();
     private final List<PlayerData> queue = new ArrayList<>();
     private final Map<UUID, PlayerResult> resultMap = new HashMap<>();
-    private Player currentPlayer = null;
-    private BukkitTask task;
+    private PlayerData currentPlayer = null;
+    private BukkitTask reconnectTask;
     private static final ItemStack TRIDENT = trident();
 
     public JavelinThrow() {
@@ -45,13 +43,12 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         queue.clear();
         queue.addAll(getPlayerDataList());
         currentPlayer = null;
-        List<Component> cl = new ArrayList<>();
-        cl.add(Translation.translatable("competition.javelin.queue_text"));
+        Component c = Translation.translatable("competition.javelin.queue_text");
         for (int i = 0; i < queue.size();) {
             PlayerData data = queue.get(i++);
-            cl.add(Translation.translatable("competition.javelin.queue").args(Component.text(i), Component.text(data.getName())));
+            c = c.appendNewline().append(Translation.translatable("competition.javelin.queue").args(Component.text(i), Component.text(data.getName())));
         }
-        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
+        Bukkit.broadcast(c);
     }
 
     @Override
@@ -76,23 +73,22 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onEnd(boolean force) {
-        getOnlinePlayers(p -> {
-            if (p.isOp()) {
-                p.sendMessage(Translation.translatable("competition.javelin.clear").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/kill @e[type=trident]")));
-            }
-        });
+        Bukkit.broadcast(Translation.translatable("competition.javelin.clear").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/kill @e[type=trident]")), Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
         if (force) return;
         leaderboard.sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
-        List<Component> cl = new ArrayList<>();
+        Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
             PlayerResult result = leaderboard.get(i++);
-            cl.add(Translation.translatable("competition.javelin.rank").args(Component.text(i), Component.text(Competitions.getPlayerData(result.uuid).getName()), Component.text(result.getDistance())));
+            c = c.append(Translation.translatable("competition.javelin.rank").args(Component.text(i), Component.text(Competitions.getPlayerData(result.uuid).getName()), Component.text(result.getDistance())));
+            if (i < leaderboard.size()) {
+                c = c.appendNewline();
+            }
             if (i <= 3) {
                 Competitions.getPlayerData(result.uuid).addScore(4 - i);
             }
             Competitions.getPlayerData(result.uuid).addScore(1);
         }
-        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
+        Bukkit.broadcast(c);
     }
 
     @EventHandler
@@ -124,7 +120,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 trident.customName(Translation.translatable( "competition.javelin.javelin_name").args(player.displayName(), Component.text(result.getDistance())));
                 resultMap.remove(player.getUniqueId());
                 getWorld().strikeLightningEffect(trident.getLocation());
-                getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.javelin.result").args(player.displayName(), Component.text(result.getDistance()))));
+                Bukkit.broadcast(Translation.translatable("competition.javelin.result").args(player.displayName(), Component.text(result.getDistance())));
                 onRoundEnd();
             }
         }
@@ -135,24 +131,27 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         if (event instanceof PlayerJoinEvent e) {
             Player p = e.getPlayer();
             if (resultMap.containsKey(p.getUniqueId())) return;
-            if (p.getUniqueId().equals(currentPlayer.getUniqueId())) {
-                task.cancel();
+            if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
+                reconnectTask.cancel();
                 p.getInventory().setItem(0, TRIDENT);
-                getOnlinePlayers(o -> o.sendActionBar(Translation.translatable("competition.javelin.player_reconnected").color(NamedTextColor.YELLOW)));
+                Bukkit.getServer().sendActionBar(Translation.translatable("competition.javelin.player_reconnected").color(NamedTextColor.YELLOW));
+                p.teleport(getLocation());
+                p.setGameMode(GameMode.ADVENTURE);
+                queue.remove(Competitions.getPlayerData(p.getUniqueId()));
             }
             return;
         }
         if (event instanceof PlayerQuitEvent e) {
             Player p = e.getPlayer();
             if (resultMap.containsKey(p.getUniqueId())) return;
-            if (p.getUniqueId().equals(currentPlayer.getUniqueId())) {
+            if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
                 p.getInventory().clear();
-                task = addRunnable(new BukkitRunnable() {
+                reconnectTask = addRunnable(new BukkitRunnable() {
                     int i = PLUGIN.getConfig().getInt("reconnect_time");
                     @Override
                     public void run() {
                         if (i > 0) {
-                            getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                            Bukkit.getServer().sendActionBar(Translation.translatable("competition.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW));
                         }
                         if (i-- == 0) {
                             onRoundEnd();
@@ -172,19 +171,32 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
     @Override
     public void onRoundStart() {
-        getOnlinePlayers(p -> p.setGameMode(GameMode.SPECTATOR));
+        Bukkit.getOnlinePlayers().forEach(p -> p.setGameMode(GameMode.SPECTATOR));
         for (PlayerData d : queue) {
+            currentPlayer = d;
             if (d.isPlayerOnline()) {
-                currentPlayer = d.getPlayer();
-                currentPlayer.teleport(getLocation());
-                currentPlayer.setGameMode(GameMode.ADVENTURE);
+                currentPlayer.getPlayer().teleport(getLocation());
+                currentPlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
                 queue.remove(d);
                 return;
             }
         }
-        queue.clear();
-        currentPlayer = null;
-        end(false);
+        if (reconnectTask == null || reconnectTask.isCancelled()) {
+            reconnectTask = addRunnable(new BukkitRunnable() {
+                int i = PLUGIN.getConfig().getInt("reconnect_time");
+                @Override
+                public void run() {
+                    if (i > 0) {
+                        Bukkit.getServer().sendActionBar(Translation.translatable("competition.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW));
+                    }
+                    if (i-- == 0) {
+                        queue.remove(currentPlayer);
+                        onRoundEnd();
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(PLUGIN, 0L, 20L));
+        }
     }
 
     @Override
@@ -204,7 +216,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
             @Override
             public void run() {
                 if (i > 0) {
-                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.javelin.next_round_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                    Bukkit.getServer().sendActionBar(Translation.translatable("competition.javelin.next_round_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                 }
                 if (i-- == 0) {
                     onRoundStart();

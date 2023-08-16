@@ -65,7 +65,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         setGameRules();
         registerCommand();
         registerListener();
-        sendPackets();
+        setTabList();
         if (scoreboardHandler == null) {
             scoreboardHandler = new ScoreboardHandler();
         }
@@ -130,7 +130,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         configManager.saveConfig();
     }
 
-    private void sendPackets() {
+    private void setTabList() {
         long d = Math.round(20f - LocalDateTime.now().getNano() / 50000000f);
         new BukkitRunnable() {
             @Override
@@ -159,7 +159,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                             p.playerListName(p.teamDisplayName());
                         }
                     }
-                }.runTaskTimer(SportsDay.getInstance(), 0L, 20L);
+                }.runTaskTimer(instance, 0L, 20L);
             }
         }.runTaskLater(this, d);
     }
