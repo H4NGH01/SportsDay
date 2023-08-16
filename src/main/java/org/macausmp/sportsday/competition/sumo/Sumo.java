@@ -2,6 +2,7 @@ package org.macausmp.sportsday.competition.sumo;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -48,7 +49,6 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         SumoStage.SEMI_FINAL.resetStage();
         SumoStage.QUARTER_FINAL.resetStage();
         SumoStage.ELIMINATE.resetStage();
-        getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.sumo.rule")));
         int stageRound;
         if (queue.size() <= 4) {
             sumoStage = SumoStage.SEMI_FINAL;
@@ -68,13 +68,15 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     private void stageSetup() {
         sumoStage.resetRoundIndex();
-        List<Component> cl = new ArrayList<>();
-        cl.add(Translation.translatable("competition.sumo.current_stage").args(sumoStage.getName()));
+        Component c = Component.translatable("competition.sumo.current_stage").args(sumoStage.getName());
         for (int i = 0; i < sumoStage.getRoundList().size();) {
             SumoRound r = sumoStage.getRoundList().get(i++);
-            cl.add(Translation.translatable("competition.sumo.queue").args(Component.text(i), r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
+            c = c.append(Translation.translatable("competition.sumo.queue").args(Component.text(i), r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
+            if (i < sumoStage.getRoundList().size() - 1) {
+                c = c.appendNewline();
+            }
         }
-        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
+        Bukkit.broadcast(c);
     }
 
     @Override
@@ -85,16 +87,19 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
     @Override
     public void onEnd(boolean force) {
         if (force) return;
-        List<Component> cl = new ArrayList<>();
+        Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
             PlayerData data = leaderboard.get(i++);
-            cl.add(Translation.translatable("competition.sumo.rank").args(Component.text(i), Component.text(data.getName())));
+            c = c.append(Translation.translatable("competition.sumo.rank").args(Component.text(i), Component.text(data.getName())));
+            if (i < leaderboard.size()) {
+                c = c.appendNewline();
+            }
             if (i <= 3) {
                 data.addScore(4 - i);
             }
             data.addScore(1);
         }
-        getOnlinePlayers(p -> cl.forEach(p::sendMessage));
+        Bukkit.broadcast(c);
     }
 
     @Override
@@ -149,11 +154,11 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                 @Override
                 public void run() {
                     if (i != 0) {
-                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                        Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.round_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                     }
                     if (i-- == 0) {
                         sumoStage.getCurrentRound().setStatus(SumoRound.RoundStatus.STARTED);
-                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.round_start")));
+                        Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.round_start"));
                         giveWeapon();
                         cancel();
                     }
@@ -182,11 +187,11 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                         return;
                     }
                     if (i <= 15 && i % 5 == 0 && i > 0) {
-                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW)));
+                        Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                     }
                     if (i-- == 0) {
                         sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon));
-                        getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given")));
+                        Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given"));
                         cancel();
                     }
                 }
@@ -200,10 +205,8 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         if (round.getLoser().isOnline()) {
             getWorld().strikeLightningEffect(round.getLoser().getLocation());
         }
-        getOnlinePlayers(p -> {
-            p.sendActionBar(Translation.translatable("competition.sumo.round_end"));
-            p.sendMessage(Translation.translatable("competition.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
-        });
+        Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.round_end"));
+        Bukkit.broadcast(Translation.translatable("competition.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
         round.getPlayers().forEach(p -> p.getInventory().clear());
         // eliminate loser
         if (sumoStage != SumoStage.SEMI_FINAL) {
@@ -229,7 +232,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
         // if there are still rounds left in this stage
         if (sumoStage.getRoundRemaining() != 0) {
             SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
-            getOnlinePlayers(p -> p.sendMessage(Translation.translatable("competition.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName())));
+            Bukkit.broadcast(Translation.translatable("competition.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
             nextRound();
         } else {
             if (sumoStage != SumoStage.FINAL) {
@@ -246,7 +249,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             int i = 5;
             @Override
             public void run() {
-                getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_round_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.next_round_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
                     onRoundStart();
                     cancel();
@@ -287,7 +290,7 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
             @Override
             public void run() {
                 if (i <= 5 && i > 0) {
-                    getOnlinePlayers(p -> p.sendActionBar(Translation.translatable("competition.sumo.next_stage_countdown").args(Component.text(i)).color(NamedTextColor.GREEN)));
+                    Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.next_stage_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                 }
                 if (i-- == 0) {
                     nextRound();

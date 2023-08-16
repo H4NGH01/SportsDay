@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public class ScoreboardHandler {
     private final SportsDay plugin = SportsDay.getInstance();
-    private final String title = Translation.translate("scoreboard.title");
 
     public void setScoreboard(Player p) {
         // Tick time correction (attempt to bring the timer closer to reality)
@@ -23,18 +22,17 @@ public class ScoreboardHandler {
         new BukkitRunnable() {
             @Override
             public void run() {
-                ScoreboardManager manager = plugin.getServer().getScoreboardManager();
-                Scoreboard scoreboard = manager.getNewScoreboard();
-                Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.text(title).color(NamedTextColor.GOLD));
+                Scoreboard scoreboard = plugin.getServer().getScoreboardManager().getNewScoreboard();
+                Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.text(Translation.translate("scoreboard.title")).color(NamedTextColor.GOLD));
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
                 Entry comp = new Entry(o, "competition");
                 Entry stage = new Entry(o, "stage");
                 Entry count = new Entry(o, "player_count").setScore(8);
                 Entry number = new Entry(o, "number");
                 Entry score = new Entry(o, "score");
+                newline(o).setScore(5);
                 Entry time = new Entry(o, "time").setScore(4);
                 Entry ping = new Entry(o, "ping").setScore(3);
-                newline(o).setScore(5);
                 newline(o).setScore(2);
                 o.getScore(Objects.requireNonNull(plugin.getConfig().getString("server_ip"))).setScore(1);
                 new BukkitRunnable() {

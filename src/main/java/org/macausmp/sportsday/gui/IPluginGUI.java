@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface IPluginGUI {
     /**
-     * Gets GUI inventory content
-     * @return GUI inventory content
+     * Gets GUI {@link Inventory} content
+     * @return GUI {@link Inventory} content
      */
     Inventory getInventory();
 
