@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class PlayerProfileGUI extends AbstractGUI {
     private final PlayerData data;
 
     public PlayerProfileGUI(@NotNull PlayerData data) {
-        super(54, Translation.translatable("gui.title.player_profile").args(Component.text(data.getName())));
+        super(54, Translation.translatable("gui.player_profile.title").args(Component.text(data.getName())));
         this.data = data;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);

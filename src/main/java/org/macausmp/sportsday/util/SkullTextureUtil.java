@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class SkullTextureUtil {
+public final class SkullTextureUtil {
     /**
      * Get custom texture player head
      * @param value Profile textures value

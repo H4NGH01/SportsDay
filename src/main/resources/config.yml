@@ -23,6 +23,8 @@ elytra_racing:
     z: 0
     pitch: 0
     yaw: 0
+  ready_command: "fill 0 0 0 0 0 0 barrier"
+  start_command: "fill 0 0 0 0 0 0 air"
 # 冰船賽
 ice_boat_racing:
   enable: true
@@ -36,6 +38,8 @@ ice_boat_racing:
     z: 0
     pitch: 0
     yaw: 0
+  ready_command: "fill 0 0 0 0 0 0 barrier"
+  start_command: "fill 0 0 0 0 0 0 air"
 # 擲標槍
 javelin_throw:
   enable: true
@@ -61,6 +65,8 @@ obstacle_course:
     z: 0
     pitch: 0
     yaw: 0
+  ready_command: "fill 0 0 0 0 0 0 barrier"
+  start_command: "fill 0 0 0 0 0 0 air"
 # 跑酷賽
 parkour:
   enable: true
@@ -74,6 +80,8 @@ parkour:
     z: 0
     pitch: 0
     yaw: 0
+  ready_command: "fill 0 0 0 0 0 0 barrier"
+  start_command: "fill 0 0 0 0 0 0 air"
 # 相撲
 sumo:
   enable: true

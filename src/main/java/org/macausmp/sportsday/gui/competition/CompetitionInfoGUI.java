@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.List;
 
 public class CompetitionInfoGUI extends AbstractGUI {
     public CompetitionInfoGUI() {
-        super(36, Translation.translatable("gui.title.info"));
+        super(36, Translation.translatable("gui.info.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }

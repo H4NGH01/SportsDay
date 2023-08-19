@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * {@link Player} extra data for the plugin
  */
-public class PlayerData {
+public final class PlayerData {
     private final UUID uuid;
     private final int number;
     private int score = 0;

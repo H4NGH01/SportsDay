@@ -1,17 +1,16 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.Translation;
 
 public class MenuGUI extends AbstractGUI {
     public MenuGUI() {
-        super(45, Translation.translatable("gui.title.menu"));
-        for (int i = 0; i < 45; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
+        super(45, Translation.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);
         getInventory().setItem(13, GUIButton.PLAYER_LIST);
         getInventory().setItem(16, GUIButton.START_COMPETITION);

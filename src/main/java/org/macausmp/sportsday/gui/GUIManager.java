@@ -1,12 +1,16 @@
 package org.macausmp.sportsday.gui;
 
 import org.bukkit.entity.Player;
+import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionSettingsGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionStartGUI;
+import org.macausmp.sportsday.gui.competition.MenuGUI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class CompetitionGUI {
+public abstract class GUIManager {
     public static final List<IPluginGUI> REGISTERED_GUI = new ArrayList<>();
     public static final HashMap<Player, IPluginGUI> GUI_MAP = new HashMap<>();
     public static final IPluginGUI MENU_GUI = register(new MenuGUI());

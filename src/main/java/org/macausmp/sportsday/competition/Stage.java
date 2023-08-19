@@ -5,7 +5,7 @@ import org.macausmp.sportsday.util.ColorTextUtil;
 import org.macausmp.sportsday.util.Translation;
 
 /**
- * Competition stage
+ * Represents the competition stage
  */
 public enum Stage {
     IDLE,

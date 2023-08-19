@@ -38,6 +38,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
         lapMap.clear();
         record.clear();
         endCountdown = false;
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));
         super.setup();
         getPlayerDataList().forEach(data -> lapMap.put(data, 0));
         Bukkit.broadcast(Translation.translatable("competition.laps").args(Component.text(laps)).color(NamedTextColor.GREEN));
@@ -46,6 +47,7 @@ public abstract class AbstractTrackCompetition extends AbstractCompetition imple
     @Override
     public void start() {
         super.start();
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".start_command")));
         time = 0f;
         addRunnable(new BukkitRunnable() {
             @Override

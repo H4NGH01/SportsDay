@@ -1,23 +1,22 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.SkullTextureUtil;
 import org.macausmp.sportsday.util.Translation;
 
-import java.util.Objects;
-
 public class CompetitionStartGUI extends AbstractGUI {
     public CompetitionStartGUI() {
-        super(54, Translation.translatable("gui.title.start"));
+        super(54, Translation.translatable("gui.start.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -47,9 +46,8 @@ public class CompetitionStartGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
-        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "start_competition")) {
-            p.playSound(p, Competitions.start(p, container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+        if (GUIButton.isSameButton(item, "start_competition")) {
+            p.playSound(p, Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(SportsDay.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
         }
     }
 

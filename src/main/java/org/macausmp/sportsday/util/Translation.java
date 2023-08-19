@@ -8,7 +8,7 @@ import org.macausmp.sportsday.SportsDay;
 
 import java.util.Objects;
 
-public class Translation {
+public final class Translation {
     private static final FileConfiguration LANGUAGE_CONFIG = SportsDay.getInstance().getLanguageConfig();
 
     public static @NotNull TranslatableComponent translatable(String key) {

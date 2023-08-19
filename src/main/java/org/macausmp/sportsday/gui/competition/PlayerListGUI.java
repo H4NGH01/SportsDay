@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,11 +11,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.gui.*;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     private int page = 0;
 
     public PlayerListGUI() {
-        super(54, Translation.translatable("gui.title.player_list"));
+        super(54, Translation.translatable("gui.player_list.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -58,9 +58,8 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
-        PlayerListGUI gui = (PlayerListGUI) CompetitionGUI.GUI_MAP.get(p);
-        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "player_icon")) {
+        PlayerListGUI gui = (PlayerListGUI) GUIManager.GUI_MAP.get(p);
+        if (GUIButton.isSameButton(item, "player_icon")) {
             SkullMeta meta = (SkullMeta) item.getItemMeta();
             new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).openTo(p);
             return;
@@ -75,7 +74,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     }
 
     public static void updateGUI() {
-        for (IPluginGUI gui : CompetitionGUI.GUI_MAP.values()) {
+        for (IPluginGUI gui : GUIManager.GUI_MAP.values()) {
             if (gui instanceof PlayerListGUI) {
                 gui.update();
             }
@@ -99,7 +98,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             lore.add(Translation.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             lore.add(Translation.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             lore.add(Component.text(""));
-            lore.add(Translation.translatable("gui.player.detail").args(Component.text(player.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(Translation.translatable("gui.player_profile.detail").args(Component.text(player.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });

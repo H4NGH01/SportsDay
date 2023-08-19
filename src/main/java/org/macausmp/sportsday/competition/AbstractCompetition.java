@@ -9,12 +9,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.macausmp.sportsday.PlayerCustomize;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
-import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.util.ColorTextUtil;
 import org.macausmp.sportsday.util.Translation;
 
@@ -74,20 +76,22 @@ public abstract class AbstractCompetition implements ICompetition {
     @Override
     public void setup() {
         COMPETITION_TASKS.forEach(BukkitTask::cancel);
+        COMPETITION_TASKS.clear();
         players.clear();
         getLeaderboard().clear();
         setStage(Stage.COMING);
         players.addAll(Competitions.getOnlinePlayers());
-        int i = PLUGIN.getConfig().getInt("ready_time");
-        Bukkit.broadcast(Translation.translatable("competition.rule." + id));
-        Bukkit.broadcast(Translation.translatable("competition.start_message").args(name, Component.text(i)).color(NamedTextColor.GREEN));
         players.forEach(data -> {
-            data.getPlayer().setBedSpawnLocation(location, true);
-            if (!SportsDay.REFEREE.hasPlayer(data.getPlayer())) {
-                data.getPlayer().getInventory().clear();
+            Player p = data.getPlayer();
+            p.setBedSpawnLocation(location, true);
+            if (!SportsDay.REFEREE.hasPlayer(p)) {
+                p.getInventory().clear();
             }
-            data.getPlayer().teleport(location);
-            data.getPlayer().setGameMode(GameMode.ADVENTURE);
+            p.clearActivePotionEffects();
+            p.setFireTicks(0);
+            p.teleport(location);
+            p.setGameMode(GameMode.ADVENTURE);
+            PlayerCustomize.suitUp(p);
         });
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
@@ -100,11 +104,11 @@ public abstract class AbstractCompetition implements ICompetition {
                 if (i-- == 0) {
                     this.cancel();
                     start();
-                    Bukkit.getServer().sendActionBar(Translation.translatable("competition.start"));
-                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
+        Bukkit.broadcast(Translation.translatable("competition.start_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Translation.translatable("competition.rule." + id));
         onSetup();
         PLUGIN.getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
     }
@@ -113,6 +117,8 @@ public abstract class AbstractCompetition implements ICompetition {
     public void start() {
         setStage(Stage.STARTED);
         onStart();
+        Bukkit.getServer().sendActionBar(Translation.translatable("competition.start"));
+        Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
     @Override
@@ -121,7 +127,6 @@ public abstract class AbstractCompetition implements ICompetition {
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
         COMPETITION_TASKS.forEach(BukkitTask::cancel);
-        PLUGIN.getServer().sendTitlePart(TitlePart.TITLE, Translation.translatable("competition.end"));
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
@@ -136,6 +141,7 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskLater(PLUGIN, 100L));
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Translation.translatable("competition.end"));
         PLUGIN.getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
     }
 
@@ -159,15 +165,18 @@ public abstract class AbstractCompetition implements ICompetition {
         return stage;
     }
 
-    @Override
-    public void setStage(Stage stage) {
+    /**
+     * Set the current competition stage
+     * @param stage new stage
+     */
+    protected void setStage(Stage stage) {
         this.stage = stage;
-        CompetitionGUI.COMPETITION_INFO_GUI.update();
+        GUIManager.COMPETITION_INFO_GUI.update();
     }
 
     /**
-     * Get the {@link PlayerData} list of competition
-     * @return {@link PlayerData} list of competition
+     * Get the list of {@link PlayerData} of current competition.
+     * @return list of {@link PlayerData} of current competition
      */
     public final List<PlayerData> getPlayerDataList() {
         return players;
