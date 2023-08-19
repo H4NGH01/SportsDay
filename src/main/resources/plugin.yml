@@ -19,6 +19,9 @@ commands:
   unregister:
     usage: "/register"
     description: "Unregister as a player"
+  customize:
+    usage: "/customize"
+    description: "Open customize gui"
   ping:
     usage: "/ping <player>"
-    description: "Ping"
+    description: "Query player's ping"

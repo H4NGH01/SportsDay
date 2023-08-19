@@ -17,6 +17,7 @@ public class CommandManager implements CommandExecutor {
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
     private static final IPluginCommand REGISTER = new RegisterCommand();
     private static final IPluginCommand UNREGISTER = new UnregisterCommand();
+    private static final IPluginCommand CUSTOMIZE = new CustomizeCommand();
     private static final IPluginCommand PING = new PingCommand();
 
     public void register() {
@@ -24,6 +25,7 @@ public class CommandManager implements CommandExecutor {
         COMMANDS.add(COMPETITIONGUI);
         COMMANDS.add(REGISTER);
         COMMANDS.add(UNREGISTER);
+        COMMANDS.add(CUSTOMIZE);
         COMMANDS.add(PING);
         for (IPluginCommand command : COMMANDS) {
             Objects.requireNonNull(plugin.getCommand(command.name())).setExecutor(this);

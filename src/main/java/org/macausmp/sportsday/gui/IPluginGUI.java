@@ -6,6 +6,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a plugin gui
+ */
 public interface IPluginGUI {
     /**
      * Gets GUI {@link Inventory} content

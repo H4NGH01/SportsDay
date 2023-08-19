@@ -20,9 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.command.CommandManager;
 import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.gui.CompetitionGUI;
 import org.macausmp.sportsday.gui.GUIListener;
-import org.macausmp.sportsday.gui.PlayerListGUI;
+import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 import org.macausmp.sportsday.util.Translation;
 
 import java.time.LocalDateTime;
@@ -61,7 +61,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         PLAYER = registerTeam(scoreboard, "player", Translation.translatable("role.player"), NamedTextColor.GREEN);
         REFEREE = registerTeam(scoreboard, "referee", Translation.translatable("role.referee"), NamedTextColor.GOLD);
         AUDIENCE = registerTeam(scoreboard, "audience", Translation.translatable("role.audience"), NamedTextColor.GRAY);
-        BOSSBAR = getServer().createBossBar(Translation.translate("bar.title"), BarColor.YELLOW, BarStyle.SOLID);
+        BOSSBAR = getServer().createBossBar(Translation.translate("bossbar.title"), BarColor.YELLOW, BarStyle.SOLID);
         setGameRules();
         registerCommand();
         registerListener();
@@ -118,10 +118,26 @@ public final class SportsDay extends JavaPlugin implements Listener {
         Competitions.save();
     }
 
+    /**
+     * Get the config that store players' data
+     * @return players config file
+     */
     public FileConfiguration getPlayerConfig() {
         return configManager.getPlayerConfig();
     }
 
+    /**
+     * Get the config that store players' customize data
+     * @return players' customize config file
+     */
+    public FileConfiguration getCustomizeConfig() {
+        return configManager.getCustomizeConfig();
+    }
+
+    /**
+     * Get the language config file
+     * @return language config file
+     */
     public FileConfiguration getLanguageConfig() {
         return configManager.getLanguageConfig();
     }
@@ -142,19 +158,19 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     Component footer;
                     @Override
                     public void run() {
-                        header = Translation.translatable("bar.title").appendNewline();
+                        header = Translation.translatable("tablist.title").appendNewline();
                         if (Competitions.getCurrentlyCompetition() != null) {
                             Component cn = Competitions.getCurrentlyCompetition().getName();
                             Component sn = Competitions.getCurrentlyCompetition().getStage().getName();
-                            competition = Translation.translatable("bar.current").args(cn, sn);
+                            competition = Translation.translatable("tablist.current").args(cn, sn);
                         } else {
-                            competition = Translation.translatable("bar.idle");
+                            competition = Translation.translatable("tablist.idle");
                         }
                         header = header.append(competition);
                         time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                         for (Player p : getServer().getOnlinePlayers()) {
-                            Component ping = Translation.translatable("bar.ping").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
-                            footer = Translation.translatable("bar.local_time").args(time).color(NamedTextColor.GREEN).appendNewline().append(ping);
+                            Component ping = Translation.translatable("tablist.ping").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+                            footer = Translation.translatable("tablist.local_time").args(time).color(NamedTextColor.GREEN).appendNewline().append(ping);
                             p.sendPlayerListHeaderAndFooter(header, footer);
                             p.playerListName(p.teamDisplayName());
                         }
@@ -174,7 +190,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
             return;
         }
         if (Competitions.containPlayer(e.getPlayer())) {
-            CompetitionGUI.COMPETITION_INFO_GUI.update();
+            GUIManager.COMPETITION_INFO_GUI.update();
             PlayerListGUI.updateGUI();
         }
     }

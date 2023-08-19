@@ -1,5 +1,8 @@
 package org.macausmp.sportsday.gui;
 
+/**
+ * Represents a pageable plugin gui
+ */
 public interface IPageableGUI extends IPluginGUI {
     /**
      * Get current page number

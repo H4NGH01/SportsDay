@@ -10,11 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.event.CompetitionJoinPlayerEvent;
-import org.macausmp.sportsday.event.CompetitionLeavePlayerEvent;
 import org.macausmp.sportsday.event.CompetitionSetupEvent;
-import org.macausmp.sportsday.gui.CompetitionGUI;
-import org.macausmp.sportsday.gui.PlayerListGUI;
+import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.*;
@@ -139,11 +137,10 @@ public class Competitions {
             }
         }
         PLAYERS.add(new PlayerData(player.getUniqueId(), number));
-        CompetitionGUI.COMPETITION_INFO_GUI.update();
+        GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
         player.sendMessage(Translation.translatable("player.register_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
-        Bukkit.getPluginManager().callEvent(new CompetitionJoinPlayerEvent(player));
         return true;
     }
 
@@ -160,13 +157,12 @@ public class Competitions {
                     PLUGIN.savePlayerConfig();
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     PLAYERS.remove(data);
-                    CompetitionGUI.COMPETITION_INFO_GUI.update();
+                    GUIManager.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();
                     if (player.isOnline()) {
                         Objects.requireNonNull(player.getPlayer()).sendMessage(Translation.translatable("player.leave_message"));
                     }
                     SportsDay.AUDIENCE.addPlayer(player);
-                    Bukkit.getPluginManager().callEvent(new CompetitionLeavePlayerEvent(player));
                     return true;
                 }
             }

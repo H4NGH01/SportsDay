@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.gui;
+package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -12,15 +12,17 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CompetitionSettingsGUI extends AbstractGUI {
     public CompetitionSettingsGUI() {
-        super(54, Translation.translatable("gui.title.settings"));
+        super(54, Translation.translatable("gui.settings.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -51,12 +53,12 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        if (container.has(SportsDay.ITEM_ID, PersistentDataType.STRING) && Objects.equals(container.get(SportsDay.ITEM_ID, PersistentDataType.STRING), "status_toggle")) {
+        if (GUIButton.isSameButton(item, "status_toggle")) {
             for (ICompetition competition : Competitions.COMPETITIONS) {
                 if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
                     plugin.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
                     plugin.saveConfig();
-                    CompetitionGUI.COMPETITION_SETTINGS_GUI.update();
+                    GUIManager.COMPETITION_SETTINGS_GUI.update();
                     p.playSound(p, competition.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     return;
                 }

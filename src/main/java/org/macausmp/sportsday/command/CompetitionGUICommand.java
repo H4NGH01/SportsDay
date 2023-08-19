@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class CompetitionGUICommand implements IPluginCommand {
                 p.getInventory().addItem(book());
                 return;
             }
-            CompetitionGUI.MENU_GUI.openTo(p);
+            GUIManager.MENU_GUI.openTo(p);
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
         }

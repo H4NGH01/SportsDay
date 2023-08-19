@@ -1,12 +1,8 @@
 package org.macausmp.sportsday.competition;
 
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,14 +21,11 @@ public class Parkour extends AbstractTrackCompetition {
 
     @Override
     public void onStart() {
-        ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
-        boots.editMeta(meta -> {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-            meta.setUnbreakable(true);
-        });
         Competitions.getOnlinePlayers().forEach(d -> {
             d.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
-            d.getPlayer().getInventory().setItem(EquipmentSlot.FEET, boots);
+            d.getPlayer().getInventory().setHelmet(null);
+            d.getPlayer().getInventory().setChestplate(null);
+            d.getPlayer().getInventory().setLeggings(null);
         });
     }
 

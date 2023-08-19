@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import java.util.List;
 
 /**
- * Competition interface
+ * Represents a competition
  */
 public interface ICompetition extends Listener {
     /**
@@ -75,12 +75,6 @@ public interface ICompetition extends Listener {
      * @return current competition stage
      */
     Stage getStage();
-
-    /**
-     * Set the current competition stage
-     * @param stage new stage
-     */
-    void setStage(Stage stage);
 
     /**
      * Get the leaderboard of competition

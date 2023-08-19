@@ -24,6 +24,6 @@ public abstract class AbstractGUI implements IPluginGUI {
     @Override
     public void openTo(@NotNull Player player) {
         player.openInventory(inventory);
-        CompetitionGUI.GUI_MAP.put(player, this);
+        GUIManager.GUI_MAP.put(player, this);
     }
 }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ColorTextUtil {
+public final class ColorTextUtil {
     private static final Map<Character, NamedTextColor> COLOR_MAP = new HashMap<>();
     private static final Map<Character, TextDecoration> STYLE_MAP = new HashMap<>();
 

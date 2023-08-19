@@ -13,6 +13,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.PlayerCustomize;
 import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.Competitions;
@@ -172,12 +173,6 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     private void giveWeapon() {
         if (weapon) {
-            ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
-            weapon.editMeta(meta -> {
-                meta.displayName(Translation.translatable("item.sportsday.kb_stick"));
-                meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
-                meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-            });
             addRunnable(new BukkitRunnable() {
                 int i = 30;
                 @Override
@@ -190,13 +185,27 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
                         Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                     }
                     if (i-- == 0) {
-                        sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon));
+                        sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
                         Bukkit.getServer().sendActionBar(Translation.translatable("competition.sumo.knockback_stick_given"));
                         cancel();
                     }
                 }
             }.runTaskTimer(PLUGIN, 0L, 20L));
         }
+    }
+
+    private @NotNull ItemStack weapon(@NotNull Player p) {
+        ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
+        String material = PlayerCustomize.getWeapon(p);
+        if (material != null) {
+            weapon.setType(Objects.requireNonNull(Material.getMaterial(material)));
+        }
+        weapon.editMeta(meta -> {
+            meta.displayName(Translation.translatable("item.sportsday.kb_stick"));
+            meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+        });
+        return weapon;
     }
 
     @Override

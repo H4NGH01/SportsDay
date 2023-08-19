@@ -23,7 +23,8 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.command.CompetitionGUICommand;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
-import org.macausmp.sportsday.gui.CompetitionGUI;
+import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
@@ -46,10 +47,13 @@ public class CompetitionListener implements Listener {
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
+    public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
+        GUIManager.GUI_MAP.remove(p);
         if (!Competitions.containPlayer(p)) return;
+        GUIManager.COMPETITION_INFO_GUI.update();
+        PlayerListGUI.updateGUI();
+        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
         Competitions.getCurrentlyCompetition().onEvent(e);
     }
 
@@ -122,7 +126,7 @@ public class CompetitionListener implements Listener {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (p.isOp()) {
-                CompetitionGUI.MENU_GUI.openTo(e.getPlayer());
+                GUIManager.MENU_GUI.openTo(e.getPlayer());
                 return;
             }
             // Easter egg, happen if player use the book without op permission

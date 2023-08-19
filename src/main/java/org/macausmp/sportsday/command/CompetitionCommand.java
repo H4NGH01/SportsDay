@@ -115,7 +115,7 @@ public class CompetitionCommand implements IPluginCommand {
                     }
                 }
                 case "info" -> {
-                    sender.sendMessage(Translation.translatable("gui.title.info"));
+                    sender.sendMessage(Translation.translatable("gui.info.title"));
                     boolean b = Competitions.getCurrentlyCompetition() != null;
                     sender.sendMessage(Translation.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
                     if (b) {

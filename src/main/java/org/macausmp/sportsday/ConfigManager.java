@@ -10,10 +10,12 @@ import java.util.logging.Level;
 /**
  * New config file for storing players' competition data
  */
-public class ConfigManager {
+public final class ConfigManager {
     private final SportsDay plugin = SportsDay.getInstance();
     private File playerFile;
     private FileConfiguration playerConfig;
+    private File customizeFile;
+    private FileConfiguration customizeConfig;
     private File languageFile;
     private FileConfiguration languageConfig;
 
@@ -24,12 +26,13 @@ public class ConfigManager {
             }
         }
         playerFile = new File(plugin.getDataFolder(), "player.yml");
+        customizeFile = new File(plugin.getDataFolder(), "customize.yml");
         languageFile = new File(plugin.getDataFolder(), "lang.json");
         playerConfig = loadFile(playerFile, "player.yml");
+        customizeConfig = loadFile(customizeFile, "customize.yml");
         loadLanguageFile();
     }
 
-    @SuppressWarnings("SameParameterValue")
     private @NotNull FileConfiguration loadFile(@NotNull File file, String name) {
         if (!file.exists()) {
             try {
@@ -76,11 +79,20 @@ public class ConfigManager {
         return playerConfig;
     }
 
+    public FileConfiguration getCustomizeConfig() {
+        return customizeConfig;
+    }
+
     public void saveConfig() {
         try {
             playerConfig.save(playerFile);
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not save the player.yml file", e);
+        }
+        try {
+            customizeConfig.save(customizeFile);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not save the customize.yml file", e);
         }
     }
 
