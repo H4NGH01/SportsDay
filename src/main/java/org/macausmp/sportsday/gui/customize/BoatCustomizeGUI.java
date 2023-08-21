@@ -10,11 +10,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class BoatCustomizeGUI extends AbstractGUI {
     private final Player player;
 
     public BoatCustomizeGUI(Player player) {
-        super(18, Translation.translatable("gui.customize.boat.title"));
+        super(18, Component.translatable("gui.customize.boat.title"));
         this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -49,7 +49,7 @@ public class BoatCustomizeGUI extends AbstractGUI {
             ItemStack boat2 = getInventory().getItem(i);
             if (boat2 != null && boat.equals(boat2.getType().name())) {
                 List<Component> lore = new ArrayList<>();
-                lore.add(Translation.translatable("gui.selected"));
+                lore.add(TextUtil.convert(Component.translatable("gui.selected")));
                 boat2.lore(lore);
                 boat2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
@@ -58,13 +58,13 @@ public class BoatCustomizeGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent event, Player player, @NotNull ItemStack item) {
+    public void onClick(InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
-            new CustomizeMenuGUI().openTo(player);
+            p.openInventory(new CustomizeMenuGUI().getInventory());
             return;
         }
         if (isBoat(item.getType())) {
-            PlayerCustomize.setBoat(player, item.getType());
+            PlayerCustomize.setBoat(p, item.getType());
             update();
         }
     }
@@ -73,7 +73,7 @@ public class BoatCustomizeGUI extends AbstractGUI {
         ItemStack boat = new ItemStack(material);
         boat.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select"));
+            lore.add(TextUtil.convert(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "boat");
@@ -84,8 +84,7 @@ public class BoatCustomizeGUI extends AbstractGUI {
     @Contract(pure = true)
     private boolean isBoat(@NotNull Material material) {
         return switch (material) {
-            case ACACIA_BOAT, BIRCH_BOAT, CHERRY_BOAT, DARK_OAK_BOAT, JUNGLE_BOAT, MANGROVE_BOAT, OAK_BOAT, SPRUCE_BOAT ->
-                    true;
+            case ACACIA_BOAT, BIRCH_BOAT, CHERRY_BOAT, DARK_OAK_BOAT, JUNGLE_BOAT, MANGROVE_BOAT, OAK_BOAT, SPRUCE_BOAT -> true;
             default -> false;
         };
     }

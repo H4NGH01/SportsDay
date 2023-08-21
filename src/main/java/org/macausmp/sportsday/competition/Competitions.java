@@ -5,20 +5,21 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerData;
+import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.event.CompetitionSetupEvent;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
-import org.macausmp.sportsday.util.Translation;
 
 import java.util.*;
 
 public class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
+    private static final FileConfiguration PLAYER_CONFIG = PLUGIN.getConfigManager().getPlayerConfig();
     public static final List<ICompetition> COMPETITIONS = new ArrayList<>();
     public static final ICompetition ELYTRA_RACING = register(new ElytraRacing());
     public static final ICompetition ICE_BOAT_RACING = register(new IceBoatRacing());
@@ -43,22 +44,22 @@ public class Competitions {
 
     public static void load() {
         PLAYERS.clear();
-        Set<String> keys = PLUGIN.getPlayerConfig().getKeys(false);
+        Set<String> keys = PLAYER_CONFIG.getKeys(false);
         for (String s : keys) {
             UUID uuid = UUID.fromString(s);
-            int number = PLUGIN.getPlayerConfig().getInt(s + ".number");
-            int score = PLUGIN.getPlayerConfig().getInt((s + ".score"));
+            int number = PLAYER_CONFIG.getInt(s + ".number");
+            int score = PLAYER_CONFIG.getInt((s + ".score"));
             PLAYERS.add(new PlayerData(uuid, number, score));
         }
     }
 
     public static void save() {
         for (PlayerData data : PLAYERS) {
-            PLUGIN.getPlayerConfig().set(data.getUUID() + ".name", data.getName());
-            PLUGIN.getPlayerConfig().set(data.getUUID() + ".number", data.getNumber());
-            PLUGIN.getPlayerConfig().set(data.getUUID() + ".score", data.getScore());
+            PLAYER_CONFIG.set(data.getUUID() + ".name", data.getName());
+            PLAYER_CONFIG.set(data.getUUID() + ".number", data.getNumber());
+            PLAYER_CONFIG.set(data.getUUID() + ".score", data.getScore());
         }
-        PLUGIN.savePlayerConfig();
+        PLUGIN.getConfigManager().saveConfig();
     }
 
     /**
@@ -69,29 +70,29 @@ public class Competitions {
      */
     public static boolean start(CommandSender sender, String id) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
-            sender.sendMessage(Translation.translatable("competition.already_in_progress").color(NamedTextColor.RED));
+            sender.sendMessage(Component.translatable("competition.already_in_progress").color(NamedTextColor.RED));
             return false;
         }
         for (ICompetition competition : COMPETITIONS) {
             if (competition.getID().equals(id)) {
                 if (!competition.isEnable()) {
-                    sender.sendMessage(Translation.translatable("competition.disabled").color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("competition.disabled").color(NamedTextColor.RED));
                     return false;
                 }
                 int i = getOnlinePlayers().size();
                 if (i >= competition.getLeastPlayersRequired()) {
-                    sender.sendMessage(Translation.translatable("competition.setting_up").color(NamedTextColor.GREEN));
+                    sender.sendMessage(Component.translatable("competition.setting_up").color(NamedTextColor.GREEN));
                     setCurrentlyCompetition(competition);
                     competition.setup();
                     Bukkit.getPluginManager().callEvent(new CompetitionSetupEvent(competition));
                     return true;
                 } else {
-                    sender.sendMessage(Translation.translatable("competition.not_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("competition.not_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
                     return false;
                 }
             }
         }
-        sender.sendMessage(Translation.translatable("competition.unknown").color(NamedTextColor.RED));
+        sender.sendMessage(Component.translatable("competition.unknown").color(NamedTextColor.RED));
         return false;
     }
 
@@ -102,9 +103,9 @@ public class Competitions {
     public static void forceEnd(CommandSender sender) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
             getCurrentlyCompetition().end(true);
-            sender.sendMessage(Translation.translatable("competition.force_end").color(NamedTextColor.GREEN));
+            sender.sendMessage(Component.translatable("competition.force_end").color(NamedTextColor.GREEN));
         } else {
-            sender.sendMessage(Translation.translatable("competition.not_in_progress").color(NamedTextColor.RED));
+            sender.sendMessage(Component.translatable("competition.not_in_progress").color(NamedTextColor.RED));
         }
     }
 
@@ -132,14 +133,12 @@ public class Competitions {
      */
     public static boolean join(@NotNull Player player, int number) {
         for (PlayerData data : PLAYERS) {
-            if (data.getNumber() == number) {
-                return false;
-            }
+            if (data.getNumber() == number) return false;
         }
         PLAYERS.add(new PlayerData(player.getUniqueId(), number));
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        player.sendMessage(Translation.translatable("player.register_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
+        player.sendMessage(Component.translatable("player.register_success_message").args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.PLAYER.addPlayer(player);
         return true;
     }
@@ -153,15 +152,12 @@ public class Competitions {
         if (containPlayer(player)) {
             for (PlayerData data : PLAYERS) {
                 if (data.getUUID().equals(player.getUniqueId())) {
-                    PLUGIN.getPlayerConfig().set(data.getUUID().toString(), null);
-                    PLUGIN.savePlayerConfig();
+                    PLAYER_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     PLAYERS.remove(data);
                     GUIManager.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();
-                    if (player.isOnline()) {
-                        Objects.requireNonNull(player.getPlayer()).sendMessage(Translation.translatable("player.leave_message"));
-                    }
+                    if (player.isOnline()) Objects.requireNonNull(player.getPlayer()).sendMessage(Component.translatable("player.leave_message"));
                     SportsDay.AUDIENCE.addPlayer(player);
                     return true;
                 }
@@ -200,9 +196,7 @@ public class Competitions {
     public static @NotNull List<PlayerData> getOnlinePlayers() {
         List<PlayerData> list = new ArrayList<>();
         for (PlayerData d : PLAYERS) {
-            if (d.isPlayerOnline()) {
-                list.add(d);
-            }
+            if (d.isPlayerOnline()) list.add(d);
         }
         return list;
     }

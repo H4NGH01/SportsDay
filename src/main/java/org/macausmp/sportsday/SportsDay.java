@@ -1,13 +1,14 @@
 package org.macausmp.sportsday;
 
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,12 +22,12 @@ import org.macausmp.sportsday.command.CommandManager;
 import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIListener;
-import org.macausmp.sportsday.gui.GUIManager;
-import org.macausmp.sportsday.gui.competition.PlayerListGUI;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.ScoreboardHandler;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
@@ -49,27 +50,32 @@ public final class SportsDay extends JavaPlugin implements Listener {
         instance = this;
         getConfig().options().copyDefaults(true);
         saveConfig();
-        if (configManager == null) {
-            configManager = new ConfigManager();
-        }
+        if (configManager == null) configManager = new ConfigManager();
         configManager.setup();
         configManager.saveConfig();
+        registerTranslation();
         ITEM_ID = NamespacedKey.fromString("item_id", this);
         COMPETITION_ID = NamespacedKey.fromString("competition_id", this);
         Competitions.load();
         Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
-        PLAYER = registerTeam(scoreboard, "player", Translation.translatable("role.player"), NamedTextColor.GREEN);
-        REFEREE = registerTeam(scoreboard, "referee", Translation.translatable("role.referee"), NamedTextColor.GOLD);
-        AUDIENCE = registerTeam(scoreboard, "audience", Translation.translatable("role.audience"), NamedTextColor.GRAY);
-        BOSSBAR = getServer().createBossBar(Translation.translate("bossbar.title"), BarColor.YELLOW, BarStyle.SOLID);
+        PLAYER = registerTeam(scoreboard, "player", Component.translatable("role.player"), NamedTextColor.GREEN);
+        REFEREE = registerTeam(scoreboard, "referee", Component.translatable("role.referee"), NamedTextColor.GOLD);
+        AUDIENCE = registerTeam(scoreboard, "audience", Component.translatable("role.audience"), NamedTextColor.GRAY);
+        BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
         setGameRules();
         registerCommand();
         registerListener();
         setTabList();
-        if (scoreboardHandler == null) {
-            scoreboardHandler = new ScoreboardHandler();
-        }
+        if (scoreboardHandler == null) scoreboardHandler = new ScoreboardHandler();
         getServer().getOnlinePlayers().forEach(scoreboardHandler::setScoreboard);
+    }
+
+    private void registerTranslation() {
+        TranslationRegistry registry = TranslationRegistry.create(Key.key("sportsday:resource"));
+        // There is no way to use an alternative language other than the en_US localization file that ships as part of the vanilla jar
+        ResourceBundle bundle = ResourceBundle.getBundle("lang.Bundle", Locale.US, UTF8ResourceBundleControl.get());
+        registry.registerAll(Locale.US, bundle, true);
+        GlobalTranslator.translator().addSource(registry);
     }
 
     private Team registerTeam(@NotNull Scoreboard scoreboard, String name, Component display, NamedTextColor color) {
@@ -83,9 +89,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     private void registerCommand() {
-        if (commandManager == null) {
-            commandManager = new CommandManager();
-        }
+        if (commandManager == null) commandManager = new CommandManager();
         commandManager.register();
     }
 
@@ -119,31 +123,11 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     /**
-     * Get the config that store players' data
-     * @return players config file
+     * Get the config manager
+     * @return config manager
      */
-    public FileConfiguration getPlayerConfig() {
-        return configManager.getPlayerConfig();
-    }
-
-    /**
-     * Get the config that store players' customize data
-     * @return players' customize config file
-     */
-    public FileConfiguration getCustomizeConfig() {
-        return configManager.getCustomizeConfig();
-    }
-
-    /**
-     * Get the language config file
-     * @return language config file
-     */
-    public FileConfiguration getLanguageConfig() {
-        return configManager.getLanguageConfig();
-    }
-
-    public void savePlayerConfig() {
-        configManager.saveConfig();
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 
     private void setTabList() {
@@ -158,19 +142,19 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     Component footer;
                     @Override
                     public void run() {
-                        header = Translation.translatable("tablist.title").appendNewline();
+                        header = Component.translatable("tablist.title").appendNewline();
                         if (Competitions.getCurrentlyCompetition() != null) {
                             Component cn = Competitions.getCurrentlyCompetition().getName();
                             Component sn = Competitions.getCurrentlyCompetition().getStage().getName();
-                            competition = Translation.translatable("tablist.current").args(cn, sn);
+                            competition = Component.translatable("tablist.current").args(cn, sn);
                         } else {
-                            competition = Translation.translatable("tablist.idle");
+                            competition = Component.translatable("tablist.idle");
                         }
                         header = header.append(competition);
                         time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                         for (Player p : getServer().getOnlinePlayers()) {
-                            Component ping = Translation.translatable("tablist.ping").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
-                            footer = Translation.translatable("tablist.local_time").args(time).color(NamedTextColor.GREEN).appendNewline().append(ping);
+                            Component ping = Component.translatable("tablist.ping").color(NamedTextColor.GREEN).args(Component.text(p.getPing()).color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+                            footer = Component.translatable("tablist.local_time").args(time).color(NamedTextColor.GREEN).appendNewline().append(ping);
                             p.sendPlayerListHeaderAndFooter(header, footer);
                             p.playerListName(p.teamDisplayName());
                         }
@@ -184,14 +168,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         scoreboardHandler.setScoreboard(p);
-        BOSSBAR.addPlayer(p);
-        if (!p.hasPlayedBefore()) {
-            SportsDay.AUDIENCE.addPlayer(p);
-            return;
-        }
-        if (Competitions.containPlayer(e.getPlayer())) {
-            GUIManager.COMPETITION_INFO_GUI.update();
-            PlayerListGUI.updateGUI();
-        }
+        BOSSBAR.addViewer(p);
+        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
     }
 }

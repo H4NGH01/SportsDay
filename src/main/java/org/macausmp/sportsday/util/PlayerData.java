@@ -1,4 +1,4 @@
-package org.macausmp.sportsday;
+package org.macausmp.sportsday.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -25,7 +25,6 @@ import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
-import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +42,14 @@ public class CompetitionListener implements Listener {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition().getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
+        GUIManager.COMPETITION_INFO_GUI.update();
+        PlayerListGUI.updateGUI();
         Competitions.getCurrentlyCompetition().onEvent(e);
     }
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        GUIManager.GUI_MAP.remove(p);
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
@@ -65,12 +65,8 @@ public class CompetitionListener implements Listener {
         Competitions.getCurrentlyCompetition().onEvent(e);
         Location loc = e.getTo().clone();
         loc.setY(loc.getY() - 0.5f);
-        if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) {
-            SPAWNPOINT_LIST.remove(p.getUniqueId());
-        }
-        if (loc.getWorld().getBlockAt(loc).getType() == DEATH) {
-            p.setHealth(0);
-        }
+        if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) SPAWNPOINT_LIST.remove(p.getUniqueId());
+        if (loc.getWorld().getBlockAt(loc).getType() == DEATH) p.setHealth(0);
     }
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
@@ -126,7 +122,7 @@ public class CompetitionListener implements Listener {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (p.isOp()) {
-                GUIManager.MENU_GUI.openTo(e.getPlayer());
+                p.openInventory(GUIManager.MENU_GUI.getInventory());
                 return;
             }
             // Easter egg, happen if player use the book without op permission
@@ -141,11 +137,11 @@ public class CompetitionListener implements Listener {
                     }
                     if (i == 0) {
                         p.damage(5);
-                        p.sendMessage(Translation.translatable("item.op_book_easter_egg1").args(e.getItem().displayName()));
+                        p.sendMessage(Component.translatable("item.op_book_easter_egg1").args(e.getItem().displayName()));
                     } else if (i == 6) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 2, false, false));
                     } else if (i == 8) {
-                        p.sendMessage(Translation.translatable("item.op_book_easter_egg2"));
+                        p.sendMessage(Component.translatable("item.op_book_easter_egg2"));
                     } if (i == 10) {
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
                         p.setHealth(0);

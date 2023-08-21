@@ -14,7 +14,6 @@ public class ObstacleCourse extends AbstractTrackCompetition {
 
     @Override
     public void onStart() {
-
     }
 
     @Override

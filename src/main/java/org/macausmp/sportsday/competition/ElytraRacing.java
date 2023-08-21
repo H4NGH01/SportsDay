@@ -38,7 +38,6 @@ public class ElytraRacing extends AbstractTrackCompetition {
 
     @Override
     protected void onEnd(boolean force) {
-
     }
 
     @EventHandler
@@ -54,9 +53,7 @@ public class ElytraRacing extends AbstractTrackCompetition {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) {
-            e.setCancelled(true);
-        }
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
     }
 
     @EventHandler
@@ -64,8 +61,6 @@ public class ElytraRacing extends AbstractTrackCompetition {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
-        if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) {
-            e.setCancelled(true);
-        }
+        if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
     }
 }

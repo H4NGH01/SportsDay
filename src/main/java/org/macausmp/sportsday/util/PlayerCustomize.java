@@ -1,7 +1,8 @@
-package org.macausmp.sportsday;
+package org.macausmp.sportsday.util;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -14,12 +15,13 @@ import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.macausmp.sportsday.SportsDay;
 
 import java.util.HashMap;
 import java.util.Objects;
 
-public class PlayerCustomize {
-    private static final SportsDay PLUGIN = SportsDay.getInstance();
+public final class PlayerCustomize {
+    private static final FileConfiguration CONFIG = SportsDay.getInstance().getConfigManager().getCustomizeConfig();
     private static final HashMap<Material, TrimMaterial> TRIM_MATERIAL = new HashMap<>();
     private static final HashMap<String, TrimPattern> TRIM_PATTERN = new HashMap<>();
 
@@ -60,87 +62,80 @@ public class PlayerCustomize {
     }
 
     private static @Nullable ItemStack cloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        String source = player.getUniqueId() + ".clothing." + slot.name().toLowerCase();
-        if (PLUGIN.getCustomizeConfig().getString(source + ".item") == null) {
-            return null;
-        }
-        ItemStack cloth = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(PLUGIN.getCustomizeConfig().getString(source + ".item")))));
-        if (cloth.getItemMeta() instanceof ColorableArmorMeta) {
-            cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(PlayerCustomize.getClothColor(player, slot)));
-        }
+        String source = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
+        if (source == null) return null;
+        ItemStack cloth = new ItemStack(Objects.requireNonNull(Material.getMaterial(source)));
+        if (cloth.getItemMeta() instanceof ColorableArmorMeta) cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(PlayerCustomize.getClothColor(player, slot)));
         cloth.editMeta(ArmorMeta.class, meta -> {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, true);
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-            if (hasClothTrim(player, slot)) {
-                meta.setTrim(new ArmorTrim(getClothTrimMaterial(player, slot), getClothTrimPattern(player, slot)));
-            }
+            if (hasClothTrim(player, slot)) meta.setTrim(new ArmorTrim(getClothTrimMaterial(player, slot), getClothTrimPattern(player, slot)));
         });
         return cloth;
     }
 
     public static @Nullable ItemStack getClothItem(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        String item = PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
-        if (item != null) {
-            return new ItemStack(Objects.requireNonNull(Material.getMaterial(item)));
-        }
+        String item = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
+        if (item != null) return new ItemStack(Objects.requireNonNull(Material.getMaterial(item)));
         return null;
     }
 
     public static void setClothItem(@NotNull Player player, @NotNull Material type) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + type.getEquipmentSlot().name().toLowerCase() + ".item", type.name());
+        CONFIG.set(player.getUniqueId() + ".clothing." + type.getEquipmentSlot().name().toLowerCase() + ".item", type.name());
     }
 
     public static void resetCloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase(), null);
+        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase(), null);
     }
 
     public static Color getClothColor(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        return PLUGIN.getCustomizeConfig().getColor(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color");
+        return CONFIG.getColor(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color");
     }
 
     public static void setClothColor(@NotNull Player player, @NotNull EquipmentSlot slot, Color color) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color", color);
+        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color", color);
     }
 
     public static boolean hasClothTrim(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        return PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim") != null && PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material") != null && PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern") != null;
+        String source = player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim";
+        return CONFIG.getString(source) != null && CONFIG.getString(source + ".material") != null && CONFIG.getString(source + ".pattern") != null;
     }
 
     public static TrimMaterial getClothTrimMaterial(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        return TRIM_MATERIAL.get(Material.getMaterial(Objects.requireNonNull(PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material"))));
+        return TRIM_MATERIAL.get(Material.getMaterial(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material"))));
     }
 
     public static void setClothTrimMaterial(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material", type.name());
+        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material", type.name());
     }
 
     public static TrimPattern getClothTrimPattern(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        return TRIM_PATTERN.get(Objects.requireNonNull(PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern")));
+        return TRIM_PATTERN.get(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern")));
     }
 
     public static void setClothTrimPattern(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern", type.name().substring(0, type.name().length() - 29));
+        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern", type.name().substring(0, type.name().length() - 29));
     }
 
     public static void resetClothTrim(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim", null);
+        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim", null);
     }
 
     public static String getBoat(@NotNull Player player) {
-        return PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".boat");
+        return CONFIG.getString(player.getUniqueId() + ".boat");
     }
 
     public static void setBoat(@NotNull Player player, @NotNull Material type) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".boat", type.name());
+        CONFIG.set(player.getUniqueId() + ".boat", type.name());
     }
 
     public static String getWeapon(@NotNull Player player) {
-        return PLUGIN.getCustomizeConfig().getString(player.getUniqueId() + ".weapon");
+        return CONFIG.getString(player.getUniqueId() + ".weapon");
     }
 
     public static void setWeapon(@NotNull Player player, @NotNull Material type) {
-        PLUGIN.getCustomizeConfig().set(player.getUniqueId() + ".weapon", type.name());
+        CONFIG.set(player.getUniqueId() + ".weapon", type.name());
     }
 }

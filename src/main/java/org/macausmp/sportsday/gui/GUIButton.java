@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.util.SkullTextureUtil;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +48,9 @@ public class GUIButton {
     private static @NotNull ItemStack competitionInfo() {
         ItemStack stack = new ItemStack(Material.GOLD_BLOCK);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.info.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.info.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.info.lore"));
+            lore.add(TextUtil.convert(Component.translatable("gui.info.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_info");
         });
@@ -60,9 +60,9 @@ public class GUIButton {
     private static @NotNull ItemStack playerlist() {
         ItemStack stack = new ItemStack(Material.PAPER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.player_list.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.player_list.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.player_list.lore"));
+            lore.add(TextUtil.convert(Component.translatable("gui.player_list.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_list");
         });
@@ -72,9 +72,9 @@ public class GUIButton {
     private static @NotNull ItemStack startCompetition() {
         @SuppressWarnings("SpellCheckingInspection") ItemStack stack = SkullTextureUtil.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=");
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.start.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.start.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.start.lore"));
+            lore.add(TextUtil.convert(Component.translatable("gui.start.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competitions");
         });
@@ -84,9 +84,9 @@ public class GUIButton {
     private static @NotNull ItemStack endCompetition() {
         ItemStack stack = new ItemStack(Material.RED_CONCRETE);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.end.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.end.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.end.lore"));
+            lore.add(TextUtil.convert(Component.translatable("gui.end.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "end_competition");
         });
@@ -96,9 +96,9 @@ public class GUIButton {
     private static @NotNull ItemStack competitionSettings() {
         ItemStack stack = new ItemStack(Material.REPEATER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.settings.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.settings.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.settings.lore"));
+            lore.add(TextUtil.convert(Component.translatable("gui.settings.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_settings");
         });
@@ -109,7 +109,7 @@ public class GUIButton {
         ItemStack version = new ItemStack(Material.OAK_SIGN);
         version.editMeta(meta -> {
             //noinspection deprecation
-            meta.displayName(Translation.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion())).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion()))));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "version");
         });
         return version;
@@ -118,7 +118,7 @@ public class GUIButton {
     private static @NotNull ItemStack nextPage() {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.page.next"));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.page.next")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "next_page");
         });
         return version;
@@ -127,7 +127,7 @@ public class GUIButton {
     private static @NotNull ItemStack previousPage() {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.page.prev"));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.page.prev")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "prev_page");
         });
         return version;
@@ -136,7 +136,7 @@ public class GUIButton {
     private static @NotNull ItemStack back() {
         ItemStack version = new ItemStack(Material.ARROW);
         version.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.back"));
+            meta.displayName(Component.translatable("gui.back").decoration(TextDecoration.ITALIC, false));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "back");
         });
         return version;
@@ -205,17 +205,8 @@ public class GUIButton {
     private static @NotNull ItemStack clothing() {
         ItemStack stack = new ItemStack(Material.LEATHER_CHESTPLATE);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.clothing.title").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.clothing.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_clothing");
-        });
-        return stack;
-    }
-
-    private static @NotNull ItemStack weapon() {
-        ItemStack stack = new ItemStack(Material.BONE);
-        stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.weapon.title").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_weapon");
         });
         return stack;
     }
@@ -223,8 +214,17 @@ public class GUIButton {
     private static @NotNull ItemStack boat() {
         ItemStack stack = new ItemStack(Material.OAK_BOAT);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.boat.title").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.boat.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_boat");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack weapon() {
+        ItemStack stack = new ItemStack(Material.BONE);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.weapon.title").color(NamedTextColor.YELLOW)));
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_weapon");
         });
         return stack;
     }
@@ -232,7 +232,7 @@ public class GUIButton {
     private static @NotNull ItemStack musickit() {
         ItemStack stack = new ItemStack(Material.JUKEBOX);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.musickit.title").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.musickit.title")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_musickit");
         });
         return stack;

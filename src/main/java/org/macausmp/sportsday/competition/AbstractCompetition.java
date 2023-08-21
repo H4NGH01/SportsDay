@@ -12,13 +12,12 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.macausmp.sportsday.PlayerCustomize;
-import org.macausmp.sportsday.PlayerData;
+import org.macausmp.sportsday.util.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
 import org.macausmp.sportsday.gui.GUIManager;
-import org.macausmp.sportsday.util.ColorTextUtil;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public abstract class AbstractCompetition implements ICompetition {
 
     public AbstractCompetition(String id) {
         this.id = id;
-        this.name = ColorTextUtil.convert(Translation.translatable("competition.name." + id));
+        this.name = TextUtil.convert(Component.translatable("competition.name." + id));
         this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
         this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
@@ -84,9 +83,7 @@ public abstract class AbstractCompetition implements ICompetition {
         players.forEach(data -> {
             Player p = data.getPlayer();
             p.setBedSpawnLocation(location, true);
-            if (!SportsDay.REFEREE.hasPlayer(p)) {
-                p.getInventory().clear();
-            }
+            if (!SportsDay.REFEREE.hasPlayer(p)) p.getInventory().clear();
             p.clearActivePotionEffects();
             p.setFireTicks(0);
             p.teleport(location);
@@ -98,7 +95,7 @@ public abstract class AbstractCompetition implements ICompetition {
             @Override
             public void run() {
                 if (i % 5 == 0 || (i <= 5 && i > 0)) {
-                    Bukkit.getServer().sendActionBar(Translation.translatable("competition.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().sendActionBar(Component.translatable("competition.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER,  1f, 0.5f));
                 }
                 if (i-- == 0) {
@@ -107,17 +104,17 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Translation.translatable("competition.start_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
-        Bukkit.broadcast(Translation.translatable("competition.rule." + id));
+        Bukkit.broadcast(Component.translatable("competition.start_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("competition.rule." + id));
         onSetup();
-        PLUGIN.getComponentLogger().info(Translation.translatable("console.competition.coming").args(name));
+        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").args(name));
     }
 
     @Override
     public void start() {
         setStage(Stage.STARTED);
         onStart();
-        Bukkit.getServer().sendActionBar(Translation.translatable("competition.start"));
+        Bukkit.getServer().sendActionBar(Component.translatable("competition.start"));
         Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
@@ -137,12 +134,15 @@ public abstract class AbstractCompetition implements ICompetition {
                         p.teleport(location);
                         p.setGameMode(GameMode.ADVENTURE);
                     });
-                    Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().clear());
+                    Competitions.getOnlinePlayers().forEach(d -> {
+                        d.getPlayer().getInventory().clear();
+                        PlayerCustomize.suitUp(d.getPlayer());
+                    });
                 }
             }
         }.runTaskLater(PLUGIN, 100L));
-        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Translation.translatable("competition.end"));
-        PLUGIN.getComponentLogger().info(Translation.translatable("console.competition." + (force ? "force_end" : "end")).args(name));
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("competition.end"));
+        PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
     }
 
     /**

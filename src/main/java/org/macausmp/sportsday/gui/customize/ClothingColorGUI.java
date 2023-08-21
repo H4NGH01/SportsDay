@@ -12,11 +12,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class ClothingColorGUI extends AbstractGUI {
     private final Player player;
     private final EquipmentSlot slot;
     public ClothingColorGUI(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        super(27, Translation.translatable("gui.customize.clothing.color.title"));
+        super(27, Component.translatable("gui.customize.clothing.color.title"));
         this.player = player;
         this.slot = slot;
         for (int i = 0; i < 9; i++) {
@@ -49,7 +49,7 @@ public class ClothingColorGUI extends AbstractGUI {
             if (color == null || DyeColor.getByColor(color) == null) return;
             if (dye != null && dye.getType().name().equals(Objects.requireNonNull(DyeColor.getByColor(color)).name() + "_DYE")) {
                 List<Component> lore = new ArrayList<>();
-                lore.add(Translation.translatable("gui.selected"));
+                lore.add(TextUtil.convert(Component.translatable("gui.selected")));
                 dye.lore(lore);
                 dye.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
@@ -58,26 +58,26 @@ public class ClothingColorGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent event, Player player, ItemStack item) {
+    public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
-            new ClothingCustomizeGUI(player).openTo(player);
+            p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             return;
         }
         String s = item.getType().name();
         if (s.endsWith("_DYE")) {
-            PlayerCustomize.setClothColor(player, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
+            PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
         } else if (GUIButton.isSameButton(item, reset())) {
-            PlayerCustomize.setClothColor(player, slot, null);
+            PlayerCustomize.setClothColor(p, slot, null);
         }
         update();
-        PlayerCustomize.suitUp(player);
+        PlayerCustomize.suitUp(p);
     }
 
     private @NotNull ItemStack dye(Material material) {
         ItemStack stack = new ItemStack(material);
         stack.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select"));
+            lore.add(TextUtil.convert(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "dye");
@@ -88,7 +88,7 @@ public class ClothingColorGUI extends AbstractGUI {
     private @NotNull ItemStack reset() {
         ItemStack stack = new ItemStack(Material.BARRIER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.clothing.reset").args(Translation.translatable("gui.customize.clothing.reset_color")));
+            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_color"))));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
         });
         return stack;

@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.util.Translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +16,7 @@ public class UnregisterCommand implements IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {
-            if (!Competitions.leave(p)) {
-                sender.sendMessage(Translation.translatable("player.unregistered_message").color(NamedTextColor.RED));
-            }
+            if (!Competitions.leave(p)) sender.sendMessage(Component.translatable("player.unregistered_message").color(NamedTextColor.RED));
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
         }

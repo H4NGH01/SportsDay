@@ -1,16 +1,16 @@
 package org.macausmp.sportsday.gui.customize;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.Translation;
 
 public class CustomizeMenuGUI extends AbstractGUI {
     public CustomizeMenuGUI() {
-        super(27, Translation.translatable("gui.customize.title"));
+        super(27, Component.translatable("gui.customize.title"));
         getInventory().setItem(10, GUIButton.CLOTHING);
         getInventory().setItem(12, GUIButton.BOAT);
         getInventory().setItem(14, GUIButton.WEAPON);
@@ -22,13 +22,13 @@ public class CustomizeMenuGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent event, Player player, @NotNull ItemStack item) {
+    public void onClick(InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.CLOTHING)) {
-            new ClothingCustomizeGUI(player).openTo(player);
+            p.openInventory(new ClothingCustomizeGUI(p).getInventory());
         } else if (GUIButton.isSameButton(item, GUIButton.BOAT)) {
-            new BoatCustomizeGUI(player).openTo(player);
+            p.openInventory(new BoatCustomizeGUI(p).getInventory());
         } else if (GUIButton.isSameButton(item, GUIButton.WEAPON)) {
-            new WeaponCustomizeGUI(player).openTo(player);
+            p.openInventory(new WeaponCustomizeGUI(p).getInventory());
         }
     }
 }

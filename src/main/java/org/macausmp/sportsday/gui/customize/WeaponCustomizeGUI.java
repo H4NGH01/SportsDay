@@ -9,11 +9,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class WeaponCustomizeGUI extends AbstractGUI {
     private final Player player;
 
     public WeaponCustomizeGUI(Player player) {
-        super(18, Translation.translatable("gui.customize.weapon.title"));
+        super(18, Component.translatable("gui.customize.weapon.title"));
         this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -46,7 +46,7 @@ public class WeaponCustomizeGUI extends AbstractGUI {
             ItemStack weapon2 = getInventory().getItem(i);
             if (weapon2 != null && weapon.equals(weapon2.getType().name())) {
                 List<Component> lore = new ArrayList<>();
-                lore.add(Translation.translatable("gui.selected"));
+                lore.add(TextUtil.convert(Component.translatable("gui.selected")));
                 weapon2.lore(lore);
                 weapon2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
@@ -55,13 +55,13 @@ public class WeaponCustomizeGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent event, Player player, @NotNull ItemStack item) {
+    public void onClick(InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
-            new CustomizeMenuGUI().openTo(player);
+            p.openInventory(new CustomizeMenuGUI().getInventory());
             return;
         }
         if (GUIButton.isSameButton(item, "weapon")) {
-            PlayerCustomize.setWeapon(player, item.getType());
+            PlayerCustomize.setWeapon(p, item.getType());
             update();
         }
     }
@@ -70,7 +70,7 @@ public class WeaponCustomizeGUI extends AbstractGUI {
         ItemStack weapon = new ItemStack(material);
         weapon.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select"));
+            lore.add(TextUtil.convert(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "weapon");
