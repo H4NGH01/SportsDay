@@ -40,17 +40,20 @@ public class GUIButton {
     public static final ItemStack PARKOUR = parkour();
     public static final ItemStack SUMO = sumo();
     public static final ItemStack CLOTHING = clothing();
-    public static final ItemStack BOAT = boat();
-    public static final ItemStack WEAPON = weapon();
+    public static final ItemStack BOAT_TYPE = boat();
+    public static final ItemStack WEAPON_SKIN = weapon();
     public static final ItemStack MUSICKIT = musickit();
+    public static final ItemStack PROJECTILE_TRAIL = projectile();
+    public static final ItemStack WALKING_EFFECT = walking();
+    public static final ItemStack GRAFFITI_SPRAY = graffiti();
     public static final ItemStack BOARD = board();
 
     private static @NotNull ItemStack competitionInfo() {
         ItemStack stack = new ItemStack(Material.GOLD_BLOCK);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.info.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.info.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.info.lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.info.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_info");
         });
@@ -60,9 +63,9 @@ public class GUIButton {
     private static @NotNull ItemStack playerlist() {
         ItemStack stack = new ItemStack(Material.PAPER);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.player_list.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.player_list.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.player_list.lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.player_list.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_list");
         });
@@ -72,9 +75,9 @@ public class GUIButton {
     private static @NotNull ItemStack startCompetition() {
         @SuppressWarnings("SpellCheckingInspection") ItemStack stack = SkullTextureUtil.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=");
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.start.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.start.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.start.lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.start.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competitions");
         });
@@ -84,9 +87,9 @@ public class GUIButton {
     private static @NotNull ItemStack endCompetition() {
         ItemStack stack = new ItemStack(Material.RED_CONCRETE);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.end.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.end.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.end.lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.end.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "end_competition");
         });
@@ -96,9 +99,9 @@ public class GUIButton {
     private static @NotNull ItemStack competitionSettings() {
         ItemStack stack = new ItemStack(Material.REPEATER);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.settings.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.settings.title")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.settings.lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.settings.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_settings");
         });
@@ -109,7 +112,7 @@ public class GUIButton {
         ItemStack version = new ItemStack(Material.OAK_SIGN);
         version.editMeta(meta -> {
             //noinspection deprecation
-            meta.displayName(TextUtil.convert(Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion()))));
+            meta.displayName(TextUtil.text(Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion()))));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "version");
         });
         return version;
@@ -118,7 +121,7 @@ public class GUIButton {
     private static @NotNull ItemStack nextPage() {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.page.next")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.page.next")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "next_page");
         });
         return version;
@@ -127,7 +130,7 @@ public class GUIButton {
     private static @NotNull ItemStack previousPage() {
         ItemStack version = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
         version.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.page.prev")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.page.prev")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "prev_page");
         });
         return version;
@@ -205,7 +208,7 @@ public class GUIButton {
     private static @NotNull ItemStack clothing() {
         ItemStack stack = new ItemStack(Material.LEATHER_CHESTPLATE);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.clothing.title").color(NamedTextColor.YELLOW)));
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.clothing.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_clothing");
         });
         return stack;
@@ -214,7 +217,7 @@ public class GUIButton {
     private static @NotNull ItemStack boat() {
         ItemStack stack = new ItemStack(Material.OAK_BOAT);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.boat.title").color(NamedTextColor.YELLOW)));
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.boat_type.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_boat");
         });
         return stack;
@@ -223,7 +226,7 @@ public class GUIButton {
     private static @NotNull ItemStack weapon() {
         ItemStack stack = new ItemStack(Material.BONE);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.weapon.title").color(NamedTextColor.YELLOW)));
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.weapon_skin.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_weapon");
         });
         return stack;
@@ -232,8 +235,35 @@ public class GUIButton {
     private static @NotNull ItemStack musickit() {
         ItemStack stack = new ItemStack(Material.JUKEBOX);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.customize.musickit.title")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.musickit.title").color(NamedTextColor.YELLOW)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_musickit");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack projectile() {
+        ItemStack stack = new ItemStack(Material.ARROW);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.projectile_trail.title").color(NamedTextColor.YELLOW)));
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_projectile_trail");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack walking() {
+        ItemStack stack = new ItemStack(Material.NETHER_STAR);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.walking_effect.title").color(NamedTextColor.YELLOW)));
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_walking_effect");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack graffiti() {
+        ItemStack stack = new ItemStack(Material.PAINTING);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.graffiti_spray.title").color(NamedTextColor.YELLOW)));
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_graffiti_spray");
         });
         return stack;
     }
@@ -251,6 +281,10 @@ public class GUIButton {
         return stack;
     }
 
+    public static boolean isButton(@NotNull ItemStack button) {
+        return button.hasItemMeta() && button.getItemMeta().getPersistentDataContainer().has(SportsDay.ITEM_ID, PersistentDataType.STRING);
+    }
+
     public static boolean isSameButton(@NotNull ItemStack button, @NotNull ItemStack button2) {
         if (!button.hasItemMeta() || !button2.hasItemMeta()) return false;
         String id1 = button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
@@ -262,9 +296,5 @@ public class GUIButton {
         if (!button.hasItemMeta()) return false;
         String id = button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id, key);
-    }
-
-    public static boolean isButton(@NotNull ItemStack button) {
-        return button.hasItemMeta() && button.getItemMeta().getPersistentDataContainer().has(SportsDay.ITEM_ID, PersistentDataType.STRING);
     }
 }

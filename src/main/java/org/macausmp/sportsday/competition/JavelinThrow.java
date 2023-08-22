@@ -19,8 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerData;
-import org.macausmp.sportsday.util.TextUtil;
+import org.macausmp.sportsday.util.*;
 
 import java.util.*;
 
@@ -59,9 +58,9 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
     private static @NotNull ItemStack trident() {
         ItemStack trident = new ItemStack(Material.TRIDENT);
         trident.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("item.sportsday.javelin")));
+            meta.displayName(TextUtil.text(Component.translatable("item.sportsday.javelin")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("enchantment.sportsday.range").appendSpace().append(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY)));
+            lore.add(TextUtil.text(Component.translatable("enchantment.sportsday.range").args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY)));
             meta.lore(lore);
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -96,6 +95,17 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
                 trident.customName(Component.translatable( "competition.javelin.javelin_name").args(p.displayName()));
+                addRunnable(new BukkitRunnable() {
+                    private final CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(p);
+                    @Override
+                    public void run() {
+                        if (effect == null || trident.isOnGround()) {
+                            cancel();
+                            return;
+                        }
+                        p.spawnParticle(effect.getParticle(), trident.getLocation(), 1, 0.3f, 0.3f, 0.3f, effect.getData());
+                    }
+                }.runTaskTimer(PLUGIN, 0, 1L));
             }
         }
     }
@@ -213,7 +223,7 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
         }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
-    private static class PlayerResult {
+    private static class PlayerResult implements PlayerHandler {
         private final UUID uuid;
         private final Location loc;
         private double distance;
@@ -229,6 +239,16 @@ public class JavelinThrow extends AbstractCompetition implements IRoundGame {
 
         public final double getDistance() {
             return this.distance;
+        }
+
+        @Override
+        public UUID getUUID() {
+            return uuid;
+        }
+
+        @Override
+        public Player getPlayer() {
+            return Bukkit.getOfflinePlayer(uuid).getPlayer();
         }
     }
 }

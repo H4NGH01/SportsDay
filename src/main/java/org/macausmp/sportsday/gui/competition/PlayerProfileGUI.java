@@ -11,11 +11,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -51,11 +51,11 @@ public class PlayerProfileGUI extends AbstractGUI {
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
             Component online = Component.translatable(player.isOnline() ? "player.online" : "player.offline");
-            meta.displayName(TextUtil.convert(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
+            meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.convert(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
         });
         return icon;
@@ -64,9 +64,9 @@ public class PlayerProfileGUI extends AbstractGUI {
     private @NotNull ItemStack unregister(PlayerData data) {
         ItemStack stack = new ItemStack(Material.RED_CONCRETE);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.player.unregister").args(Component.text(data.getName()))).color(NamedTextColor.RED));
+            meta.displayName(TextUtil.text(Component.translatable("gui.player.unregister").args(Component.text(data.getName()))).color(NamedTextColor.RED));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.player.unregister_lore")));
+            lore.add(TextUtil.text(Component.translatable("gui.player.unregister_lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "unregister");
         });

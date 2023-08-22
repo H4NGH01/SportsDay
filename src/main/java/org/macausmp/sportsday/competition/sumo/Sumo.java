@@ -13,11 +13,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerCustomize;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.competition.AbstractCompetition;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IRoundGame;
+import org.macausmp.sportsday.util.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -186,10 +186,10 @@ public class Sumo extends AbstractCompetition implements IRoundGame {
 
     private @NotNull ItemStack weapon(@NotNull Player p) {
         ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
-        String material = PlayerCustomize.getWeapon(p);
-        if (material != null) weapon.setType(Objects.requireNonNull(Material.getMaterial(material)));
+        Material material = PlayerCustomize.getWeaponSkin(p);
+        if (material != null) weapon.setType(material);
         weapon.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("item.sportsday.kb_stick")));
+            meta.displayName(TextUtil.text(Component.translatable("item.sportsday.kb_stick")));
             meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
         });

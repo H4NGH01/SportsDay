@@ -8,9 +8,9 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 import org.macausmp.sportsday.event.PlayerFinishLapEvent;
+import org.macausmp.sportsday.util.PlayerData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

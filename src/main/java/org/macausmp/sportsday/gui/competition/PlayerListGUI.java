@@ -93,13 +93,13 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
             Component online = Component.translatable(player.isOnline() ? "player.online" : "player.offline");
-            meta.displayName(TextUtil.convert(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
+            meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.convert(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
             lore.add(Component.text(""));
-            lore.add(TextUtil.convert(Component.translatable("gui.player_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("gui.player_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });

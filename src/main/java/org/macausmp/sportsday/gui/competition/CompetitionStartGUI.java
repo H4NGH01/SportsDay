@@ -53,7 +53,7 @@ public class CompetitionStartGUI extends AbstractGUI {
     private @NotNull ItemStack start(@NotNull ICompetition competition) {
         @SuppressWarnings("SpellCheckingInspection") ItemStack stack = SkullTextureUtil.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=");
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("gui.start_competition")));
+            meta.displayName(TextUtil.text(Component.translatable("gui.start_competition")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "start_competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
         });

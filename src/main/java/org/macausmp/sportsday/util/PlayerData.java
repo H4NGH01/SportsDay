@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * {@link Player} extra data for the plugin
  */
-public final class PlayerData {
+public final class PlayerData implements PlayerHandler {
     private final UUID uuid;
     private final int number;
     private int score = 0;
@@ -28,6 +28,7 @@ public final class PlayerData {
      * Returns the UUID of the {@link Player}
      * @return {@link Player#getUniqueId()}
      */
+    @Override
     public UUID getUUID() {
         return uuid;
     }
@@ -44,6 +45,7 @@ public final class PlayerData {
      * Returns the {@link Player} of this data
      * @return {@link Player}
      */
+    @Override
     public Player getPlayer() {
         return Bukkit.getOfflinePlayer(uuid).getPlayer();
     }

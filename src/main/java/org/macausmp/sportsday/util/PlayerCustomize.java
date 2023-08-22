@@ -2,8 +2,10 @@ package org.macausmp.sportsday.util;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -76,66 +78,104 @@ public final class PlayerCustomize {
         return cloth;
     }
 
-    public static @Nullable ItemStack getClothItem(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static @Nullable ItemStack getClothItem(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         String item = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
         if (item != null) return new ItemStack(Objects.requireNonNull(Material.getMaterial(item)));
         return null;
     }
 
-    public static void setClothItem(@NotNull Player player, @NotNull Material type) {
+    public static void setClothItem(@NotNull OfflinePlayer player, @NotNull Material type) {
         CONFIG.set(player.getUniqueId() + ".clothing." + type.getEquipmentSlot().name().toLowerCase() + ".item", type.name());
     }
 
-    public static void resetCloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static void resetCloth(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase(), null);
     }
 
-    public static Color getClothColor(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static Color getClothColor(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         return CONFIG.getColor(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color");
     }
 
-    public static void setClothColor(@NotNull Player player, @NotNull EquipmentSlot slot, Color color) {
+    public static void setClothColor(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, Color color) {
         CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color", color);
     }
 
-    public static boolean hasClothTrim(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static boolean hasClothTrim(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         String source = player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim";
         return CONFIG.getString(source) != null && CONFIG.getString(source + ".material") != null && CONFIG.getString(source + ".pattern") != null;
     }
 
-    public static TrimMaterial getClothTrimMaterial(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static TrimMaterial getClothTrimMaterial(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         return TRIM_MATERIAL.get(Material.getMaterial(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material"))));
     }
 
-    public static void setClothTrimMaterial(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
+    public static void setClothTrimMaterial(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, @NotNull Material type) {
         CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material", type.name());
     }
 
-    public static TrimPattern getClothTrimPattern(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static TrimPattern getClothTrimPattern(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         return TRIM_PATTERN.get(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern")));
     }
 
-    public static void setClothTrimPattern(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
+    public static void setClothTrimPattern(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, @NotNull Material type) {
         CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern", type.name().substring(0, type.name().length() - 29));
     }
 
-    public static void resetClothTrim(@NotNull Player player, @NotNull EquipmentSlot slot) {
+    public static void resetClothTrim(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
         CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim", null);
     }
 
-    public static String getBoat(@NotNull Player player) {
-        return CONFIG.getString(player.getUniqueId() + ".boat");
+    public static Boat.@Nullable Type getBoatType(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".boat_type");
+        return source != null ? Boat.Type.valueOf(source) : null;
     }
 
-    public static void setBoat(@NotNull Player player, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".boat", type.name());
+    public static void setBoatType(@NotNull OfflinePlayer player, @NotNull Material type) {
+        CONFIG.set(player.getUniqueId() + ".boat_type", type.name().substring(0, type.name().length() - 5));
     }
 
-    public static String getWeapon(@NotNull Player player) {
-        return CONFIG.getString(player.getUniqueId() + ".weapon");
+    public static @Nullable Material getWeaponSkin(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".weapon_skin");
+        return source != null ? Material.getMaterial(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".weapon_skin"))) : null;
     }
 
-    public static void setWeapon(@NotNull Player player, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".weapon", type.name());
+    public static void setWeaponSkin(@NotNull OfflinePlayer player, @NotNull Material type) {
+        CONFIG.set(player.getUniqueId() + ".weapon_skin", type.name());
+    }
+
+    public static @Nullable CustomizeMusickit getMusickit(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".musickit");
+        return source != null ? CustomizeMusickit.valueOf(source) : null;
+    }
+
+    public static void setMusickit(@NotNull OfflinePlayer player, CustomizeMusickit musickit) {
+        CONFIG.set(player.getUniqueId() + ".musickit", musickit != null ? musickit.name() : null);
+    }
+
+    public static @Nullable CustomizeParticleEffect getProjectileTrail(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".projectile_trail");
+        return source != null ? CustomizeParticleEffect.valueOf(source) : null;
+    }
+
+    public static void setProjectileTrail(@NotNull OfflinePlayer player, CustomizeParticleEffect effect) {
+        CONFIG.set(player.getUniqueId() + ".projectile_trail", effect != null ? effect.name() : null);
+    }
+
+    public static @Nullable CustomizeParticleEffect getWalkingEffect(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".walking_effect");
+        return source != null ? CustomizeParticleEffect.valueOf(source) : null;
+    }
+
+    public static void setWalkingEffect(@NotNull OfflinePlayer player, CustomizeParticleEffect effect) {
+        CONFIG.set(player.getUniqueId() + ".walking_effect", effect != null ? effect.name() : null);
+    }
+
+    public static @Nullable CustomizeGraffitiSpray getGraffitiSpray(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".graffiti_spray");
+        return source != null ? CustomizeGraffitiSpray.valueOf(source) : null;
+    }
+
+    public static void setGraffitiSpray(@NotNull OfflinePlayer player, CustomizeGraffitiSpray graffiti) {
+        CONFIG.set(player.getUniqueId() + ".graffiti_spray", graffiti != null ? graffiti.name() : null);
     }
 }

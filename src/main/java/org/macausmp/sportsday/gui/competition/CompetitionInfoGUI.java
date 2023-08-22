@@ -44,9 +44,9 @@ public class CompetitionInfoGUI extends AbstractGUI {
         ItemStack status = new ItemStack(Material.BEACON);
         status.editMeta(meta -> {
             boolean b = Competitions.getCurrentlyCompetition() != null;
-            meta.displayName(TextUtil.convert(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.translatable("gui.none"))));
+            meta.displayName(TextUtil.text(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.translatable("gui.none"))));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName())));
+            lore.add(TextUtil.text(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName())));
             meta.lore(lore);
         });
         return status;
@@ -55,9 +55,9 @@ public class CompetitionInfoGUI extends AbstractGUI {
     private @NotNull ItemStack player() {
         ItemStack stack = new ItemStack(Material.PAPER);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW))));
+            meta.displayName(TextUtil.text(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW))));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW))));
+            lore.add(TextUtil.text(Component.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW))));
             meta.lore(lore);
         });
         return stack;

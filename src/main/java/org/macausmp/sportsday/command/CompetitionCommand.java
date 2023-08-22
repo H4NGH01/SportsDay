@@ -8,9 +8,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.util.PlayerData;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +117,7 @@ public class CompetitionCommand implements IPluginCommand {
                 case "info" -> {
                     sender.sendMessage(Component.translatable("gui.info.title"));
                     boolean b = Competitions.getCurrentlyCompetition() != null;
-                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.translatable("gui.none")));
+                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : TextUtil.convert(Component.translatable("gui.none"))));
                     if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
                     sender.sendMessage(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();

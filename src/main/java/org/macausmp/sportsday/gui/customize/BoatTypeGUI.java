@@ -2,7 +2,9 @@ package org.macausmp.sportsday.gui.customize;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -10,20 +12,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoatCustomizeGUI extends AbstractGUI {
+public class BoatTypeGUI extends AbstractGUI {
     private final Player player;
 
-    public BoatCustomizeGUI(Player player) {
-        super(18, Component.translatable("gui.customize.boat.title"));
+    public BoatTypeGUI(Player player) {
+        super(18, Component.translatable("gui.customize.boat_type.title"));
         this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -43,28 +45,31 @@ public class BoatCustomizeGUI extends AbstractGUI {
         getInventory().setItem(15, boat(Material.MANGROVE_BOAT));
         getInventory().setItem(16, boat(Material.CHERRY_BOAT));
         if (player == null) return;
-        String boat = PlayerCustomize.getBoat(player);
-        if (boat == null) return;
-        for (int i = 9; i < 17; i++) {
-            ItemStack boat2 = getInventory().getItem(i);
-            if (boat2 != null && boat.equals(boat2.getType().name())) {
+        Boat.Type type = PlayerCustomize.getBoatType(player);
+        if (type == null) return;
+        for (int i = 9; i < getInventory().getSize(); i++) {
+            ItemStack stack = getInventory().getItem(i);
+            if (stack == null) break;
+            if (stack.getType().name().startsWith(type.name())) {
                 List<Component> lore = new ArrayList<>();
-                lore.add(TextUtil.convert(Component.translatable("gui.selected")));
-                boat2.lore(lore);
-                boat2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+                lore.add(TextUtil.text(Component.translatable("gui.selected")));
+                stack.lore(lore);
+                stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
             }
         }
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, Player p, @NotNull ItemStack item) {
+    public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
+            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (isBoat(item.getType())) {
-            PlayerCustomize.setBoat(p, item.getType());
+            PlayerCustomize.setBoatType(p, item.getType());
+            p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
             update();
         }
     }
@@ -73,7 +78,7 @@ public class BoatCustomizeGUI extends AbstractGUI {
         ItemStack boat = new ItemStack(material);
         boat.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.select")));
+            lore.add(TextUtil.text(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "boat");

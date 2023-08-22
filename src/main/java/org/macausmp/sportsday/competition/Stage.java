@@ -14,8 +14,8 @@ public enum Stage {
 
     private final Component name;
 
-    Stage(String name) {
-        this.name = TextUtil.convert(Component.translatable(name));
+    Stage(String code) {
+        this.name = TextUtil.convert(Component.translatable(code));
     }
 
     public Component getName() {

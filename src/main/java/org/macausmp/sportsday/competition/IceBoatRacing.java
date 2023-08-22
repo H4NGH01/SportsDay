@@ -10,9 +10,9 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 import org.macausmp.sportsday.event.PlayerFinishLapEvent;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
@@ -96,8 +96,8 @@ public class IceBoatRacing extends AbstractTrackCompetition {
 
     private @NotNull Boat boat(@NotNull Player p) {
         Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
-        String b = PlayerCustomize.getBoat(p);
-        if (b != null) boat.setBoatType(Boat.Type.valueOf(b.substring(0, b.length() - 5)));
+        Boat.Type type = PlayerCustomize.getBoatType(p);
+        if (type != null) boat.setBoatType(type);
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;

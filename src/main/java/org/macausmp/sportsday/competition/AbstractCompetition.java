@@ -5,18 +5,17 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.TitlePart;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.macausmp.sportsday.util.PlayerCustomize;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.event.CompetitionEndEvent;
 import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.util.CustomizeMusickit;
+import org.macausmp.sportsday.util.PlayerCustomize;
+import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -89,6 +88,7 @@ public abstract class AbstractCompetition implements ICompetition {
             p.teleport(location);
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
+            p.getInventory().setItem(4, CompetitionListener.SPRAY);
         });
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
@@ -138,9 +138,18 @@ public abstract class AbstractCompetition implements ICompetition {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
                     });
+                    getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
+                        if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
+                    });
                 }
             }
         }.runTaskLater(PLUGIN, 100L));
+        OfflinePlayer mvp = Bukkit.getOfflinePlayer(getLeaderboard().get(0).getUUID());
+        Bukkit.getServer().sendActionBar(Component.translatable("MVP: %s").args(Component.text(Objects.requireNonNull(mvp.getName()))).color(NamedTextColor.GOLD));
+        CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
+        if (musickit != null) {
+            Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+        }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("competition.end"));
         PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
     }

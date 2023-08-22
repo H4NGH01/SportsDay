@@ -8,12 +8,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.event.CompetitionSetupEvent;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
+import org.macausmp.sportsday.util.PlayerData;
 
 import java.util.*;
 

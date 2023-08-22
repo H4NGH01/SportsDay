@@ -69,11 +69,11 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     private @NotNull ItemStack status(@NotNull ICompetition competition) {
         ItemStack stack = new ItemStack(competition.isEnable() ? Material.LIME_DYE : Material.BARRIER);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled")));
+            meta.displayName(TextUtil.text(Component.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "status_toggle");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.toggle")));
+            lore.add(TextUtil.text(Component.translatable("gui.toggle")));
             meta.lore(lore);
         });
         return stack;

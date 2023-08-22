@@ -17,11 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompetitionGUICommand implements IPluginCommand {
+    public static final ItemStack OP_BOOK = book();
+
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {
             if (args.length != 0 && args[0].equals("book")) {
-                p.getInventory().addItem(book());
+                p.getInventory().addItem(OP_BOOK);
                 return;
             }
             p.openInventory(GUIManager.MENU_GUI.getInventory());
@@ -30,12 +32,12 @@ public class CompetitionGUICommand implements IPluginCommand {
         }
     }
 
-    public static @NotNull ItemStack book() {
+    private static @NotNull ItemStack book() {
         ItemStack book = new ItemStack(Material.BOOK);
         book.editMeta(meta -> {
-            meta.displayName(TextUtil.convert(Component.translatable("item.op_book")));
+            meta.displayName(TextUtil.text(Component.translatable("item.op_book")));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("item.op_book_lore")));
+            lore.add(TextUtil.text(Component.translatable("item.op_book_lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition_book");
         });

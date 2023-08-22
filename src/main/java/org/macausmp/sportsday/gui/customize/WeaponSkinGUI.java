@@ -2,6 +2,7 @@ package org.macausmp.sportsday.gui.customize;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -9,20 +10,20 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeaponCustomizeGUI extends AbstractGUI {
+public class WeaponSkinGUI extends AbstractGUI {
     private final Player player;
 
-    public WeaponCustomizeGUI(Player player) {
-        super(18, Component.translatable("gui.customize.weapon.title"));
+    public WeaponSkinGUI(Player player) {
+        super(18, Component.translatable("gui.customize.weapon_skin.title"));
         this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -40,28 +41,31 @@ public class WeaponCustomizeGUI extends AbstractGUI {
         getInventory().setItem(13, weapon(Material.DEAD_BUSH));
         getInventory().setItem(14, weapon(Material.COD));
         if (player == null) return;
-        String weapon = PlayerCustomize.getWeapon(player);
+        Material weapon = PlayerCustomize.getWeaponSkin(player);
         if (weapon == null) return;
         for (int i = 9; i < 17; i++) {
-            ItemStack weapon2 = getInventory().getItem(i);
-            if (weapon2 != null && weapon.equals(weapon2.getType().name())) {
+            ItemStack stack = getInventory().getItem(i);
+            if (stack == null) break;
+            if (weapon.equals(stack.getType())) {
                 List<Component> lore = new ArrayList<>();
-                lore.add(TextUtil.convert(Component.translatable("gui.selected")));
-                weapon2.lore(lore);
-                weapon2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+                lore.add(TextUtil.text(Component.translatable("gui.selected")));
+                stack.lore(lore);
+                stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
             }
         }
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, Player p, @NotNull ItemStack item) {
+    public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
+            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (GUIButton.isSameButton(item, "weapon")) {
-            PlayerCustomize.setWeapon(p, item.getType());
+            PlayerCustomize.setWeaponSkin(p, item.getType());
+            p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
             update();
         }
     }
@@ -70,7 +74,7 @@ public class WeaponCustomizeGUI extends AbstractGUI {
         ItemStack weapon = new ItemStack(material);
         weapon.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.convert(Component.translatable("gui.select")));
+            lore.add(TextUtil.text(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "weapon");
