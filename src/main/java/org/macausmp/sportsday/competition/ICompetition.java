@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import org.macausmp.sportsday.util.PlayerHandler;
 
 import java.util.List;
 
@@ -80,5 +81,5 @@ public interface ICompetition extends Listener {
      * Get the leaderboard of competition
      * @return leaderboard of competition
      */
-    List<?> getLeaderboard();
+    List<? extends PlayerHandler> getLeaderboard();
 }

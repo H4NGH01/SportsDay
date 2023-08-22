@@ -1,7 +1,9 @@
 package org.macausmp.sportsday.gui;
 
 /**
- * Represents a pageable plugin gui
+ * Represents a pageable plugin gui.
+ * <p>
+ * Pageable gui must not be registered as a constant gui
  */
 public interface IPageableGUI extends IPluginGUI {
     /**

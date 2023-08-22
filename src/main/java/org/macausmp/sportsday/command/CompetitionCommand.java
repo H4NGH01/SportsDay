@@ -8,10 +8,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerData;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ICompetition;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.PlayerData;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ public class CompetitionCommand implements IPluginCommand {
                                 try {
                                     number = Integer.parseInt(args[2]);
                                     if (number < 0) {
-                                        sender.sendMessage(Translation.translatable("argument.register.negative").color(NamedTextColor.RED));
+                                        sender.sendMessage(Component.translatable("argument.register.negative").color(NamedTextColor.RED));
                                         return;
                                     }
                                 } catch (Exception e) {
@@ -55,9 +55,9 @@ public class CompetitionCommand implements IPluginCommand {
                             } else {
                                 number = Competitions.genNumber();
                             }
-                            sender.sendMessage(Competitions.join(p, number) ? Translation.translatable("player.register_success").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Translation.translatable("player.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
+                            sender.sendMessage(Competitions.join(p, number) ? Component.translatable("player.register_success").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Component.translatable("player.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
                         } else {
-                            sender.sendMessage(Translation.translatable("player.registered").args(p.displayName()).color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("player.registered").args(p.displayName()).color(NamedTextColor.RED));
                         }
                     } else {
                         sender.sendMessage(Component.text("/competition join <player>"));
@@ -70,11 +70,11 @@ public class CompetitionCommand implements IPluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        sender.sendMessage(Competitions.leave(p) ? Translation.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Translation.translatable("player.unregistered").args(Component.text(p.getName())).color(NamedTextColor.RED));
+                        sender.sendMessage(Competitions.leave(p) ? Component.translatable("player.leave").args(Component.text(p.getName())).color(NamedTextColor.GREEN) : Component.translatable("player.unregistered").args(Component.text(p.getName())).color(NamedTextColor.RED));
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p)) {
-                                sender.sendMessage(Translation.translatable("player.unregistered_message").color(NamedTextColor.RED));
+                                sender.sendMessage(Component.translatable("player.unregistered_message").color(NamedTextColor.RED));
                             }
                             return;
                         }
@@ -90,14 +90,14 @@ public class CompetitionCommand implements IPluginCommand {
                         }
                         if (Competitions.containPlayer(p)) {
                             if (args.length == 2) {
-                                sender.sendMessage(Translation.translatable("score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
+                                sender.sendMessage(Component.translatable("score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
                                 return;
                             }
                             int score;
                             try {
                                 score = Integer.parseInt(args[2]);
                                 if (score < 0) {
-                                    sender.sendMessage(Translation.translatable("argument.score.negative"));
+                                    sender.sendMessage(Component.translatable("argument.score.negative"));
                                     return;
                                 }
                             } catch (Exception e) {
@@ -106,35 +106,30 @@ public class CompetitionCommand implements IPluginCommand {
                             }
                             PlayerData data = Competitions.getPlayerData(p.getUniqueId());
                             data.setScore(score);
-                            sender.sendMessage(Translation.translatable("score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
+                            sender.sendMessage(Component.translatable("score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
                         } else {
-                            sender.sendMessage(Translation.translatable("player.unregistered").args(Component.text(p.getName())));
+                            sender.sendMessage(Component.translatable("player.unregistered").args(Component.text(p.getName())));
                         }
                     } else {
                         sender.sendMessage(Component.text("/competition score <player> <new_score>"));
                     }
                 }
                 case "info" -> {
-                    sender.sendMessage(Translation.translatable("gui.info.title"));
+                    sender.sendMessage(Component.translatable("gui.info.title"));
                     boolean b = Competitions.getCurrentlyCompetition() != null;
-                    sender.sendMessage(Translation.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Translation.translatable("gui.none")));
-                    if (b) {
-                        sender.sendMessage(Translation.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
-                    }
-                    sender.sendMessage(Translation.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
+                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : TextUtil.convert(Component.translatable("gui.none"))));
+                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
+                    sender.sendMessage(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
                     Competitions.getPlayerData().forEach(d -> pl.add(d.getName()));
-                    sender.sendMessage(Translation.translatable("competition.players_name").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
+                    sender.sendMessage(Component.translatable("competition.players_name").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
                     for (ICompetition c : Competitions.COMPETITIONS) {
-                        if (c.isEnable()) {
-                            cl.add(c.getID().toUpperCase());
-                        }
+                        if (c.isEnable()) cl.add(c.getID().toUpperCase());
                     }
-                    sender.sendMessage(Translation.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
+                    sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
                 }
-                default ->
-                        sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
+                default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.text("/competition (start|end|join|leave|score|info) <argument>"));
@@ -159,15 +154,11 @@ public class CompetitionCommand implements IPluginCommand {
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "start" -> Competitions.COMPETITIONS.forEach(c -> {
-                    if (c.isEnable()) {
-                        l.add(c.getID());
-                    }
+                    if (c.isEnable()) l.add(c.getID());
                 });
                 case "join" -> {
                     for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (!Competitions.containPlayer(p)) {
-                            l.add(p.getName());
-                        }
+                        if (!Competitions.containPlayer(p)) l.add(p.getName());
                     }
                 }
                 case "leave", "score" -> Competitions.getPlayerData().forEach(d -> l.add(d.getName()));

@@ -39,8 +39,7 @@ public class Parkour extends AbstractTrackCompetition {
 
     @EventHandler
     public void onFinished(@NotNull PlayerFinishCompetitionEvent e) {
-        if (e.getCompetition() != this) return;
-        e.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
+        if (e.getCompetition() == this) e.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 
     @EventHandler

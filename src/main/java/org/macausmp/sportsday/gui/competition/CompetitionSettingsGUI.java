@@ -15,14 +15,14 @@ import org.macausmp.sportsday.competition.ICompetition;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.GUIManager;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CompetitionSettingsGUI extends AbstractGUI {
     public CompetitionSettingsGUI() {
-        super(54, Translation.translatable("gui.settings.title"));
+        super(54, Component.translatable("gui.settings.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -51,13 +51,13 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
         if (GUIButton.isSameButton(item, "status_toggle")) {
             for (ICompetition competition : Competitions.COMPETITIONS) {
                 if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
-                    plugin.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
-                    plugin.saveConfig();
+                    PLUGIN.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
+                    PLUGIN.saveConfig();
                     GUIManager.COMPETITION_SETTINGS_GUI.update();
                     p.playSound(p, competition.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     return;
@@ -69,11 +69,11 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     private @NotNull ItemStack status(@NotNull ICompetition competition) {
         ItemStack stack = new ItemStack(competition.isEnable() ? Material.LIME_DYE : Material.BARRIER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled"));
+            meta.displayName(TextUtil.text(Component.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "status_toggle");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.toggle"));
+            lore.add(TextUtil.text(Component.translatable("gui.toggle")));
             meta.lore(lore);
         });
         return stack;

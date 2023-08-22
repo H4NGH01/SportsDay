@@ -15,8 +15,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.gui.*;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.IPageableGUI;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +26,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
+    private static final List<PlayerListGUI> GUIS = new ArrayList<>();
     private int page = 0;
 
     public PlayerListGUI() {
-        super(54, Translation.translatable("gui.player_list.title"));
+        super(54, Component.translatable("gui.player_list.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -40,6 +43,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
         getInventory().setItem(13, pages());
         getInventory().setItem(17, GUIButton.NEXT_PAGE);
+        GUIS.add(this);
     }
 
     @Override
@@ -49,35 +53,32 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             getInventory().setItem(i, null);
         }
         for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getPlayerData().size()) {
-                break;
-            }
+            if (i >= Competitions.getPlayerData().size()) break;
             getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerData().get(i + getPage() * getSize()).getUUID()));
         }
     }
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
-        PlayerListGUI gui = (PlayerListGUI) GUIManager.GUI_MAP.get(p);
-        if (GUIButton.isSameButton(item, "player_icon")) {
-            SkullMeta meta = (SkullMeta) item.getItemMeta();
-            new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).openTo(p);
-            return;
-        }
-        if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
-            p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
-            gui.nextPage();
-        } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
-            p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
-            gui.previousPage();
+        if (event.getInventory().getHolder() instanceof PlayerListGUI gui) {
+            if (GUIButton.isSameButton(item, "player_icon")) {
+                SkullMeta meta = (SkullMeta) item.getItemMeta();
+                p.openInventory(new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
+                return;
+            }
+            if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
+                p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+                gui.nextPage();
+            } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
+                p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+                gui.previousPage();
+            }
         }
     }
 
     public static void updateGUI() {
-        for (IPluginGUI gui : GUIManager.GUI_MAP.values()) {
-            if (gui instanceof PlayerListGUI) {
-                gui.update();
-            }
+        for (PlayerListGUI gui : GUIS) {
+            gui.update();
         }
     }
 
@@ -91,14 +92,14 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            Component online = Translation.translatable("player." + (player.isOnline() ? "online" : "offline"));
-            meta.displayName(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online).decoration(TextDecoration.ITALIC, false));
+            Component online = Component.translatable(player.isOnline() ? "player.online" : "player.offline");
+            meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
-            lore.add(Translation.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
             lore.add(Component.text(""));
-            lore.add(Translation.translatable("gui.player_profile.detail").args(Component.text(player.getName())).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("gui.player_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });

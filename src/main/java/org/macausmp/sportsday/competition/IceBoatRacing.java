@@ -10,9 +10,9 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.PlayerCustomize;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 import org.macausmp.sportsday.event.PlayerFinishLapEvent;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
@@ -49,9 +49,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
             super.onEvent(event);
             Location loc = player.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
-            if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) {
-                boatMap.get(player).setVelocity(new Vector(0f, 1.3f, 0f));
-            }
+            if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) boatMap.get(player).setVelocity(new Vector(0f, 1.3f, 0f));
         }
     }
 
@@ -75,8 +73,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || !Competitions.containPlayer(p)) return;
-            e.setCancelled(true);
+            if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) e.setCancelled(true);
         }
     }
 
@@ -84,8 +81,7 @@ public class IceBoatRacing extends AbstractTrackCompetition {
     public void onMount(EntityMountEvent e) {
         if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || !Competitions.containPlayer(p)) return;
-            boatMap.put(p, b);
+            if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) boatMap.put(p, b);
         }
     }
 
@@ -100,10 +96,8 @@ public class IceBoatRacing extends AbstractTrackCompetition {
 
     private @NotNull Boat boat(@NotNull Player p) {
         Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
-        String b = PlayerCustomize.getBoat(p);
-        if (b != null) {
-            boat.setBoatType(Boat.Type.valueOf(b.substring(0, b.length() - 5)));
-        }
+        Boat.Type type = PlayerCustomize.getBoatType(p);
+        if (type != null) boat.setBoatType(type);
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;

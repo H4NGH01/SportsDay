@@ -16,7 +16,7 @@ public class CustomizeCommand implements IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {
-            new CustomizeMenuGUI().openTo(p);
+            p.openInventory(new CustomizeMenuGUI().getInventory());
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
         }

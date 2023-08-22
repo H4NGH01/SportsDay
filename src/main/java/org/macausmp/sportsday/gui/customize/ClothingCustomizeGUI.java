@@ -3,6 +3,7 @@ package org.macausmp.sportsday.gui.customize;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -14,11 +15,11 @@ import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.macausmp.sportsday.PlayerCustomize;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.PlayerCustomize;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,16 +31,16 @@ public class ClothingCustomizeGUI extends AbstractGUI {
     private final Player player;
 
     public ClothingCustomizeGUI(Player player) {
-        super(45, Translation.translatable("gui.customize.clothing.title"));
+        super(45, Component.translatable("gui.customize.clothing.title"));
         this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
-        getInventory().setItem(17, reset(EquipmentSlot.HEAD));
-        getInventory().setItem(26, reset(EquipmentSlot.CHEST));
-        getInventory().setItem(35, reset(EquipmentSlot.LEGS));
-        getInventory().setItem(44, reset(EquipmentSlot.FEET));
+        getInventory().setItem(17, reset("gui.customize.clothing.head"));
+        getInventory().setItem(26, reset("gui.customize.clothing.chest"));
+        getInventory().setItem(35, reset("gui.customize.clothing.legs"));
+        getInventory().setItem(44, reset("gui.customize.clothing.feet"));
         update();
     }
 
@@ -58,46 +59,46 @@ public class ClothingCustomizeGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent event, @NotNull Player player, @NotNull ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (GUIButton.isSameButton(item, GUIButton.BACK)) {
-            new CustomizeMenuGUI().openTo(player);
+            p.openInventory(new CustomizeMenuGUI().getInventory());
+            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (item.getType().getEquipmentSlot().isArmor()) {
             if (GUIButton.isSameButton(item, "select_cloth")) {
-                if (event.isLeftClick()) {
-                    PlayerCustomize.setClothItem(player, item.getType());
-                } else if (event.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
-                    new ClothingColorGUI(player, item.getType().getEquipmentSlot()).openTo(player);
+                if (e.isLeftClick()) {
+                    PlayerCustomize.setClothItem(p, item.getType());
+                } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
+                    p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
                     return;
                 }
-            } else if (GUIButton.isSameButton(item, "cloth") && event.isRightClick()) {
-                new ClothingTrimGUI(player, item.getType().getEquipmentSlot()).openTo(player);
+            } else if (GUIButton.isSameButton(item, "cloth") && e.isRightClick()) {
+                p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
+            } else {
+                return;
             }
         } else {
-            switch (event.getSlot()) {
-                case 17 -> PlayerCustomize.resetCloth(player, EquipmentSlot.HEAD);
-                case 26 -> PlayerCustomize.resetCloth(player, EquipmentSlot.CHEST);
-                case 35 -> PlayerCustomize.resetCloth(player, EquipmentSlot.LEGS);
-                case 44 -> PlayerCustomize.resetCloth(player, EquipmentSlot.FEET);
+            switch (e.getSlot()) {
+                case 17 -> PlayerCustomize.resetCloth(p, EquipmentSlot.HEAD);
+                case 26 -> PlayerCustomize.resetCloth(p, EquipmentSlot.CHEST);
+                case 35 -> PlayerCustomize.resetCloth(p, EquipmentSlot.LEGS);
+                case 44 -> PlayerCustomize.resetCloth(p, EquipmentSlot.FEET);
             }
         }
+        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
         update();
-        PlayerCustomize.suitUp(player);
+        PlayerCustomize.suitUp(p);
     }
 
     private @Nullable ItemStack present(@NotNull EquipmentSlot slot) {
         ItemStack cloth = PlayerCustomize.getClothItem(player, slot);
-        if (cloth == null) {
-            return null;
-        }
+        if (cloth == null) return null;
         cloth.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.customize.clothing.trim.lore"));
+            lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.trim.lore")));
             meta.lore(lore);
-            if (PlayerCustomize.hasClothTrim(player, slot)) {
-                meta.setTrim(new ArmorTrim(PlayerCustomize.getClothTrimMaterial(player, slot), PlayerCustomize.getClothTrimPattern(player, slot)));
-            }
+            if (PlayerCustomize.hasClothTrim(player, slot)) meta.setTrim(new ArmorTrim(PlayerCustomize.getClothTrimMaterial(player, slot), PlayerCustomize.getClothTrimPattern(player, slot)));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "cloth");
         });
         if (cloth.getItemMeta() instanceof ColorableArmorMeta) {
@@ -113,10 +114,8 @@ public class ClothingCustomizeGUI extends AbstractGUI {
         ItemStack cloth = new ItemStack(material);
         cloth.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
-            lore.add(Translation.translatable("gui.select"));
-            if (cloth.getItemMeta() instanceof ColorableArmorMeta) {
-                lore.add(Translation.translatable("gui.customize.clothing.color.lore"));
-            }
+            lore.add(TextUtil.text(Component.translatable("gui.select")));
+            if (cloth.getItemMeta() instanceof ColorableArmorMeta) lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "select_cloth");
@@ -130,10 +129,10 @@ public class ClothingCustomizeGUI extends AbstractGUI {
         return cloth;
     }
 
-    private @NotNull ItemStack reset(EquipmentSlot slot) {
+    private @NotNull ItemStack reset(String slot) {
         ItemStack stack = new ItemStack(Material.BARRIER);
         stack.editMeta(meta -> {
-            meta.displayName(Translation.translatable("gui.customize.clothing.reset").args(Translation.translatable("gui.customize.clothing." + slot.name().toLowerCase())));
+            meta.displayName(TextUtil.text(Component.translatable("gui.customize.clothing.reset").args(Component.translatable(slot))));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
         });
         return stack;

@@ -1,22 +1,21 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
-import org.macausmp.sportsday.util.ColorTextUtil;
-import org.macausmp.sportsday.util.Translation;
+import org.macausmp.sportsday.util.TextUtil;
 
 /**
  * Represents the competition stage
  */
 public enum Stage {
-    IDLE,
-    COMING,
-    STARTED,
-    ENDED;
+    IDLE("competition.status.idle"),
+    COMING("competition.status.coming"),
+    STARTED("competition.status.started"),
+    ENDED("competition.status.ended");
 
     private final Component name;
 
-    Stage() {
-        this.name = ColorTextUtil.convert(Translation.translatable("competition.status." + name().toLowerCase()));
+    Stage(String code) {
+        this.name = TextUtil.convert(Component.translatable(code));
     }
 
     public Component getName() {

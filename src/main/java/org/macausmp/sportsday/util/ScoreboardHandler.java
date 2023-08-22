@@ -1,13 +1,14 @@
-package org.macausmp.sportsday;
+package org.macausmp.sportsday.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.util.Translation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,16 +24,16 @@ public class ScoreboardHandler {
             @Override
             public void run() {
                 Scoreboard scoreboard = plugin.getServer().getScoreboardManager().getNewScoreboard();
-                Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.text(Translation.translate("scoreboard.title")).color(NamedTextColor.GOLD));
+                Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.translatable("scoreboard.title").color(NamedTextColor.GOLD));
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
-                Entry comp = new Entry(o, "competition");
-                Entry stage = new Entry(o, "stage");
-                Entry count = new Entry(o, "player_count").setScore(8);
-                Entry number = new Entry(o, "number");
-                Entry score = new Entry(o, "score");
+                Entry comp = new Entry(o, "competition", "scoreboard.competition");
+                Entry stage = new Entry(o, "stage", "scoreboard.stage");
+                Entry count = new Entry(o, "player_count", "scoreboard.player_count").setScore(8);
+                Entry number = new Entry(o, "number", "scoreboard.number");
+                Entry score = new Entry(o, "score", "scoreboard.score");
                 newline(o).setScore(5);
-                Entry time = new Entry(o, "time").setScore(4);
-                Entry ping = new Entry(o, "ping").setScore(3);
+                Entry time = new Entry(o, "time", "scoreboard.time").setScore(4);
+                Entry ping = new Entry(o, "ping", "scoreboard.ping").setScore(3);
                 newline(o).setScore(2);
                 o.getScore(Objects.requireNonNull(plugin.getConfig().getString("server_ip"))).setScore(1);
                 new BukkitRunnable() {
@@ -82,10 +83,10 @@ public class ScoreboardHandler {
         protected final Team team;
         protected final String entry;
 
-        protected Entry(@NotNull Objective objective, String entry) {
+        protected Entry(@NotNull Objective objective, String entry, String code) {
             this.objective = objective;
             this.team = Objects.requireNonNull(objective.getScoreboard()).registerNewTeam(entry);
-            this.entry = Translation.translate("scoreboard." + entry);
+            this.entry = LegacyComponentSerializer.legacySection().serialize(Component.translatable(code));
             this.team.addEntry(this.entry);
         }
 
