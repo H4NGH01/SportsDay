@@ -3,17 +3,17 @@ package org.macausmp.sportsday.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.IEvent;
 
 public class CompetitionSetupEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final ICompetition competition;
+    private final IEvent competition;
 
-    public CompetitionSetupEvent(ICompetition competition) {
+    public CompetitionSetupEvent(IEvent competition) {
         this.competition = competition;
     }
 
-    public ICompetition getCompetition() {
+    public IEvent getCompetition() {
         return competition;
     }
 

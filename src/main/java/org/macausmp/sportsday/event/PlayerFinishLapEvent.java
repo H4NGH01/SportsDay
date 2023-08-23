@@ -4,18 +4,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.ITrackCompetition;
+import org.macausmp.sportsday.competition.ITrackEvent;
 
 public class PlayerFinishLapEvent extends PlayerEvent {
     private static final HandlerList handlers = new HandlerList();
-    private final ITrackCompetition competition;
+    private final ITrackEvent competition;
 
-    public PlayerFinishLapEvent(@NotNull Player who, ITrackCompetition competition) {
+    public PlayerFinishLapEvent(@NotNull Player who, ITrackEvent competition) {
         super(who);
         this.competition = competition;
     }
 
-    public ITrackCompetition getCompetition() {
+    public ITrackEvent getCompetition() {
         return competition;
     }
 

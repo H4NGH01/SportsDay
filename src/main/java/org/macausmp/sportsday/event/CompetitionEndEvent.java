@@ -3,14 +3,14 @@ package org.macausmp.sportsday.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.IEvent;
 
 public class CompetitionEndEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final ICompetition competition;
+    private final IEvent competition;
     private final boolean force;
 
-    public CompetitionEndEvent(ICompetition competition, boolean force) {
+    public CompetitionEndEvent(IEvent competition, boolean force) {
         this.competition = competition;
         this.force = force;
     }
@@ -19,7 +19,7 @@ public class CompetitionEndEvent extends Event {
         return force;
     }
 
-    public ICompetition getCompetition() {
+    public IEvent getCompetition() {
         return competition;
     }
 

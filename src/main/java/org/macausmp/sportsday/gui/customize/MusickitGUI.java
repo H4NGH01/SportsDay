@@ -51,6 +51,7 @@ public class MusickitGUI extends AbstractGUI {
             String key = stack.getItemMeta().getPersistentDataContainer().get(MUSICKIT, PersistentDataType.STRING);
             if (key != null && key.equals(musickit.name())) {
                 List<Component> lore = new ArrayList<>();
+                lore.add(TextUtil.text(Component.translatable("gui.customize.musickit.view")));
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));
                 stack.lore(lore);
                 stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
@@ -67,7 +68,14 @@ public class MusickitGUI extends AbstractGUI {
             return;
         }
         if (GUIButton.isSameButton(item, "musickit")) {
-            PlayerCustomize.setMusickit(p, CustomizeMusickit.values()[e.getSlot() - START_INDEX]);
+            CustomizeMusickit musickit = CustomizeMusickit.values()[e.getSlot() - START_INDEX];
+            if (e.isRightClick()) {
+                p.stopAllSounds();
+                p.playSound(net.kyori.adventure.sound.Sound.sound(musickit.getKey(), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
+                return;
+            } else {
+                PlayerCustomize.setMusickit(p, musickit);
+            }
         } else if (GUIButton.isSameButton(item, reset())) {
             PlayerCustomize.setMusickit(p, null);
         }
@@ -80,6 +88,7 @@ public class MusickitGUI extends AbstractGUI {
         stack.editMeta(meta -> {
             meta.displayName(musickit.getName());
             List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("gui.customize.musickit.view")));
             lore.add(TextUtil.text(Component.translatable("gui.select")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

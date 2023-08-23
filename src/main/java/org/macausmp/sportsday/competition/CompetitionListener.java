@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.competition;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -41,19 +42,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class CompetitionListener implements Listener {
+public final class CompetitionListener implements Listener {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final List<UUID> SPAWNPOINT_LIST = new ArrayList<>();
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
-    public static final ItemStack SPRAY = spray();
     public static final NamespacedKey GRAFFITI = Objects.requireNonNull(NamespacedKey.fromString("graffiti_frame", PLUGIN));
+    public static final ItemStack SPRAY = spray();
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        PlayerCustomize.suitUp(p);
         p.getInventory().setItem(4, SPRAY);
-        ICompetition current = Competitions.getCurrentlyCompetition();
+        IEvent current = Competitions.getCurrentlyCompetition();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
@@ -67,7 +69,7 @@ public class CompetitionListener implements Listener {
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        ICompetition current = Competitions.getCurrentlyCompetition();
+        IEvent current = Competitions.getCurrentlyCompetition();
         if (current == null || current.getStage() != Stage.STARTED) return;
         current.onEvent(e);
     }
@@ -81,7 +83,7 @@ public class CompetitionListener implements Listener {
             loc.setY(loc.y() + 0.3);
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
-        ICompetition current = Competitions.getCurrentlyCompetition();
+        IEvent current = Competitions.getCurrentlyCompetition();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p) || !p.getGameMode().equals(GameMode.ADVENTURE)) return;
         current.onEvent(e);
@@ -103,7 +105,7 @@ public class CompetitionListener implements Listener {
     @EventHandler
     public void onHit(@NotNull EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
-            ICompetition current = Competitions.getCurrentlyCompetition();
+            IEvent current = Competitions.getCurrentlyCompetition();
             if (current != null && current == Competitions.SUMO) {
                 SumoRound sumo = ((Sumo) current).getSumoStage().getCurrentRound();
                 if (sumo != null && sumo.getStatus() == SumoRound.RoundStatus.STARTED && sumo.containPlayer(player) && sumo.containPlayer(damager)) {
@@ -120,7 +122,7 @@ public class CompetitionListener implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            ICompetition current = Competitions.getCurrentlyCompetition();
+            IEvent current = Competitions.getCurrentlyCompetition();
             if (current == null || !Competitions.containPlayer(player) || current.getStage() == Stage.STARTED) return;
             e.setCancelled(true);
         }
@@ -146,20 +148,36 @@ public class CompetitionListener implements Listener {
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
                 p.openInventory(new GraffitiSprayGUI(p).getInventory());
             } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                if (p.getCooldown(SPRAY.getType()) > 0 && !p.isOp()) {
+                    p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
+                    return;
+                }
                 CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
                 if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
                 Block b = p.getTargetBlockExact(4);
                 BlockFace f = p.getTargetBlockFace(4);
-                if (b != null && b.isSolid() && f != null) {
+                if (b != null && b.getType().isOccluding() && f != null) {
                     Location loc = b.getLocation().add(f.getDirection());
-                    ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
                     ItemStack map = new ItemStack(Material.FILLED_MAP);
                     map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-                    frame.setVisible(false);
-                    frame.setInvulnerable(true);
-                    frame.setFixed(true);
-                    frame.setItem(map);
-                    frame.getPersistentDataContainer().set(GRAFFITI, PersistentDataType.BOOLEAN, true);
+                    Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), p);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            if (!p.isOp()) p.setCooldown(SPRAY.getType(), 600);
+                            ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
+                            // Remove item frame that should not appear in an illegal position
+                            if (!frame.getLocation().add(frame.getFacing().getOppositeFace().getDirection()).getBlock().getType().isOccluding()) {
+                                frame.remove();
+                                return;
+                            }
+                            frame.setVisible(false);
+                            frame.setInvulnerable(true);
+                            frame.setFixed(true);
+                            frame.setItem(map, false);
+                            frame.getPersistentDataContainer().set(GRAFFITI, PersistentDataType.BOOLEAN, true);
+                        }
+                    }.runTaskLater(PLUGIN, 30L);
                 }
             }
         }
@@ -172,11 +190,22 @@ public class CompetitionListener implements Listener {
             if (!frame.getPersistentDataContainer().has(GRAFFITI)) return;
             e.setCancelled(true);
             Player p = e.getPlayer();
+            if (p.getCooldown(SPRAY.getType()) > 0 && !p.isOp()) {
+                p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
+                return;
+            }
             CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
             if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
             ItemStack map = new ItemStack(Material.FILLED_MAP);
             map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-            frame.setItem(map);
+            Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), p);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (!p.isOp()) p.setCooldown(SPRAY.getType(), 600);
+                    frame.setItem(map, false);
+                }
+            }.runTaskLater(PLUGIN, 30L);
         }
     }
 
@@ -198,6 +227,10 @@ public class CompetitionListener implements Listener {
                 int i = 0;
                 @Override
                 public void run() {
+                    if (!p.isOnline()) {
+                        cancel();
+                        return;
+                    }
                     if (i >= 3 && i < 10) {
                         p.spawnParticle(Particle.BLOCK_CRACK, p.getLocation(), 20, 0.2, 0.5, 0.2, Material.REDSTONE_BLOCK.createBlockData());
                     }

@@ -1,5 +1,5 @@
 package org.macausmp.sportsday.competition;
 
-public interface ITrackCompetition extends ICompetition {
+public interface ITrackEvent extends IEvent {
     int getMaxLaps();
 }

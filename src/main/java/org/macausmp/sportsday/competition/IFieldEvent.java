@@ -1,6 +1,6 @@
 package org.macausmp.sportsday.competition;
 
-public interface IRoundGame extends ICompetition {
+public interface IFieldEvent extends IEvent {
     void onRoundStart();
 
     void onRoundEnd();

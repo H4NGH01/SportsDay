@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.jetbrains.annotations.NotNull;
 
-public class ElytraRacing extends AbstractTrackCompetition {
+public class ElytraRacing extends AbstractTrackEvent {
     public ElytraRacing() {
         super("elytra_racing");
     }
@@ -33,7 +33,7 @@ public class ElytraRacing extends AbstractTrackCompetition {
         ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
         firework.setAmount(64);
         firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
-        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.HAND, firework));
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(0, firework));
     }
 
     @Override

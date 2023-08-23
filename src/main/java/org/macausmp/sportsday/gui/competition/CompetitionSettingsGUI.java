@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.GUIManager;
@@ -54,7 +54,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
         if (GUIButton.isSameButton(item, "status_toggle")) {
-            for (ICompetition competition : Competitions.COMPETITIONS) {
+            for (IEvent competition : Competitions.COMPETITIONS) {
                 if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
                     PLUGIN.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
                     PLUGIN.saveConfig();
@@ -66,7 +66,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         }
     }
 
-    private @NotNull ItemStack status(@NotNull ICompetition competition) {
+    private @NotNull ItemStack status(@NotNull IEvent competition) {
         ItemStack stack = new ItemStack(competition.isEnable() ? Material.LIME_DYE : Material.BARRIER);
         stack.editMeta(meta -> {
             meta.displayName(TextUtil.text(Component.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled")));

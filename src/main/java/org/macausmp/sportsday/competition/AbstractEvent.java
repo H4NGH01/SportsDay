@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractCompetition implements ICompetition {
+public abstract class AbstractEvent implements IEvent {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
-    private static final List<BukkitTask> COMPETITION_TASKS = new ArrayList<>();
+    private static final List<BukkitTask> EVENT_TASKS = new ArrayList<>();
     private final String id;
     private final Component name;
     private final int least;
@@ -33,9 +33,9 @@ public abstract class AbstractCompetition implements ICompetition {
     private Stage stage = Stage.IDLE;
     private final List<PlayerData> players = new ArrayList<>();
 
-    public AbstractCompetition(String id) {
+    public AbstractEvent(String id) {
         this.id = id;
-        this.name = TextUtil.convert(Component.translatable("competition.name." + id));
+        this.name = TextUtil.convert(Component.translatable("event.name." + id));
         this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
         this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
@@ -73,8 +73,8 @@ public abstract class AbstractCompetition implements ICompetition {
 
     @Override
     public void setup() {
-        COMPETITION_TASKS.forEach(BukkitTask::cancel);
-        COMPETITION_TASKS.clear();
+        EVENT_TASKS.forEach(BukkitTask::cancel);
+        EVENT_TASKS.clear();
         players.clear();
         getLeaderboard().clear();
         setStage(Stage.COMING);
@@ -95,7 +95,7 @@ public abstract class AbstractCompetition implements ICompetition {
             @Override
             public void run() {
                 if (i % 5 == 0 || (i <= 5 && i > 0)) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("competition.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER,  1f, 0.5f));
                 }
                 if (i-- == 0) {
@@ -104,8 +104,8 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Component.translatable("competition.start_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
-        Bukkit.broadcast(Component.translatable("competition.rule." + id));
+        Bukkit.broadcast(Component.translatable("event.ready_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.rule." + id));
         onSetup();
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").args(name));
     }
@@ -114,7 +114,7 @@ public abstract class AbstractCompetition implements ICompetition {
     public void start() {
         setStage(Stage.STARTED);
         onStart();
-        Bukkit.getServer().sendActionBar(Component.translatable("competition.start"));
+        Bukkit.getServer().sendActionBar(Component.translatable("event.start_message"));
         Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
@@ -123,7 +123,7 @@ public abstract class AbstractCompetition implements ICompetition {
         setStage(Stage.ENDED);
         Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
-        COMPETITION_TASKS.forEach(BukkitTask::cancel);
+        EVENT_TASKS.forEach(BukkitTask::cancel);
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
@@ -137,6 +137,7 @@ public abstract class AbstractCompetition implements ICompetition {
                     Competitions.getOnlinePlayers().forEach(d -> {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
+                        d.getPlayer().getInventory().setItem(4, CompetitionListener.SPRAY);
                     });
                     getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
                         if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
@@ -144,28 +145,30 @@ public abstract class AbstractCompetition implements ICompetition {
                 }
             }
         }.runTaskLater(PLUGIN, 100L));
-        OfflinePlayer mvp = Bukkit.getOfflinePlayer(getLeaderboard().get(0).getUUID());
-        Bukkit.getServer().sendActionBar(Component.translatable("MVP: %s").args(Component.text(Objects.requireNonNull(mvp.getName()))).color(NamedTextColor.GOLD));
-        CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
-        if (musickit != null) {
-            Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+        if (!force) {
+            OfflinePlayer mvp = getLeaderboard().get(0).getOfflinePlayer();
+            CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
+            if (musickit != null) {
+                Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())), musickit.getName()));
+            }
         }
-        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("competition.end"));
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.ended_message"));
         PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
     }
 
     /**
-     * extra event on {@link ICompetition#setup()}
+     * extra event on {@link IEvent#setup()}
      */
     protected abstract void onSetup();
 
     /**
-     * extra event on {@link ICompetition#start()}
+     * extra event on {@link IEvent#start()}
      */
     protected abstract void onStart();
 
     /**
-     * extra event on {@link ICompetition#end(boolean)}}
+     * extra event on {@link IEvent#end(boolean)}}
      */
     protected abstract void onEnd(boolean force);
 
@@ -196,7 +199,7 @@ public abstract class AbstractCompetition implements ICompetition {
      * @param task {@link BukkitTask} to add
      */
     protected BukkitTask addRunnable(BukkitTask task) {
-        COMPETITION_TASKS.add(task);
+        EVENT_TASKS.add(task);
         return task;
     }
 }
