@@ -17,18 +17,18 @@ import org.macausmp.sportsday.util.PlayerData;
 
 import java.util.*;
 
-public class Competitions {
+public final class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final FileConfiguration PLAYER_CONFIG = PLUGIN.getConfigManager().getPlayerConfig();
-    public static final List<ICompetition> COMPETITIONS = new ArrayList<>();
-    public static final ICompetition ELYTRA_RACING = register(new ElytraRacing());
-    public static final ICompetition ICE_BOAT_RACING = register(new IceBoatRacing());
-    public static final ICompetition JAVELIN_THROW = register(new JavelinThrow());
-    public static final ICompetition OBSTACLE_COURSE = register(new ObstacleCourse());
-    public static final ICompetition PARKOUR = register(new Parkour());
-    public static final ICompetition SUMO = register(new Sumo());
+    public static final List<IEvent> COMPETITIONS = new ArrayList<>();
+    public static final IEvent ELYTRA_RACING = register(new ElytraRacing());
+    public static final IEvent ICE_BOAT_RACING = register(new IceBoatRacing());
+    public static final IEvent JAVELIN_THROW = register(new JavelinThrow());
+    public static final IEvent OBSTACLE_COURSE = register(new ObstacleCourse());
+    public static final IEvent PARKOUR = register(new Parkour());
+    public static final IEvent SUMO = register(new Sumo());
     private static final List<PlayerData> PLAYERS = new ArrayList<>();
-    private static ICompetition CURRENTLY_COMPETITION;
+    private static IEvent CURRENTLY_COMPETITION;
     private static int NUMBER = 1;
     private static final List<Integer> REGISTERED_NUMBER_LIST = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class Competitions {
      * @param competition competition to register
      * @return competition after registered
      */
-    private static <T extends ICompetition> T register(T competition) {
+    private static <T extends IEvent> T register(T competition) {
         COMPETITIONS.add(competition);
         return competition;
     }
@@ -73,10 +73,10 @@ public class Competitions {
             sender.sendMessage(Component.translatable("competition.already_in_progress").color(NamedTextColor.RED));
             return false;
         }
-        for (ICompetition competition : COMPETITIONS) {
+        for (IEvent competition : COMPETITIONS) {
             if (competition.getID().equals(id)) {
                 if (!competition.isEnable()) {
-                    sender.sendMessage(Component.translatable("competition.disabled").color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("competition.event_disabled").color(NamedTextColor.RED));
                     return false;
                 }
                 int i = getOnlinePlayers().size();
@@ -92,7 +92,7 @@ public class Competitions {
                 }
             }
         }
-        sender.sendMessage(Component.translatable("competition.unknown").color(NamedTextColor.RED));
+        sender.sendMessage(Component.translatable("event.name.unknown").color(NamedTextColor.RED));
         return false;
     }
 
@@ -103,7 +103,7 @@ public class Competitions {
     public static void forceEnd(CommandSender sender) {
         if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
             getCurrentlyCompetition().end(true);
-            sender.sendMessage(Component.translatable("competition.force_end").color(NamedTextColor.GREEN));
+            sender.sendMessage(Component.translatable("competition.force_ended").color(NamedTextColor.GREEN));
         } else {
             sender.sendMessage(Component.translatable("competition.not_in_progress").color(NamedTextColor.RED));
         }
@@ -113,7 +113,7 @@ public class Competitions {
      * Get current competition
      * @return current competition
      */
-    public static ICompetition getCurrentlyCompetition() {
+    public static IEvent getCurrentlyCompetition() {
         return CURRENTLY_COMPETITION;
     }
 
@@ -121,7 +121,7 @@ public class Competitions {
      * Set current competition
      * @param competition new competition
      */
-    public static void setCurrentlyCompetition(ICompetition competition) {
+    public static void setCurrentlyCompetition(IEvent competition) {
         CURRENTLY_COMPETITION = competition;
     }
 
@@ -196,7 +196,7 @@ public class Competitions {
     public static @NotNull List<PlayerData> getOnlinePlayers() {
         List<PlayerData> list = new ArrayList<>();
         for (PlayerData d : PLAYERS) {
-            if (d.isPlayerOnline()) list.add(d);
+            if (d.getOfflinePlayer().isOnline()) list.add(d);
         }
         return list;
     }

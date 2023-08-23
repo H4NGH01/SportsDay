@@ -19,7 +19,7 @@ import org.spigotmc.event.entity.EntityMountEvent;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class IceBoatRacing extends AbstractTrackCompetition {
+public class IceBoatRacing extends AbstractTrackEvent {
     private final HashMap<Player, Boat> boatMap = new HashMap<>();
 
     public IceBoatRacing() {

@@ -14,7 +14,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 
-public class GUIListener implements Listener {
+public final class GUIListener implements Listener {
     @EventHandler
     public void onClick(@NotNull InventoryClickEvent e) {
         if (e.getWhoClicked() instanceof Player p) {

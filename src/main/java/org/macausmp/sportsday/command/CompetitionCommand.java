@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -124,7 +124,7 @@ public class CompetitionCommand implements IPluginCommand {
                     Competitions.getPlayerData().forEach(d -> pl.add(d.getName()));
                     sender.sendMessage(Component.translatable("competition.players_name").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
-                    for (ICompetition c : Competitions.COMPETITIONS) {
+                    for (IEvent c : Competitions.COMPETITIONS) {
                         if (c.isEnable()) cl.add(c.getID().toUpperCase());
                     }
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));

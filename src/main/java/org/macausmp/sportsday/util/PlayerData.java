@@ -1,14 +1,14 @@
 package org.macausmp.sportsday.util;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 /**
  * {@link Player} extra data for the plugin
  */
-public final class PlayerData implements PlayerHandler {
+public final class PlayerData implements PlayerHolder {
     private final UUID uuid;
     private final int number;
     private int score = 0;
@@ -29,7 +29,7 @@ public final class PlayerData implements PlayerHandler {
      * @return {@link Player#getUniqueId()}
      */
     @Override
-    public UUID getUUID() {
+    public @NotNull UUID getUUID() {
         return uuid;
     }
 
@@ -38,24 +38,7 @@ public final class PlayerData implements PlayerHandler {
      * @return {@link Player#getName()} ()}
      */
     public String getName() {
-        return Bukkit.getOfflinePlayer(uuid).getName();
-    }
-
-    /**
-     * Returns the {@link Player} of this data
-     * @return {@link Player}
-     */
-    @Override
-    public Player getPlayer() {
-        return Bukkit.getOfflinePlayer(uuid).getPlayer();
-    }
-
-    /**
-     * Checks if {@link Player} is currently online
-     * @return {@link Player#isOnline()}
-     */
-    public boolean isPlayerOnline() {
-        return Bukkit.getOfflinePlayer(uuid).isOnline();
+        return getOfflinePlayer().getName();
     }
 
     /**

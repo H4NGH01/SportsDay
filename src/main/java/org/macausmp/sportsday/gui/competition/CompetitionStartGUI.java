@@ -9,7 +9,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.ICompetition;
+import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.SkullTextureUtil;
@@ -50,7 +50,7 @@ public class CompetitionStartGUI extends AbstractGUI {
         if (GUIButton.isSameButton(item, "start_competition")) p.playSound(p, Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(SportsDay.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
     }
 
-    private @NotNull ItemStack start(@NotNull ICompetition competition) {
+    private @NotNull ItemStack start(@NotNull IEvent competition) {
         @SuppressWarnings("SpellCheckingInspection") ItemStack stack = SkullTextureUtil.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=");
         stack.editMeta(meta -> {
             meta.displayName(TextUtil.text(Component.translatable("gui.start_competition")));

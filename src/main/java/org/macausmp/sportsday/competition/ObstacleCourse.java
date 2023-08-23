@@ -2,7 +2,7 @@ package org.macausmp.sportsday.competition;
 
 import org.bukkit.potion.PotionEffectType;
 
-public class ObstacleCourse extends AbstractTrackCompetition {
+public class ObstacleCourse extends AbstractTrackEvent {
     public ObstacleCourse() {
         super("obstacle_course");
     }

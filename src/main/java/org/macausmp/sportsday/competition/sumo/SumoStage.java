@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SumoStage {
-    public static final SumoStage FINAL = new SumoStage(Component.translatable("competition.sumo.final"), null);
-    public static final SumoStage THIRD_PLACE = new SumoStage(Component.translatable("competition.sumo.third_place"), FINAL);
-    public static final SumoStage SEMI_FINAL = new SumoStage(Component.translatable("competition.sumo.semi_final"), THIRD_PLACE);
-    public static final SumoStage QUARTER_FINAL = new SumoStage(Component.translatable("competition.sumo.quarter_final"), SEMI_FINAL);
-    public static final SumoStage ELIMINATE = new SumoStage(Component.translatable("competition.sumo.eliminate"), QUARTER_FINAL);
+    public static final SumoStage FINAL = new SumoStage(Component.translatable("event.sumo.final"), null);
+    public static final SumoStage THIRD_PLACE = new SumoStage(Component.translatable("event.sumo.third_place"), FINAL);
+    public static final SumoStage SEMI_FINAL = new SumoStage(Component.translatable("event.sumo.semi_final"), THIRD_PLACE);
+    public static final SumoStage QUARTER_FINAL = new SumoStage(Component.translatable("event.sumo.quarter_final"), SEMI_FINAL);
+    public static final SumoStage ELIMINATE = new SumoStage(Component.translatable("event.sumo.eliminate"), QUARTER_FINAL);
 
     private final List<SumoRound> roundList = new ArrayList<>();
     private final Component name;

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GUIButton {
+public final class GUIButton {
     public static final ItemStack COMPETITION_INFO = competitionInfo();
     public static final ItemStack COMPETITION_INFO_SELECTED = addEffect(competitionInfo());
     public static final ItemStack PLAYER_LIST = playerlist();

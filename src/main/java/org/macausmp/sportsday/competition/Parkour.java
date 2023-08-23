@@ -9,7 +9,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 
-public class Parkour extends AbstractTrackCompetition {
+public class Parkour extends AbstractTrackEvent {
     public Parkour() {
         super("parkour");
     }
