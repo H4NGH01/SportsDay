@@ -58,14 +58,14 @@ public class ProjectileTrailGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameButton(item, "projectile_trail")) {
+        if (GUIButton.isSameItem(item, "projectile_trail")) {
             PlayerCustomize.setProjectileTrail(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
-        } else if (GUIButton.isSameButton(item, reset())) {
+        } else if (GUIButton.isSameItem(item, reset())) {
             PlayerCustomize.setProjectileTrail(p, null);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);

@@ -61,15 +61,15 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
         if (event.getInventory().getHolder() instanceof PlayerListGUI gui) {
-            if (GUIButton.isSameButton(item, "player_icon")) {
+            if (GUIButton.isSameItem(item, "player_icon")) {
                 SkullMeta meta = (SkullMeta) item.getItemMeta();
                 p.openInventory(new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
                 return;
             }
-            if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
+            if (GUIButton.isSameItem(item, GUIButton.NEXT_PAGE)) {
                 p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                 gui.nextPage();
-            } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
+            } else if (GUIButton.isSameItem(item, GUIButton.PREVIOUS_PAGE)) {
                 p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                 gui.previousPage();
             }

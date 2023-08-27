@@ -151,6 +151,9 @@ public final class Competitions {
                 if (data.getUUID().equals(player.getUniqueId())) {
                     PLAYER_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
+                    if (getCurrentlyEvent() != null) {
+                        ((AbstractEvent) getCurrentlyEvent()).getPlayerDataList().remove(data);
+                    }
                     PLAYERS.remove(data);
                     GUIManager.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();

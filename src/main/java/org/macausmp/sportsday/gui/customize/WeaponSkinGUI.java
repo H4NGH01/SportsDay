@@ -58,12 +58,12 @@ public class WeaponSkinGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameButton(item, "weapon")) {
+        if (GUIButton.isSameItem(item, "weapon")) {
             PlayerCustomize.setWeaponSkin(p, item.getType());
             p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
             update();

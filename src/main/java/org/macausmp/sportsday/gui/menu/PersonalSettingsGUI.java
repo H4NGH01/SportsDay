@@ -27,7 +27,7 @@ public class PersonalSettingsGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
         }

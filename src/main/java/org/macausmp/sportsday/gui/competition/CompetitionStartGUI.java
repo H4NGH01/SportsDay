@@ -47,7 +47,7 @@ public class CompetitionStartGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameButton(item, "start_competition")) p.playSound(p, Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(SportsDay.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+        if (GUIButton.isSameItem(item, "start_competition")) p.playSound(p, Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(SportsDay.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {

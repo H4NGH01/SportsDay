@@ -1,9 +1,11 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -72,7 +74,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onEnd(boolean force) {
-        Bukkit.broadcast(Component.translatable("event.javelin.clear").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/kill @e[type=trident]")), Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         if (force) return;
         leaderboard.sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
         Component c = Component.text().build();

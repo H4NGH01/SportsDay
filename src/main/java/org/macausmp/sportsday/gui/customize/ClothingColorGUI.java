@@ -62,7 +62,7 @@ public class ClothingColorGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
@@ -70,7 +70,7 @@ public class ClothingColorGUI extends AbstractGUI {
         String s = item.getType().name();
         if (s.endsWith("_DYE")) {
             PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
-        } else if (GUIButton.isSameButton(item, reset())) {
+        } else if (GUIButton.isSameItem(item, reset())) {
             PlayerCustomize.setClothColor(p, slot, null);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);

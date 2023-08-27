@@ -53,7 +53,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        if (GUIButton.isSameButton(item, "status_toggle")) {
+        if (GUIButton.isSameItem(item, "status_toggle")) {
             for (IEvent event : Competitions.COMPETITIONS) {
                 if (event.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
                     PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());

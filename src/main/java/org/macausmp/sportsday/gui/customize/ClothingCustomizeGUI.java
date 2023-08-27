@@ -60,20 +60,20 @@ public class ClothingCustomizeGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (item.getType().getEquipmentSlot().isArmor()) {
-            if (GUIButton.isSameButton(item, "select_cloth")) {
+            if (GUIButton.isSameItem(item, "select_cloth")) {
                 if (e.isLeftClick()) {
                     PlayerCustomize.setClothItem(p, item.getType());
                 } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
                     p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
                     return;
                 }
-            } else if (GUIButton.isSameButton(item, "cloth") && e.isRightClick()) {
+            } else if (GUIButton.isSameItem(item, "cloth") && e.isRightClick()) {
                 p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
             } else {
                 return;

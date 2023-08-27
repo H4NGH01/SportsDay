@@ -36,19 +36,21 @@ public class MenuGUI extends AbstractGUI {
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-        if (GUIButton.isSameButton(item, GUIButton.GUIDEBOOK)) {
+        if (GUIButton.isSameItem(item, GUIButton.GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);
-        } else if (GUIButton.isSameButton(item, GUIButton.HOME)) {
-            p.teleport(p.getWorld().getSpawnLocation());
-            p.getInventory().clear();
-            PlayerCustomize.suitUp(p);
-            p.getInventory().setItem(3, CompetitionListener.MENU);
-            p.getInventory().setItem(4, CompetitionListener.CUSTOMIZE);
-        } else if (GUIButton.isSameButton(item, GUIButton.PRACTICE)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.HOME)) {
+            if (Competitions.getCurrentlyEvent() == null) {
+                p.teleport(p.getWorld().getSpawnLocation());
+                p.getInventory().clear();
+                PlayerCustomize.suitUp(p);
+                p.getInventory().setItem(3, CompetitionListener.MENU);
+                p.getInventory().setItem(4, CompetitionListener.CUSTOMIZE);
+            }
+        } else if (GUIButton.isSameItem(item, GUIButton.PRACTICE)) {
             if (Competitions.getCurrentlyEvent() == null) {
                 p.openInventory(new PracticeGUI().getInventory());
             }
-        } else if (GUIButton.isSameButton(item, GUIButton.PERSONAL_SETTINGS)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.PERSONAL_SETTINGS)) {
             p.openInventory(new PersonalSettingsGUI(p).getInventory());
         }
     }

@@ -28,19 +28,19 @@ public class CustomizeMenuGUI extends AbstractGUI {
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-        if (GUIButton.isSameButton(item, GUIButton.CLOTHING)) {
+        if (GUIButton.isSameItem(item, GUIButton.CLOTHING)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.BOAT_TYPE)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.BOAT_TYPE)) {
             p.openInventory(new BoatTypeGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.WEAPON_SKIN)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.WEAPON_SKIN)) {
             p.openInventory(new WeaponSkinGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.MUSICKIT)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.MUSICKIT)) {
             p.openInventory(new MusickitGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.PROJECTILE_TRAIL)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.PROJECTILE_TRAIL)) {
             p.openInventory(new ProjectileTrailGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.WALKING_EFFECT)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.WALKING_EFFECT)) {
             p.openInventory(new WalkingEffectGUI(p).getInventory());
-        } else if (GUIButton.isSameButton(item, GUIButton.GRAFFITI_SPRAY)) {
+        } else if (GUIButton.isSameItem(item, GUIButton.GRAFFITI_SPRAY)) {
             p.openInventory(new GraffitiSprayGUI(p).getInventory());
         }
     }

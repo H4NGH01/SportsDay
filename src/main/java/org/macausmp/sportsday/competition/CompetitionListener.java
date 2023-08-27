@@ -147,7 +147,7 @@ public final class CompetitionListener implements Listener {
 
     @EventHandler
     public void onSpray(@NotNull PlayerInteractEvent e) {
-        if (e.getItem() != null && GUIButton.isSameButton(e.getItem(), SPRAY)) {
+        if (e.getItem() != null && GUIButton.isSameItem(e.getItem(), SPRAY)) {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
@@ -191,7 +191,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onChangeSpray(@NotNull PlayerInteractEntityEvent e) {
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-        if (GUIButton.isSameButton(item, SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
+        if (GUIButton.isSameItem(item, SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
             if (!frame.getPersistentDataContainer().has(GRAFFITI)) return;
             e.setCancelled(true);
             Player p = e.getPlayer();
@@ -219,17 +219,17 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onOpenGUI(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
-        if (GUIButton.isSameButton(e.getItem(), MENU)) {
+        if (GUIButton.isSameItem(e.getItem(), MENU)) {
             e.setCancelled(true);
             e.getPlayer().openInventory(new MenuGUI().getInventory());
             return;
         }
-        if (GUIButton.isSameButton(e.getItem(), CUSTOMIZE)) {
+        if (GUIButton.isSameItem(e.getItem(), CUSTOMIZE)) {
             e.setCancelled(true);
             e.getPlayer().openInventory(new CustomizeMenuGUI().getInventory());
             return;
         }
-        if (GUIButton.isSameButton(e.getItem(), CompetitionGUICommand.OP_BOOK)) {
+        if (GUIButton.isSameItem(e.getItem(), CompetitionGUICommand.OP_BOOK)) {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (p.isOp()) {

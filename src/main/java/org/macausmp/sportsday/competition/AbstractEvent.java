@@ -158,17 +158,20 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * extra event on {@link IEvent#setup()}
+     * Called when the event sets up
+     * @see IEvent#setup()
      */
     protected abstract void onSetup();
 
     /**
-     * extra event on {@link IEvent#start()}
+     * Called when the event starts
+     * @see IEvent#start() ()
      */
     protected abstract void onStart();
 
     /**
-     * extra event on {@link IEvent#end(boolean)}}
+     * Called when the event ends
+     * @see IEvent#end(boolean)
      */
     protected abstract void onEnd(boolean force);
 
@@ -178,7 +181,7 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * Set the current competition stage
+     * Set the current event stage
      * @param stage new stage
      */
     protected void setStage(Stage stage) {
@@ -198,15 +201,15 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * Get the list of {@link PlayerData} of current competition.
-     * @return list of {@link PlayerData} of current competition
+     * Get the list of {@link PlayerData} of current event
+     * @return list of {@link PlayerData} of current event
      */
     public final List<PlayerData> getPlayerDataList() {
         return players;
     }
 
     /**
-     * Add a {@link BukkitTask} to this competition
+     * Add a {@link BukkitTask} to this event
      * @param task {@link BukkitTask} to add
      */
     protected BukkitTask addRunnable(BukkitTask task) {

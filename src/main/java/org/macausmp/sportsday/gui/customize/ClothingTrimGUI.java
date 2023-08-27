@@ -99,16 +99,16 @@ public class ClothingTrimGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameButton(item, "select_material")) {
+        if (GUIButton.isSameItem(item, "select_material")) {
             PlayerCustomize.setClothTrimMaterial(p, slot, item.getType());
-        } else if (GUIButton.isSameButton(item, "select_pattern")) {
+        } else if (GUIButton.isSameItem(item, "select_pattern")) {
             PlayerCustomize.setClothTrimPattern(p, slot, item.getType());
-        } else if (GUIButton.isSameButton(item, reset())) {
+        } else if (GUIButton.isSameItem(item, reset())) {
             PlayerCustomize.resetClothTrim(p, slot);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);

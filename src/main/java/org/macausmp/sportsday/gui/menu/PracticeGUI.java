@@ -44,14 +44,14 @@ public class PracticeGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent().getStage() != Stage.STARTED) {
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            if (GUIButton.isSameButton(item, "practice")) {
+            if (GUIButton.isSameItem(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
                     if (event.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
                         event.practice(p);
