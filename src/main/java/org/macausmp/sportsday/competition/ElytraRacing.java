@@ -19,7 +19,7 @@ public class ElytraRacing extends AbstractTrackEvent {
     }
 
     @Override
-    public void onSetup() {
+    protected void onSetup() {
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         elytra.editMeta(meta -> {
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
@@ -29,7 +29,7 @@ public class ElytraRacing extends AbstractTrackEvent {
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
         firework.setAmount(64);
         firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
@@ -40,9 +40,23 @@ public class ElytraRacing extends AbstractTrackEvent {
     protected void onEnd(boolean force) {
     }
 
+    @Override
+    protected void onPractice(@NotNull Player p) {
+        ItemStack elytra = new ItemStack(Material.ELYTRA);
+        elytra.editMeta(meta -> {
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+            meta.setUnbreakable(true);
+        });
+        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
+        firework.setAmount(64);
+        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
+        p.getInventory().setItem(EquipmentSlot.CHEST, elytra);
+        p.getInventory().setItem(0, firework);
+    }
+
     @EventHandler
     public void onElytraBoost(@NotNull PlayerElytraBoostEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
         e.setShouldConsume(false);
@@ -50,7 +64,7 @@ public class ElytraRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
@@ -58,7 +72,7 @@ public class ElytraRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onDropFirework(@NotNull PlayerDropItemEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this) return;
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
         if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);

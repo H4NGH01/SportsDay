@@ -224,7 +224,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         } else if (sumoStage == SumoStage.QUARTER_FINAL) {
             semiFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
         }
-        // if there are still rounds left in this stage
+        // If this stage is not over
         if (sumoStage.getRoundRemaining() != 0) {
             SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
             Bukkit.broadcast(Component.translatable("event.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
@@ -254,8 +254,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     private void nextSumoStage() {
+        // If this is not the first stage of the event, it means there are some players in the arena
         if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
-        // if the number of players is less than 8 go to the next stage
+        // If the number of players is less than 8 go to the next stage
         if (alive.size() <= 8 && sumoStage.hasNextStage()) sumoStage = sumoStage.getNextStage();
         // Assign players to their round
         if (sumoStage == SumoStage.FINAL) {
@@ -272,7 +273,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             for (int i = 0; i < alive.size() / 2; i++) {
                 sumoStage.getRoundList().add(new SumoRound(getFromQueue(), getFromQueue()));
             }
-        } else {
+        } else { // Eliminate stage, number of rounds = n - 8, 8 is the total number of players in the quarter-final
             for (int i = 0; i < alive.size() - 8; i++) {
                 sumoStage.getRoundList().add(new SumoRound(getFromQueue(), getFromQueue()));
             }

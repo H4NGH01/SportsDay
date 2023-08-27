@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.competition.ITrackEvent;
 import org.macausmp.sportsday.util.SkullTextureUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -39,6 +40,10 @@ public final class GUIButton {
     public static final ItemStack OBSTACLE_COURSE = obstacleCourse();
     public static final ItemStack PARKOUR = parkour();
     public static final ItemStack SUMO = sumo();
+    public static final ItemStack GUIDEBOOK = guidebook();
+    public static final ItemStack HOME = home();
+    public static final ItemStack PRACTICE = practice();
+    public static final ItemStack PERSONAL_SETTINGS = personalSettings();
     public static final ItemStack CLOTHING = clothing();
     public static final ItemStack BOAT_TYPE = boat();
     public static final ItemStack WEAPON_SKIN = weapon();
@@ -149,6 +154,9 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(Material.ELYTRA);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.ELYTRA_RACING.getName());
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text(((ITrackEvent) Competitions.ELYTRA_RACING).getMaxLaps())).color(NamedTextColor.YELLOW)));
+            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ELYTRA_RACING.getID());
         });
@@ -159,6 +167,9 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(Material.OAK_BOAT);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.ICE_BOAT_RACING.getName());
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text(((ITrackEvent) Competitions.ICE_BOAT_RACING).getMaxLaps())).color(NamedTextColor.YELLOW)));
+            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.ICE_BOAT_RACING.getID());
         });
@@ -179,6 +190,9 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(Material.OAK_FENCE_GATE);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.OBSTACLE_COURSE.getName());
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text(((ITrackEvent) Competitions.OBSTACLE_COURSE).getMaxLaps())).color(NamedTextColor.YELLOW)));
+            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.OBSTACLE_COURSE.getID());
         });
@@ -189,6 +203,9 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(Material.LEATHER_BOOTS);
         stack.editMeta(meta -> {
             meta.displayName(Competitions.PARKOUR.getName());
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text(((ITrackEvent) Competitions.PARKOUR).getMaxLaps())).color(NamedTextColor.YELLOW)));
+            meta.lore(lore);
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.PARKOUR.getID());
         });
@@ -201,6 +218,54 @@ public final class GUIButton {
             meta.displayName(Competitions.SUMO.getName());
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, Competitions.SUMO.getID());
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack guidebook() {
+        ItemStack stack = new ItemStack(Material.WRITTEN_BOOK);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW)));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("gui.menu.guidebook.lore")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "guideline");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack home() {
+        ItemStack stack = new ItemStack(Material.RED_BED);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW)));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("gui.menu.home.lore")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "home");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack practice() {
+        ItemStack stack = new ItemStack(Material.ARMOR_STAND);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW)));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("gui.menu.practice.lore")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "practice");
+        });
+        return stack;
+    }
+
+    private static @NotNull ItemStack personalSettings() {
+        ItemStack stack = new ItemStack(Material.REPEATER);
+        stack.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("gui.menu.personal_settings.title").color(NamedTextColor.YELLOW)));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("gui.menu.personal_settings.lore")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "personal_settings");
         });
         return stack;
     }

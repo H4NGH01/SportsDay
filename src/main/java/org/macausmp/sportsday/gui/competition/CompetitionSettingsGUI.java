@@ -32,16 +32,16 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS_SELECTED);
         getInventory().setItem(5, GUIButton.VERSION);
-    }
-
-    @Override
-    public void update() {
         getInventory().setItem(18, GUIButton.ELYTRA_RACING);
         getInventory().setItem(19, GUIButton.ICE_BOAT_RACING);
         getInventory().setItem(20, GUIButton.JAVELIN_THROW);
         getInventory().setItem(21, GUIButton.OBSTACLE_COURSE);
         getInventory().setItem(22, GUIButton.PARKOUR);
         getInventory().setItem(23, GUIButton.SUMO);
+    }
+
+    @Override
+    public void update() {
         getInventory().setItem(27, status(Competitions.ELYTRA_RACING));
         getInventory().setItem(28, status(Competitions.ICE_BOAT_RACING));
         getInventory().setItem(29, status(Competitions.JAVELIN_THROW));
@@ -54,24 +54,24 @@ public class CompetitionSettingsGUI extends AbstractGUI {
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
         if (GUIButton.isSameButton(item, "status_toggle")) {
-            for (IEvent competition : Competitions.COMPETITIONS) {
-                if (competition.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
-                    PLUGIN.getConfig().set(competition.getID() + ".enable", !competition.isEnable());
+            for (IEvent event : Competitions.COMPETITIONS) {
+                if (event.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
+                    PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
                     PLUGIN.saveConfig();
                     GUIManager.COMPETITION_SETTINGS_GUI.update();
-                    p.playSound(p, competition.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                    p.playSound(p, event.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     return;
                 }
             }
         }
     }
 
-    private @NotNull ItemStack status(@NotNull IEvent competition) {
-        ItemStack stack = new ItemStack(competition.isEnable() ? Material.LIME_DYE : Material.BARRIER);
+    private @NotNull ItemStack status(@NotNull IEvent event) {
+        ItemStack stack = new ItemStack(event.isEnable() ? Material.LIME_DYE : Material.BARRIER);
         stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable(competition.isEnable() ? "gui.enabled" : "gui.disabled")));
+            meta.displayName(TextUtil.text(Component.translatable(event.isEnable() ? "gui.enabled" : "gui.disabled")));
             meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "status_toggle");
-            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, competition.getID());
+            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, event.getID());
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.toggle")));
             meta.lore(lore);

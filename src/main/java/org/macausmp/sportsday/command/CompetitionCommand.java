@@ -116,9 +116,9 @@ public class CompetitionCommand implements IPluginCommand {
                 }
                 case "info" -> {
                     sender.sendMessage(Component.translatable("gui.info.title"));
-                    boolean b = Competitions.getCurrentlyCompetition() != null;
-                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : TextUtil.convert(Component.translatable("gui.none"))));
-                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
+                    boolean b = Competitions.getCurrentlyEvent() != null;
+                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getName() : TextUtil.convert(Component.translatable("gui.none"))));
+                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyEvent().getStage().getName()));
                     sender.sendMessage(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
                     Competitions.getPlayerData().forEach(d -> pl.add(d.getName()));

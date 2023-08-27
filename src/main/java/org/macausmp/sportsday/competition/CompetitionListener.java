@@ -31,7 +31,9 @@ import org.macausmp.sportsday.competition.sumo.SumoRound;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
+import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
+import org.macausmp.sportsday.gui.menu.MenuGUI;
 import org.macausmp.sportsday.util.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.util.CustomizeParticleEffect;
 import org.macausmp.sportsday.util.PlayerCustomize;
@@ -48,14 +50,17 @@ public final class CompetitionListener implements Listener {
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
     public static final NamespacedKey GRAFFITI = Objects.requireNonNull(NamespacedKey.fromString("graffiti_frame", PLUGIN));
+    public static final ItemStack MENU = menu();
+    public static final ItemStack CUSTOMIZE = customize();
     public static final ItemStack SPRAY = spray();
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(4, SPRAY);
-        IEvent current = Competitions.getCurrentlyCompetition();
+        p.getInventory().setItem(3, MENU);
+        p.getInventory().setItem(4, CUSTOMIZE);
+        IEvent current = Competitions.getCurrentlyEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
@@ -69,7 +74,7 @@ public final class CompetitionListener implements Listener {
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        IEvent current = Competitions.getCurrentlyCompetition();
+        IEvent current = Competitions.getCurrentlyEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         current.onEvent(e);
     }
@@ -83,7 +88,7 @@ public final class CompetitionListener implements Listener {
             loc.setY(loc.y() + 0.3);
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
-        IEvent current = Competitions.getCurrentlyCompetition();
+        IEvent current = Competitions.getCurrentlyEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p) || !p.getGameMode().equals(GameMode.ADVENTURE)) return;
         current.onEvent(e);
@@ -105,7 +110,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onHit(@NotNull EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
-            IEvent current = Competitions.getCurrentlyCompetition();
+            IEvent current = Competitions.getCurrentlyEvent();
             if (current != null && current == Competitions.SUMO) {
                 SumoRound sumo = ((Sumo) current).getSumoStage().getCurrentRound();
                 if (sumo != null && sumo.getStatus() == SumoRound.RoundStatus.STARTED && sumo.containPlayer(player) && sumo.containPlayer(damager)) {
@@ -122,7 +127,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            IEvent current = Competitions.getCurrentlyCompetition();
+            IEvent current = Competitions.getCurrentlyEvent();
             if (current == null || !Competitions.containPlayer(player) || current.getStage() == Stage.STARTED) return;
             e.setCancelled(true);
         }
@@ -213,7 +218,18 @@ public final class CompetitionListener implements Listener {
 
     @EventHandler
     public void onOpenGUI(@NotNull PlayerInteractEvent e) {
-        if (e.getItem() != null && GUIButton.isSameButton(e.getItem(), CompetitionGUICommand.OP_BOOK)) {
+        if (e.getItem() == null) return;
+        if (GUIButton.isSameButton(e.getItem(), MENU)) {
+            e.setCancelled(true);
+            e.getPlayer().openInventory(new MenuGUI().getInventory());
+            return;
+        }
+        if (GUIButton.isSameButton(e.getItem(), CUSTOMIZE)) {
+            e.setCancelled(true);
+            e.getPlayer().openInventory(new CustomizeMenuGUI().getInventory());
+            return;
+        }
+        if (GUIButton.isSameButton(e.getItem(), CompetitionGUICommand.OP_BOOK)) {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (p.isOp()) {
@@ -252,6 +268,31 @@ public final class CompetitionListener implements Listener {
                 }
             }.runTaskTimer(PLUGIN, 0L, 10L);
         }
+    }
+
+    private static @NotNull ItemStack menu() {
+        ItemStack menu = new ItemStack(Material.COMPASS);
+        menu.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("item.menu")));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("item.menu_lore")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "menu");
+        });
+        return menu;
+    }
+
+    private static @NotNull ItemStack customize() {
+        ItemStack customize = new ItemStack(Material.CHEST);
+        customize.editMeta(meta -> {
+            meta.displayName(TextUtil.text(Component.translatable("item.customize")));
+            List<Component> lore = new ArrayList<>();
+            lore.add(TextUtil.text(Component.translatable("item.customize_lore1")));
+            lore.add(TextUtil.text(Component.translatable("item.customize_lore2")));
+            meta.lore(lore);
+            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize");
+        });
+        return customize;
     }
 
     private static @NotNull ItemStack spray() {

@@ -40,9 +40,9 @@ public class ScoreboardHandler {
                     final Score line = newline(o);
                     @Override
                     public void run() {
-                        if (Competitions.getCurrentlyCompetition() != null) {
-                            comp.suffix(Competitions.getCurrentlyCompetition().getName());
-                            stage.suffix(Competitions.getCurrentlyCompetition().getStage().getName());
+                        if (Competitions.getCurrentlyEvent() != null) {
+                            comp.suffix(Competitions.getCurrentlyEvent().getName());
+                            stage.suffix(Competitions.getCurrentlyEvent().getStage().getName());
                             comp.setScore(11);
                             stage.setScore(10);
                             line.setScore(9);

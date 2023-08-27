@@ -8,8 +8,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
-import org.macausmp.sportsday.event.PlayerFinishLapEvent;
+import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.PlayerData;
 
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
-    private static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("finish_line_block")));
+    public static final Material FINISH_LINE = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("finish_line_block")));
     private final List<PlayerData> leaderboard = new ArrayList<>();
     private final HashMap<PlayerData, Integer> lapMap = new HashMap<>();
     private final HashMap<PlayerData, Float> record = new HashMap<>();
@@ -78,26 +77,26 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     @Override
     public <T extends Event> void onEvent(T event) {
         if (event instanceof PlayerMoveEvent e) {
-            Player player = e.getPlayer();
-            PlayerData data = Competitions.getPlayerData(player.getUniqueId());
+            Player p = e.getPlayer();
+            PlayerData data = Competitions.getPlayerData(p.getUniqueId());
             if (leaderboard.contains(data) || !lapMap.containsKey(data)) return;
-            Location loc = player.getLocation().clone();
+            Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
-            CompetitionListener.spawnpoint(player, loc);
+            CompetitionListener.spawnpoint(p, loc);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 lapMap.put(data, lapMap.get(data) + 1);
-                player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+                p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 if (lapMap.get(data) < laps) {
-                    player.setBedSpawnLocation(getLocation(), true);
-                    player.teleport(getLocation());
-                    Bukkit.getPluginManager().callEvent(new PlayerFinishLapEvent(player, this));
-                    Bukkit.broadcast(Component.translatable("event.player_finished_lap").args(player.displayName()).color(NamedTextColor.YELLOW));
+                    p.setBedSpawnLocation(getLocation(), true);
+                    p.teleport(getLocation());
+                    onCompletedLap(p);
+                    Bukkit.broadcast(Component.translatable("event.player_finished_lap").args(p.displayName()).color(NamedTextColor.YELLOW));
                 } else {
                     record.put(data, time / 20f);
-                    leaderboard.add(Competitions.getPlayerData(player.getUniqueId()));
-                    player.setGameMode(GameMode.SPECTATOR);
-                    Bukkit.getPluginManager().callEvent(new PlayerFinishCompetitionEvent(player, this));
-                    Bukkit.broadcast(Component.translatable("event.player_finished").args(player.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
+                    leaderboard.add(Competitions.getPlayerData(p.getUniqueId()));
+                    p.setGameMode(GameMode.SPECTATOR);
+                    onRaceFinish(p);
+                    Bukkit.broadcast(Component.translatable("event.player_finished").args(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
                     if (leaderboard.size() == getPlayerDataList().size()) {
                         if (task != null && !task.isCancelled()) task.cancel();
                         PLUGIN.getServer().sendActionBar(Component.translatable("event.all_player_finished"));
@@ -106,9 +105,9 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                     }
                     if (leaderboard.size() >= 3 && !endCountdown) {
                         endCountdown = true;
-                        Bukkit.broadcast(Component.translatable("event.third_player_finished"));
+                        Bukkit.broadcast(Component.translatable("event.third_player_finished").args(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
                         task = addRunnable(new BukkitRunnable() {
-                            int i = 30;
+                            int i = PLUGIN.getConfig().getInt("event_end_countdown");
                             @Override
                             public void run() {
                                 if (i > 0) PLUGIN.getServer().sendActionBar(Component.translatable("event.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
@@ -123,6 +122,12 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 }
             }
         }
+    }
+
+    protected void onCompletedLap(@NotNull Player player) {
+    }
+
+    protected void onRaceFinish(@NotNull Player player) {
     }
 
     @Override

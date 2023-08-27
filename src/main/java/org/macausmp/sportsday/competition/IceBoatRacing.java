@@ -10,8 +10,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
-import org.macausmp.sportsday.event.PlayerFinishLapEvent;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
@@ -27,18 +25,23 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     @Override
-    public void onSetup() {
+    protected void onSetup() {
+        getLocation().getWorld().getEntitiesByClass(Boat.class).forEach(Boat::remove);
         getPlayerDataList().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
     }
 
     @Override
-    public void onStart() {
-
+    protected void onStart() {
     }
 
     @Override
     protected void onEnd(boolean force) {
         boatMap.forEach((p, b) -> b.remove());
+    }
+
+    @Override
+    protected void onPractice(@NotNull Player p) {
+        boat(p);
     }
 
     @Override
@@ -53,25 +56,25 @@ public class IceBoatRacing extends AbstractTrackEvent {
         }
     }
 
-    @EventHandler
-    public void onLapFinished(@NotNull PlayerFinishLapEvent e) {
-        if (e.getCompetition() != this) return;
-        Player p = e.getPlayer();
+    @Override
+    protected void onCompletedLap(@NotNull Player p) {
         boatMap.get(p).remove();
         boatMap.put(p, boat(p));
     }
 
-    @EventHandler
-    public void onFinished(@NotNull PlayerFinishCompetitionEvent e) {
-        if (e.getCompetition() != this) return;
-        Player p = e.getPlayer();
+    @Override
+    protected void onRaceFinish(@NotNull Player p) {
         boatMap.get(p).remove();
         boatMap.remove(p);
     }
 
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+        if (Competitions.getCurrentlyEvent() == null) {
+            e.getDismounted().remove();
+            return;
+        }
+        if (Competitions.getCurrentlyEvent() != this) return;
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
             if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) e.setCancelled(true);
         }
@@ -79,7 +82,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onMount(EntityMountEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this) return;
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
             if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) boatMap.put(p, b);
         }
@@ -87,7 +90,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onFall(PlayerDeathEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this) return;
         Player p = e.getPlayer();
         if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || boatMap.get(p) == null) return;
         boatMap.get(p).remove();

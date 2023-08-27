@@ -43,10 +43,10 @@ public class CompetitionInfoGUI extends AbstractGUI {
     private @NotNull ItemStack status() {
         ItemStack status = new ItemStack(Material.BEACON);
         status.editMeta(meta -> {
-            boolean b = Competitions.getCurrentlyCompetition() != null;
-            meta.displayName(TextUtil.text(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.translatable("gui.none"))));
+            boolean b = Competitions.getCurrentlyEvent() != null;
+            meta.displayName(TextUtil.text(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getName() : Component.translatable("gui.none"))));
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName())));
+            lore.add(TextUtil.text(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getStage().getName() : Stage.IDLE.getName())));
             meta.lore(lore);
         });
         return status;

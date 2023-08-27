@@ -37,6 +37,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onSetup() {
+        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         resultMap.clear();
         queue.clear();
         queue.addAll(getPlayerDataList());
@@ -85,9 +86,14 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         Bukkit.broadcast(c);
     }
 
+    @Override
+    protected void onPractice(@NotNull Player p) {
+        p.getInventory().setItem(0, TRIDENT);
+    }
+
     @EventHandler
     public void onThrow(ProjectileLaunchEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
         if (e.getEntity().getShooter() instanceof Player p) {
             if (!Competitions.containPlayer(p)) return;
             if (e.getEntity() instanceof Trident trident) {
@@ -112,7 +118,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @EventHandler
     public void onArrived(ProjectileHitEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
         if (e.getEntity().getShooter() instanceof Player p) {
             if (!Competitions.containPlayer(p)) return;
             if (e.getEntity() instanceof Trident trident) {

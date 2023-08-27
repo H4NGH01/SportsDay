@@ -10,8 +10,8 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.event.CompetitionEndEvent;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.util.CustomizeMusickit;
 import org.macausmp.sportsday.util.PlayerCustomize;
@@ -121,14 +121,13 @@ public abstract class AbstractEvent implements IEvent {
     @Override
     public void end(boolean force) {
         setStage(Stage.ENDED);
-        Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
                 if (stage == Stage.ENDED) {
-                    Competitions.setCurrentlyCompetition(null);
+                    Competitions.setCurrentlyEvent(null);
                     setStage(Stage.IDLE);
                     Bukkit.getOnlinePlayers().forEach(p -> {
                         p.teleport(location);
@@ -137,7 +136,8 @@ public abstract class AbstractEvent implements IEvent {
                     Competitions.getOnlinePlayers().forEach(d -> {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
-                        d.getPlayer().getInventory().setItem(4, CompetitionListener.SPRAY);
+                        d.getPlayer().getInventory().setItem(3, CompetitionListener.MENU);
+                        d.getPlayer().getInventory().setItem(4, CompetitionListener.CUSTOMIZE);
                     });
                     getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
                         if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
@@ -150,7 +150,7 @@ public abstract class AbstractEvent implements IEvent {
             CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
             if (musickit != null) {
                 Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())), musickit.getName()));
+                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
             }
         }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.ended_message"));
@@ -184,6 +184,17 @@ public abstract class AbstractEvent implements IEvent {
     protected void setStage(Stage stage) {
         this.stage = stage;
         GUIManager.COMPETITION_INFO_GUI.update();
+    }
+
+    @Override
+    public void practice(@NotNull Player player) {
+        player.teleport(location);
+        player.setBedSpawnLocation(location, true);
+        player.sendMessage(Component.translatable("player.teleport.field").args(name));
+        onPractice(player);
+    }
+
+    protected void onPractice(Player player) {
     }
 
     /**

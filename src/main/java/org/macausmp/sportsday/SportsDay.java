@@ -143,9 +143,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     @Override
                     public void run() {
                         header = Component.translatable("tablist.title").appendNewline();
-                        if (Competitions.getCurrentlyCompetition() != null) {
-                            Component cn = Competitions.getCurrentlyCompetition().getName();
-                            Component sn = Competitions.getCurrentlyCompetition().getStage().getName();
+                        if (Competitions.getCurrentlyEvent() != null) {
+                            Component cn = Competitions.getCurrentlyEvent().getName();
+                            Component sn = Competitions.getCurrentlyEvent().getStage().getName();
                             competition = Component.translatable("tablist.current").args(cn, sn);
                         } else {
                             competition = Component.translatable("tablist.idle");
