@@ -6,16 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractEvent;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IFieldEvent;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
@@ -98,10 +96,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @Override
-    public <T extends Event> void onEvent(T event) {
-        SumoRound round = sumoStage.getCurrentRound();
-        if (event instanceof PlayerMoveEvent e) {
-            Player p = e.getPlayer();
+    protected void onPractice(Player p) {
+    }
+
+    @EventHandler
+    public void onMove(@NotNull PlayerMoveEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
+            SumoRound round = sumoStage.getCurrentRound();
             if (round == null || !round.containPlayer(p)) return;
             if (round.getStatus() == SumoRound.RoundStatus.COMING) {
                 e.setCancelled(true);
@@ -111,10 +114,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
                 onRoundEnd();
             }
-            return;
         }
-        if (event instanceof PlayerQuitEvent e) {
-            Player p = e.getPlayer();
+    }
+
+    @EventHandler
+    public void onQuit(@NotNull PlayerQuitEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
+            SumoRound round = sumoStage.getCurrentRound();
             PlayerData d = Competitions.getPlayerData(p.getUniqueId());
             if (!alive.contains(d)) return;
             if (round != null && round.containPlayer(p)) {
@@ -224,7 +232,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         } else if (sumoStage == SumoStage.QUARTER_FINAL) {
             semiFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
         }
-        // if there are still rounds left in this stage
+        // If this stage is not over
         if (sumoStage.getRoundRemaining() != 0) {
             SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
             Bukkit.broadcast(Component.translatable("event.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
@@ -254,8 +262,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     private void nextSumoStage() {
+        // If this is not the first stage of the event, it means there are some players in the arena
         if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
-        // if the number of players is less than 8 go to the next stage
+        // If the number of players is less than 8 go to the next stage
         if (alive.size() <= 8 && sumoStage.hasNextStage()) sumoStage = sumoStage.getNextStage();
         // Assign players to their round
         if (sumoStage == SumoStage.FINAL) {
@@ -272,7 +281,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             for (int i = 0; i < alive.size() / 2; i++) {
                 sumoStage.getRoundList().add(new SumoRound(getFromQueue(), getFromQueue()));
             }
-        } else {
+        } else { // Eliminate stage, number of rounds = n - 8, 8 is the total number of players in the quarter-final
             for (int i = 0; i < alive.size() - 8; i++) {
                 sumoStage.getRoundList().add(new SumoRound(getFromQueue(), getFromQueue()));
             }

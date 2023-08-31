@@ -7,7 +7,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
 
 public class Parkour extends AbstractTrackEvent {
     public Parkour() {
@@ -15,12 +14,12 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
-    public void onSetup() {
+    protected void onSetup() {
         getPlayerDataList().forEach(data -> data.getPlayer().setCollidable(false));
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         Competitions.getOnlinePlayers().forEach(d -> {
             d.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
             d.getPlayer().getInventory().setHelmet(null);
@@ -30,21 +29,27 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
-    public void onEnd(boolean force) {
+    protected void onEnd(boolean force) {
         Competitions.getOnlinePlayers().forEach(d -> {
             d.getPlayer().setCollidable(true);
             d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });
     }
 
-    @EventHandler
-    public void onFinished(@NotNull PlayerFinishCompetitionEvent e) {
-        if (e.getCompetition() == this) e.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
+    @Override
+    protected void onPractice(Player p) {
+
+    }
+
+    @Override
+    protected void onRaceFinish(@NotNull Player p) {
+        p.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        IEvent event = Competitions.getCurrentlyEvent();
+        if (event != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) return;
         addRunnable(new BukkitRunnable() {

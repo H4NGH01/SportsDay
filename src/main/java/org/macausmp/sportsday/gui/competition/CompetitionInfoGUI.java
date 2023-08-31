@@ -11,10 +11,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.TextUtil;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.macausmp.sportsday.util.ItemUtil;
 
 public class CompetitionInfoGUI extends AbstractGUI {
     public CompetitionInfoGUI() {
@@ -22,7 +19,7 @@ public class CompetitionInfoGUI extends AbstractGUI {
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
-        getInventory().setItem(0, GUIButton.COMPETITION_INFO_SELECTED);
+        getInventory().setItem(0, ItemUtil.addEffect(GUIButton.COMPETITION_INFO));
         getInventory().setItem(1, GUIButton.PLAYER_LIST);
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
@@ -41,25 +38,15 @@ public class CompetitionInfoGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack status() {
-        ItemStack status = new ItemStack(Material.BEACON);
-        status.editMeta(meta -> {
-            boolean b = Competitions.getCurrentlyCompetition() != null;
-            meta.displayName(TextUtil.text(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : Component.translatable("gui.none"))));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getStage().getName() : Stage.IDLE.getName())));
-            meta.lore(lore);
-        });
-        return status;
+        boolean b = Competitions.getCurrentlyEvent() != null;
+        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getName() : Component.translatable("gui.none"));
+        Component lore = Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getStage().getName() : Stage.IDLE.getName());
+        return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 
     private @NotNull ItemStack player() {
-        ItemStack stack = new ItemStack(Material.PAPER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW))));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW))));
-            meta.lore(lore);
-        });
-        return stack;
+        Component display = Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW));
+        Component lore = Component.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW));
+        return ItemUtil.item(Material.PAPER, null, display, lore);
     }
 }

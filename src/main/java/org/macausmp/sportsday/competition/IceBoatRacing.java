@@ -4,14 +4,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.event.PlayerFinishCompetitionEvent;
-import org.macausmp.sportsday.event.PlayerFinishLapEvent;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
@@ -27,13 +26,13 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     @Override
-    public void onSetup() {
+    protected void onSetup() {
+        getLocation().getWorld().getEntitiesByClass(Boat.class).forEach(Boat::remove);
         getPlayerDataList().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
     }
 
     @Override
-    public void onStart() {
-
+    protected void onStart() {
     }
 
     @Override
@@ -42,56 +41,80 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     @Override
-    public <T extends Event> void onEvent(T event) {
-        if (event instanceof PlayerMoveEvent e) {
-            Player player = e.getPlayer();
-            if (getLeaderboard().contains(Competitions.getPlayerData(player.getUniqueId())) || boatMap.get(player) == null) return;
-            super.onEvent(event);
-            Location loc = player.getLocation().clone();
-            loc.setY(loc.getY() - 0.5f);
-            if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) boatMap.get(player).setVelocity(new Vector(0f, 1.3f, 0f));
-        }
-    }
-
-    @EventHandler
-    public void onLapFinished(@NotNull PlayerFinishLapEvent e) {
-        if (e.getCompetition() != this) return;
-        Player p = e.getPlayer();
-        boatMap.get(p).remove();
+    protected void onPractice(@NotNull Player p) {
         boatMap.put(p, boat(p));
     }
 
     @EventHandler
-    public void onFinished(@NotNull PlayerFinishCompetitionEvent e) {
-        if (e.getCompetition() != this) return;
+    public void onMove(@NotNull PlayerMoveEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
         Player p = e.getPlayer();
+        boolean b = event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        if ((b || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) bounce(p);
+    }
+
+    private void bounce(@NotNull Player p) {
+        Location loc = p.getLocation().clone();
+        loc.setY(loc.getY() - 0.5f);
+        if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) boatMap.get(p).setVelocity(new Vector(0f, 1.0f, 0f));
+    }
+
+    @Override
+    protected void onCompletedLap(@NotNull Player p) {
+        boatMap.get(p).remove();
+        boatMap.put(p, boat(p));
+    }
+
+    @Override
+    protected void onRaceFinish(@NotNull Player p) {
         boatMap.get(p).remove();
         boatMap.remove(p);
     }
 
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) e.setCancelled(true);
+            IEvent event = Competitions.getCurrentlyEvent();
+            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+            if (bl || AbstractEvent.inPractice(p)) {
+                e.setCancelled(true);
+            } else {
+                boatMap.remove(p);
+            }
         }
     }
 
     @EventHandler
-    public void onMount(EntityMountEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+    public void onMount(@NotNull EntityMountEvent e) {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            if (Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) boatMap.put(p, b);
+            IEvent event = Competitions.getCurrentlyEvent();
+            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+            if (bl || AbstractEvent.inPractice(p)) boatMap.put(p, b);
         }
     }
 
     @EventHandler
-    public void onFall(PlayerDeathEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
+    public void onDeath(@NotNull PlayerDeathEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
         Player p = e.getPlayer();
-        if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId())) || boatMap.get(p) == null) return;
-        boatMap.get(p).remove();
-        boatMap.put(p, boat(p));
+        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) {
+            boatMap.get(p).remove();
+            boatMap.put(p, boat(p));
+        }
+    }
+
+    @EventHandler
+    public void onFall(@NotNull EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player p)) return;
+        IEvent event = Competitions.getCurrentlyEvent();
+        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBreak(@NotNull VehicleDestroyEvent e) {
+        e.setCancelled(true);
     }
 
     private @NotNull Boat boat(@NotNull Player p) {

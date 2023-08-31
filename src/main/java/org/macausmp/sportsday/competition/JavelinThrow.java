@@ -1,14 +1,15 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Trident;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -37,6 +38,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onSetup() {
+        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         resultMap.clear();
         queue.clear();
         queue.addAll(getPlayerDataList());
@@ -71,7 +73,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onEnd(boolean force) {
-        Bukkit.broadcast(Component.translatable("event.javelin.clear").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/kill @e[type=trident]")), Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         if (force) return;
         leaderboard.sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
         Component c = Component.text().build();
@@ -85,18 +87,24 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         Bukkit.broadcast(c);
     }
 
+    @Override
+    protected void onPractice(@NotNull Player p) {
+        p.getInventory().setItem(0, TRIDENT);
+    }
+
     @EventHandler
-    public void onThrow(ProjectileLaunchEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
-        if (e.getEntity().getShooter() instanceof Player p) {
-            if (!Competitions.containPlayer(p)) return;
-            if (e.getEntity() instanceof Trident trident) {
+    public void onThrow(@NotNull ProjectileLaunchEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
+            boolean b = event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p);
+            if (b || inPractice(p)) {
                 resultMap.put(p.getUniqueId(), new PlayerResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
-                trident.customName(Component.translatable("event.javelin.javelin_name").args(p.displayName()));
+                trident.customName(Component.translatable("event.javelin.javelin_name").args(p.displayName(), Component.text()));
                 addRunnable(new BukkitRunnable() {
                     private final CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(p);
+
                     @Override
                     public void run() {
                         if (effect == null || trident.isDead() || trident.isOnGround()) {
@@ -111,28 +119,36 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     }
 
     @EventHandler
-    public void onArrived(ProjectileHitEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
-        if (e.getEntity().getShooter() instanceof Player p) {
-            if (!Competitions.containPlayer(p)) return;
-            if (e.getEntity() instanceof Trident trident) {
+    public void onArrived(@NotNull ProjectileHitEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
+            if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
                 PlayerResult result = resultMap.get(p.getUniqueId());
+                resultMap.remove(p.getUniqueId());
                 if (result == null) return;
                 result.setTridentLocation(trident);
                 leaderboard.add(result);
                 trident.customName(Component.translatable("event.javelin.javelin_name").args(p.displayName(), Component.text(result.getDistance())));
-                resultMap.remove(p.getUniqueId());
                 getWorld().strikeLightningEffect(trident.getLocation());
                 Bukkit.broadcast(Component.translatable("event.javelin.result").args(p.displayName(), Component.text(result.getDistance())));
                 onRoundEnd();
+            } else {
+                PlayerResult result = resultMap.get(p.getUniqueId());
+                resultMap.remove(p.getUniqueId());
+                if (result == null) return;
+                result.setTridentLocation(trident);
+                trident.remove();
+                if (p.isOnline()) p.sendMessage(Component.translatable("event.javelin.practice_result").args(Component.text(result.getDistance())));
+                if (inPractice(p)) p.getInventory().setItem(0, TRIDENT);
             }
         }
     }
 
-    @Override
-    public <T extends Event> void onEvent(T event) {
-        if (event instanceof PlayerJoinEvent e) {
-            Player p = e.getPlayer();
+    @EventHandler
+    public void onJoin(@NotNull PlayerJoinEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
             if (resultMap.containsKey(p.getUniqueId())) return;
             if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
                 reconnectTask.cancel();
@@ -142,10 +158,14 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                 p.setGameMode(GameMode.ADVENTURE);
                 queue.remove(Competitions.getPlayerData(p.getUniqueId()));
             }
-            return;
         }
-        if (event instanceof PlayerQuitEvent e) {
-            Player p = e.getPlayer();
+    }
+
+    @EventHandler
+    public void onQuit(@NotNull PlayerQuitEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
             if (resultMap.containsKey(p.getUniqueId())) return;
             if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
                 p.getInventory().clear();

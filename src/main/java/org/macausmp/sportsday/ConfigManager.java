@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 /**
- * New config file for storing players' competition data
+ * Config files for storing players' plugin data
  */
 public final class ConfigManager {
     private final SportsDay plugin = SportsDay.getInstance();

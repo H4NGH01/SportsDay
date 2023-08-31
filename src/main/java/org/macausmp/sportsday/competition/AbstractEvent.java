@@ -10,17 +10,12 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.event.CompetitionEndEvent;
 import org.macausmp.sportsday.gui.GUIManager;
-import org.macausmp.sportsday.util.CustomizeMusickit;
-import org.macausmp.sportsday.util.PlayerCustomize;
-import org.macausmp.sportsday.util.PlayerData;
-import org.macausmp.sportsday.util.TextUtil;
+import org.macausmp.sportsday.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class AbstractEvent implements IEvent {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
@@ -32,6 +27,7 @@ public abstract class AbstractEvent implements IEvent {
     private final World world;
     private Stage stage = Stage.IDLE;
     private final List<PlayerData> players = new ArrayList<>();
+    private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
 
     public AbstractEvent(String id) {
         this.id = id;
@@ -73,6 +69,7 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void setup() {
+        PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
         players.clear();
@@ -85,10 +82,11 @@ public abstract class AbstractEvent implements IEvent {
             if (!SportsDay.REFEREE.hasPlayer(p)) p.getInventory().clear();
             p.clearActivePotionEffects();
             p.setFireTicks(0);
+            p.setHealth(20);
             p.teleport(location);
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
-            p.getInventory().setItem(4, CompetitionListener.SPRAY);
+            p.getInventory().setItem(4, ItemUtil.SPRAY);
         });
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
@@ -121,14 +119,13 @@ public abstract class AbstractEvent implements IEvent {
     @Override
     public void end(boolean force) {
         setStage(Stage.ENDED);
-        Bukkit.getPluginManager().callEvent(new CompetitionEndEvent(this, force));
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
                 if (stage == Stage.ENDED) {
-                    Competitions.setCurrentlyCompetition(null);
+                    Competitions.setCurrentlyEvent(null);
                     setStage(Stage.IDLE);
                     Bukkit.getOnlinePlayers().forEach(p -> {
                         p.teleport(location);
@@ -137,7 +134,8 @@ public abstract class AbstractEvent implements IEvent {
                     Competitions.getOnlinePlayers().forEach(d -> {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
-                        d.getPlayer().getInventory().setItem(4, CompetitionListener.SPRAY);
+                        d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
+                        d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
                     });
                     getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
                         if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
@@ -150,7 +148,7 @@ public abstract class AbstractEvent implements IEvent {
             CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
             if (musickit != null) {
                 Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())), musickit.getName()));
+                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
             }
         }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.ended_message"));
@@ -158,17 +156,20 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * extra event on {@link IEvent#setup()}
+     * Called when the event sets up
+     * @see IEvent#setup()
      */
     protected abstract void onSetup();
 
     /**
-     * extra event on {@link IEvent#start()}
+     * Called when the event starts
+     * @see IEvent#start()
      */
     protected abstract void onStart();
 
     /**
-     * extra event on {@link IEvent#end(boolean)}}
+     * Called when the event ends
+     * @see IEvent#end(boolean)
      */
     protected abstract void onEnd(boolean force);
 
@@ -178,7 +179,7 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * Set the current competition stage
+     * Set the current event stage
      * @param stage new stage
      */
     protected void setStage(Stage stage) {
@@ -186,16 +187,49 @@ public abstract class AbstractEvent implements IEvent {
         GUIManager.COMPETITION_INFO_GUI.update();
     }
 
+    @Override
+    public void practice(@NotNull Player p) {
+        PRACTICE.put(p, this);
+        p.teleport(location);
+        p.setBedSpawnLocation(location, true);
+        p.getInventory().clear();
+        PlayerCustomize.suitUp(p);
+        p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
+        p.sendMessage(Component.translatable("player.practice.teleport.venue").args(name));
+        p.playSound(p, org.bukkit.Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+        onPractice(p);
+    }
+
+    protected abstract void onPractice(Player p);
+
+    public static void quitPractice(Player p) {
+        PRACTICE.remove(p);
+        if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
+        p.teleport(p.getWorld().getSpawnLocation());
+        p.getInventory().clear();
+        PlayerCustomize.suitUp(p);
+        p.getInventory().setItem(3, ItemUtil.MENU);
+        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+    }
+
+    public static <T extends IEvent> boolean inPractice(Player p, T event) {
+        return PRACTICE.containsKey(p) && PRACTICE.get(p).equals(event);
+    }
+
+    public static boolean inPractice(Player p) {
+        return PRACTICE.containsKey(p);
+    }
+
     /**
-     * Get the list of {@link PlayerData} of current competition.
-     * @return list of {@link PlayerData} of current competition
+     * Get the list of {@link PlayerData} of current event
+     * @return list of {@link PlayerData} of current event
      */
     public final List<PlayerData> getPlayerDataList() {
         return players;
     }
 
     /**
-     * Add a {@link BukkitTask} to this competition
+     * Add a {@link BukkitTask} to this event
      * @param task {@link BukkitTask} to add
      */
     protected BukkitTask addRunnable(BukkitTask task) {

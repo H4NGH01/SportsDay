@@ -11,10 +11,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.CustomizeGraffitiSpray;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -53,6 +53,7 @@ public class GraffitiSprayGUI extends AbstractGUI {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));
                 stack.lore(lore);
+                stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
             }
@@ -61,40 +62,27 @@ public class GraffitiSprayGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameButton(item, "graffiti")) {
+        if (ItemUtil.isSameItem(item, "graffiti")) {
             PlayerCustomize.setGraffitiSpray(p, CustomizeGraffitiSpray.values()[e.getSlot() - START_INDEX]);
-        } else if (GUIButton.isSameButton(item, reset())) {
+        } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.setGraffitiSpray(p, null);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
         update();
     }
 
-    private @NotNull ItemStack graffiti(CustomizeGraffitiSpray graffiti) {
-        ItemStack stack = new ItemStack(Material.PAINTING);
-        stack.editMeta(meta -> {
-            meta.displayName(graffiti.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.select")));
-            meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "graffiti");
-            meta.getPersistentDataContainer().set(GRAFFITI_SPRAY, PersistentDataType.STRING, graffiti.name());
-        });
+    private @NotNull ItemStack graffiti(@NotNull CustomizeGraffitiSpray graffiti) {
+        ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(), "gui.select");
+        stack.editMeta(meta -> meta.getPersistentDataContainer().set(GRAFFITI_SPRAY, PersistentDataType.STRING, graffiti.name()));
         return stack;
     }
 
     private @NotNull ItemStack reset() {
-        ItemStack stack = new ItemStack(Material.BARRIER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize.graffiti_spray.reset")));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
-        });
-        return stack;
+        return ItemUtil.item(Material.BARRIER, "reset", "gui.customize.graffiti_spray.reset");
     }
 }

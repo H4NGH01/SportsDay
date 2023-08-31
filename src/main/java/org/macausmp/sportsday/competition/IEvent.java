@@ -3,7 +3,7 @@ package org.macausmp.sportsday.competition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.macausmp.sportsday.util.PlayerHolder;
 
@@ -66,12 +66,6 @@ public interface IEvent extends Listener {
     void end(boolean force);
 
     /**
-     * Listener call from {@link CompetitionListener}
-     * @param event {@link Event} given from {@link CompetitionListener}
-     */
-    <T extends Event> void onEvent(T event);
-
-    /**
      * Get the current event stage
      * @return Current stage of event
      */
@@ -82,4 +76,10 @@ public interface IEvent extends Listener {
      * @return Leaderboard of event
      */
     List<? extends PlayerHolder> getLeaderboard();
+
+    /**
+     * Teleport player to event location and sets up practice environment for the player
+     * @param player Who going to practice this event
+     */
+    void practice(Player player);
 }

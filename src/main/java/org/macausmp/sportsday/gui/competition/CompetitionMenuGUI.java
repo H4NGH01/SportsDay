@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 
-public class MenuGUI extends AbstractGUI {
-    public MenuGUI() {
+public class CompetitionMenuGUI extends AbstractGUI {
+    public CompetitionMenuGUI() {
         super(45, Component.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);
         getInventory().setItem(13, GUIButton.PLAYER_LIST);

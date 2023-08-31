@@ -14,11 +14,10 @@ import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.ColorableArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -77,6 +76,7 @@ public class ClothingTrimGUI extends AbstractGUI {
                     List<Component> lore = new ArrayList<>();
                     lore.add(TextUtil.text(Component.translatable("gui.selected")));
                     material2.lore(lore);
+                    material2.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     material2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                     break;
                 }
@@ -90,6 +90,7 @@ public class ClothingTrimGUI extends AbstractGUI {
                     List<Component> lore = new ArrayList<>();
                     lore.add(TextUtil.text(Component.translatable("gui.selected")));
                     pattern2.lore(lore);
+                    pattern2.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     pattern2.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                     break;
                 }
@@ -99,16 +100,16 @@ public class ClothingTrimGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        if (GUIButton.isSameButton(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameButton(item, "select_material")) {
+        if (ItemUtil.isSameItem(item, "select_material")) {
             PlayerCustomize.setClothTrimMaterial(p, slot, item.getType());
-        } else if (GUIButton.isSameButton(item, "select_pattern")) {
+        } else if (ItemUtil.isSameItem(item, "select_pattern")) {
             PlayerCustomize.setClothTrimPattern(p, slot, item.getType());
-        } else if (GUIButton.isSameButton(item, reset())) {
+        } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.resetClothTrim(p, slot);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -117,27 +118,11 @@ public class ClothingTrimGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack material(Material material) {
-        ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.select")));
-            meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "select_material");
-        });
-        return stack;
+        return ItemUtil.item(material, "select_material", "gui.select");
     }
 
     private @NotNull ItemStack pattern(Material material) {
-        ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.select")));
-            meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "select_pattern");
-        });
-        return stack;
+        return ItemUtil.item(material, "select_pattern", "gui.select");
     }
 
     private @NotNull ItemStack present() {
@@ -148,11 +133,6 @@ public class ClothingTrimGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack reset() {
-        ItemStack stack = new ItemStack(Material.BARRIER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_trim"))));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
-        });
-        return stack;
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_trim")));
     }
 }

@@ -14,53 +14,65 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.jetbrains.annotations.NotNull;
 
 public class ElytraRacing extends AbstractTrackEvent {
+    private static final ItemStack ELYTRA = elytra();
+    private static final ItemStack FIREWORK = firework();
+
     public ElytraRacing() {
         super("elytra_racing");
     }
 
     @Override
-    public void onSetup() {
-        ItemStack elytra = new ItemStack(Material.ELYTRA);
-        elytra.editMeta(meta -> {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-            meta.setUnbreakable(true);
-        });
-        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytra));
+    protected void onSetup() {
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, ELYTRA));
     }
 
     @Override
-    public void onStart() {
-        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
-        firework.setAmount(64);
-        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
-        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(0, firework));
+    protected void onStart() {
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(0, FIREWORK));
     }
 
     @Override
     protected void onEnd(boolean force) {
     }
 
+    @Override
+    protected void onPractice(@NotNull Player p) {
+        p.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
+        p.getInventory().setItem(0, FIREWORK);
+    }
+
     @EventHandler
     public void onElytraBoost(@NotNull PlayerElytraBoostEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
-        Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
         e.setShouldConsume(false);
     }
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this || getStage() != Stage.STARTED) return;
+        IEvent event = Competitions.getCurrentlyEvent();
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+        if ((event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) || inPractice(p, this)) {
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onDropFirework(@NotNull PlayerDropItemEvent e) {
-        if (Competitions.getCurrentlyCompetition() == null || Competitions.getCurrentlyCompetition() != this) return;
-        Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
         if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+    }
+
+    private static @NotNull ItemStack elytra() {
+        ItemStack elytra = new ItemStack(Material.ELYTRA);
+        elytra.editMeta(meta -> {
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+            meta.setUnbreakable(true);
+        });
+        return elytra;
+    }
+
+    private static @NotNull ItemStack firework() {
+        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
+        firework.setAmount(64);
+        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
+        return firework;
     }
 }

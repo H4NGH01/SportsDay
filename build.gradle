@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.macausmp'
-version = '2.4.2-BETA'
+version = '2.5-BETA'
 
 repositories {
     mavenCentral()
@@ -33,6 +33,7 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        //noinspection GroovyAssignabilityCheck, GroovyAccessibility
         options.release = targetJavaVersion
     }
 }

@@ -90,7 +90,7 @@ public class CompetitionCommand implements IPluginCommand {
                         }
                         if (Competitions.containPlayer(p)) {
                             if (args.length == 2) {
-                                sender.sendMessage(Component.translatable("score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
+                                sender.sendMessage(Component.translatable("player.score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
                                 return;
                             }
                             int score;
@@ -106,7 +106,7 @@ public class CompetitionCommand implements IPluginCommand {
                             }
                             PlayerData data = Competitions.getPlayerData(p.getUniqueId());
                             data.setScore(score);
-                            sender.sendMessage(Component.translatable("score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
+                            sender.sendMessage(Component.translatable("player.score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
                         } else {
                             sender.sendMessage(Component.translatable("player.unregistered").args(Component.text(p.getName())));
                         }
@@ -116,9 +116,9 @@ public class CompetitionCommand implements IPluginCommand {
                 }
                 case "info" -> {
                     sender.sendMessage(Component.translatable("gui.info.title"));
-                    boolean b = Competitions.getCurrentlyCompetition() != null;
-                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyCompetition().getName() : TextUtil.convert(Component.translatable("gui.none"))));
-                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyCompetition().getStage().getName()));
+                    boolean b = Competitions.getCurrentlyEvent() != null;
+                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getName() : TextUtil.convert(Component.translatable("gui.none"))));
+                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentlyEvent().getStage().getName()));
                     sender.sendMessage(Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
                     Competitions.getPlayerData().forEach(d -> pl.add(d.getName()));

@@ -2,7 +2,6 @@ package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -13,11 +12,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.IPageableGUI;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.PLAYER_LIST_SELECTED);
+        getInventory().setItem(1, ItemUtil.addEffect(GUIButton.PLAYER_LIST));
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
@@ -61,15 +60,15 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
         if (event.getInventory().getHolder() instanceof PlayerListGUI gui) {
-            if (GUIButton.isSameButton(item, "player_icon")) {
+            if (ItemUtil.isSameItem(item, "player_icon")) {
                 SkullMeta meta = (SkullMeta) item.getItemMeta();
                 p.openInventory(new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
                 return;
             }
-            if (GUIButton.isSameButton(item, GUIButton.NEXT_PAGE)) {
+            if (ItemUtil.isSameItem(item, GUIButton.NEXT_PAGE)) {
                 p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                 gui.nextPage();
-            } else if (GUIButton.isSameButton(item, GUIButton.PREVIOUS_PAGE)) {
+            } else if (ItemUtil.isSameItem(item, GUIButton.PREVIOUS_PAGE)) {
                 p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                 gui.previousPage();
             }
@@ -83,9 +82,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     }
 
     private @NotNull ItemStack pages() {
-        ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
-        stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
-        return stack;
+        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, null, Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())));
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
@@ -101,7 +98,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             lore.add(Component.text(""));
             lore.add(TextUtil.text(Component.translatable("gui.player_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "player_icon");
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });
         return icon;
     }

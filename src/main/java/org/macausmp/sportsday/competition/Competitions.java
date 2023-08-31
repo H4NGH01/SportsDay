@@ -2,7 +2,6 @@ package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.event.CompetitionSetupEvent;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 import org.macausmp.sportsday.util.PlayerData;
@@ -28,7 +26,7 @@ public final class Competitions {
     public static final IEvent PARKOUR = register(new Parkour());
     public static final IEvent SUMO = register(new Sumo());
     private static final List<PlayerData> PLAYERS = new ArrayList<>();
-    private static IEvent CURRENTLY_COMPETITION;
+    private static IEvent CURRENTLY_EVENT;
     private static int NUMBER = 1;
     private static final List<Integer> REGISTERED_NUMBER_LIST = new ArrayList<>();
 
@@ -69,25 +67,24 @@ public final class Competitions {
      * @return True if competition successfully started
      */
     public static boolean start(CommandSender sender, String id) {
-        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
+        if (getCurrentlyEvent() != null && getCurrentlyEvent().getStage() != Stage.ENDED) {
             sender.sendMessage(Component.translatable("competition.already_in_progress").color(NamedTextColor.RED));
             return false;
         }
-        for (IEvent competition : COMPETITIONS) {
-            if (competition.getID().equals(id)) {
-                if (!competition.isEnable()) {
+        for (IEvent event : COMPETITIONS) {
+            if (event.getID().equals(id)) {
+                if (!event.isEnable()) {
                     sender.sendMessage(Component.translatable("competition.event_disabled").color(NamedTextColor.RED));
                     return false;
                 }
                 int i = getOnlinePlayers().size();
-                if (i >= competition.getLeastPlayersRequired()) {
+                if (i >= event.getLeastPlayersRequired()) {
                     sender.sendMessage(Component.translatable("competition.setting_up").color(NamedTextColor.GREEN));
-                    setCurrentlyCompetition(competition);
-                    competition.setup();
-                    Bukkit.getPluginManager().callEvent(new CompetitionSetupEvent(competition));
+                    setCurrentlyEvent(event);
+                    event.setup();
                     return true;
                 } else {
-                    sender.sendMessage(Component.translatable("competition.not_enough_player_required").args(Component.text(competition.getLeastPlayersRequired())).color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("competition.not_enough_player_required").args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
                     return false;
                 }
             }
@@ -101,8 +98,8 @@ public final class Competitions {
      * @param sender who end the competition
      */
     public static void forceEnd(CommandSender sender) {
-        if (getCurrentlyCompetition() != null && getCurrentlyCompetition().getStage() != Stage.ENDED) {
-            getCurrentlyCompetition().end(true);
+        if (getCurrentlyEvent() != null && getCurrentlyEvent().getStage() != Stage.ENDED) {
+            getCurrentlyEvent().end(true);
             sender.sendMessage(Component.translatable("competition.force_ended").color(NamedTextColor.GREEN));
         } else {
             sender.sendMessage(Component.translatable("competition.not_in_progress").color(NamedTextColor.RED));
@@ -110,19 +107,19 @@ public final class Competitions {
     }
 
     /**
-     * Get current competition
-     * @return current competition
+     * Get current event
+     * @return current event
      */
-    public static IEvent getCurrentlyCompetition() {
-        return CURRENTLY_COMPETITION;
+    public static IEvent getCurrentlyEvent() {
+        return CURRENTLY_EVENT;
     }
 
     /**
-     * Set current competition
-     * @param competition new competition
+     * Set current event
+     * @param event new event
      */
-    public static void setCurrentlyCompetition(IEvent competition) {
-        CURRENTLY_COMPETITION = competition;
+    public static void setCurrentlyEvent(IEvent event) {
+        CURRENTLY_EVENT = event;
     }
 
     /**
@@ -154,6 +151,7 @@ public final class Competitions {
                 if (data.getUUID().equals(player.getUniqueId())) {
                     PLAYER_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
+                    if (getCurrentlyEvent() != null) ((AbstractEvent) getCurrentlyEvent()).getPlayerDataList().remove(data);
                     PLAYERS.remove(data);
                     GUIManager.COMPETITION_INFO_GUI.update();
                     PlayerListGUI.updateGUI();
