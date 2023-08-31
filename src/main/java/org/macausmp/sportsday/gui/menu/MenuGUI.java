@@ -27,7 +27,6 @@ public class MenuGUI extends AbstractGUI {
         getInventory().setItem(0, GUIButton.GUIDEBOOK);
         getInventory().setItem(1, GUIButton.HOME);
         getInventory().setItem(2, GUIButton.PRACTICE);
-        getInventory().setItem(8, GUIButton.PERSONAL_SETTINGS);
     }
 
     @Override
@@ -51,8 +50,6 @@ public class MenuGUI extends AbstractGUI {
             if (Competitions.getCurrentlyEvent() == null) {
                 p.openInventory(new PracticeGUI().getInventory());
             }
-        } else if (ItemUtil.isSameItem(item, GUIButton.PERSONAL_SETTINGS)) {
-            p.openInventory(new PersonalSettingsGUI(p).getInventory());
         }
     }
 

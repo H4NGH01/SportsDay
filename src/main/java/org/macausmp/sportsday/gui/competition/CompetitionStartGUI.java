@@ -12,7 +12,6 @@ import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.SkullTextureUtil;
 
 public class CompetitionStartGUI extends AbstractGUI {
     public CompetitionStartGUI() {
@@ -50,7 +49,7 @@ public class CompetitionStartGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {
-        ItemStack stack = ItemUtil.head(SkullTextureUtil.START, "start_competition", "gui.start_competition");
+        ItemStack stack = ItemUtil.head(ItemUtil.START, "start_competition", "gui.start_competition");
         stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }

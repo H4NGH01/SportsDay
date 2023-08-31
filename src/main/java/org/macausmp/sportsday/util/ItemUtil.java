@@ -1,11 +1,15 @@
 package org.macausmp.sportsday.util;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +18,10 @@ import org.macausmp.sportsday.SportsDay;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-public class ItemUtil {
+@SuppressWarnings("SpellCheckingInspection")
+public final class ItemUtil {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     public static final NamespacedKey ITEM_ID = Objects.requireNonNull(NamespacedKey.fromString("item_id", PLUGIN));
     public static final NamespacedKey COMPETITION_ID = Objects.requireNonNull(NamespacedKey.fromString("competition_id", PLUGIN));
@@ -24,6 +30,9 @@ public class ItemUtil {
     public static final ItemStack QUIT_PRACTICE = ItemUtil.item(Material.BARRIER, "quit_practice", "item.quit_practice", "item.quit_practice_lore");
     public static final ItemStack CUSTOMIZE = ItemUtil.item(Material.CHEST, "customize", "item.customize", "item.customize_lore1", "item.customize_lore2");
     public static final ItemStack SPRAY = ItemUtil.item(Material.DRAGON_BREATH, "graffiti_spray", "item.spray", "item.spray_lore1", "item.spray_lore2", "item.spray_lore3");
+
+    public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";
+
 
     public static @NotNull ItemStack item(@NotNull ItemStack stack, String id, Object display, Object... lore) {
         ItemStack clone = stack.clone();
@@ -59,8 +68,15 @@ public class ItemUtil {
         return item(new ItemStack(material), id, display, lore);
     }
 
-    public static @NotNull ItemStack head(String skin, String id, Object display, Object... lore) {
-        return item(SkullTextureUtil.getSkull(skin), id, display, lore);
+    public static @NotNull ItemStack head(String value, String id, Object display, Object... lore) {
+        ItemStack stack = item(Material.PLAYER_HEAD, id, display, lore);
+        if (value == null || value.isEmpty()) return stack;
+        stack.editMeta(SkullMeta.class, meta -> {
+            PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
+            profile.getProperties().add(new ProfileProperty("textures", value));
+            meta.setPlayerProfile(profile);
+        });
+        return stack;
     }
 
     @Contract("_ -> param1")
