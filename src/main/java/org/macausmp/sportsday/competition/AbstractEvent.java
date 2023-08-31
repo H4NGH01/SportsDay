@@ -196,7 +196,7 @@ public abstract class AbstractEvent implements IEvent {
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
         p.sendMessage(Component.translatable("player.practice.teleport.venue").args(name));
-        p.playSound(p, org.bukkit.Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         onPractice(p);
     }
 
@@ -218,6 +218,11 @@ public abstract class AbstractEvent implements IEvent {
 
     public static boolean inPractice(Player p) {
         return PRACTICE.containsKey(p);
+    }
+
+    public static <T extends IEvent> T getPracticeEvent(Player p) {
+        //noinspection unchecked
+        return (T) PRACTICE.get(p);
     }
 
     /**

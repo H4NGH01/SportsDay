@@ -114,7 +114,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onBreak(@NotNull VehicleDestroyEvent e) {
-        e.setCancelled(true);
+        if (!e.getVehicle().getPassengers().isEmpty()) e.setCancelled(true);
     }
 
     private @NotNull Boat boat(@NotNull Player p) {

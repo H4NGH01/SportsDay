@@ -1,8 +1,13 @@
 package org.macausmp.sportsday.competition;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -85,7 +90,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             loc.setY(loc.getY() - 0.5f);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 lapMap.put(data, lapMap.get(data) + 1);
-                p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 if (lapMap.get(data) < laps) {
                     p.teleport(getLocation());
                     p.setBedSpawnLocation(getLocation(), true);
@@ -127,7 +132,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             if (loc.getBlock().getType() == FINISH_LINE) {
-                p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 p.teleport(getLocation());
                 p.setBedSpawnLocation(getLocation(), true);
                 p.sendMessage(Component.translatable("player.practice.finished").args(getName()));

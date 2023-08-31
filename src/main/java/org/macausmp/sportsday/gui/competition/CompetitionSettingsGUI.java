@@ -1,8 +1,9 @@
 package org.macausmp.sportsday.gui.competition;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -54,7 +55,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
                     PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
                     PLUGIN.saveConfig();
                     GUIManager.COMPETITION_SETTINGS_GUI.update();
-                    p.playSound(p, event.isEnable() ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                    p.playSound(Sound.sound(Key.key(event.isEnable() ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
                     return;
                 }
             }

@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -81,7 +82,7 @@ public final class CompetitionListener implements Listener {
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
         IEvent current = Competitions.getCurrentlyEvent();
-        if ((current != null && current.getStage() == Stage.STARTED && Competitions.containPlayer(p)) || AbstractEvent.inPractice(p)) {
+        if ((current instanceof ITrackEvent && current.getStage() == Stage.STARTED && Competitions.containPlayer(p)) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
             Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
             spawnpoint(p, loc);
@@ -94,7 +95,7 @@ public final class CompetitionListener implements Listener {
         if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
             SPAWNPOINT_LIST.add(player.getUniqueId());
             player.setBedSpawnLocation(player.getLocation(), true);
-            player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+            player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
         }
     }
@@ -144,6 +145,7 @@ public final class CompetitionListener implements Listener {
         Player p = e.getPlayer();
         if (ItemUtil.isSameItem(e.getItem(), ItemUtil.QUIT_PRACTICE)) {
             AbstractEvent.quitPractice(p);
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         }
     }
 
@@ -154,6 +156,7 @@ public final class CompetitionListener implements Listener {
             Player p = e.getPlayer();
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
                 p.openInventory(new GraffitiSprayGUI(p).getInventory());
+                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
                 if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
                     p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
@@ -220,18 +223,21 @@ public final class CompetitionListener implements Listener {
     public void onOpenGUI(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
         if (ItemUtil.hasID(e.getItem())) e.setCancelled(true);
+        Player p = e.getPlayer();
         if (ItemUtil.isSameItem(e.getItem(), ItemUtil.MENU)) {
-            e.getPlayer().openInventory(new MenuGUI().getInventory());
+            p.openInventory(new MenuGUI().getInventory());
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         if (ItemUtil.isSameItem(e.getItem(), ItemUtil.CUSTOMIZE)) {
-            e.getPlayer().openInventory(new CustomizeMenuGUI().getInventory());
+            p.openInventory(new CustomizeMenuGUI().getInventory());
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         if (ItemUtil.isSameItem(e.getItem(), ItemUtil.OP_BOOK)) {
-            Player p = e.getPlayer();
             if (p.isOp()) {
                 p.openInventory(GUIManager.MENU_GUI.getInventory());
+                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
                 return;
             }
             // Easter egg, happen if player use the book without op permission
