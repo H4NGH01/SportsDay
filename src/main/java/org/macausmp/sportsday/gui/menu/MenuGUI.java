@@ -1,9 +1,10 @@
 package org.macausmp.sportsday.gui.menu;
 
 import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -35,12 +36,13 @@ public class MenuGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         if (ItemUtil.isSameItem(item, GUIButton.GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);
         } else if (ItemUtil.isSameItem(item, GUIButton.HOME)) {
             if (Competitions.getCurrentlyEvent() == null) {
                 p.teleport(p.getWorld().getSpawnLocation());
+                p.playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:entity.bat.takeoff"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), net.kyori.adventure.sound.Sound.Emitter.self());
                 p.getInventory().clear();
                 PlayerCustomize.suitUp(p);
                 p.getInventory().setItem(3, ItemUtil.MENU);

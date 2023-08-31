@@ -1,11 +1,12 @@
 package org.macausmp.sportsday.gui.competition;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
-    private static final List<PlayerListGUI> GUIS = new ArrayList<>();
+    private static final List<PlayerListGUI> HANDLER = new ArrayList<>();
     private int page = 0;
 
     public PlayerListGUI() {
@@ -42,7 +43,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
         getInventory().setItem(13, pages());
         getInventory().setItem(17, GUIButton.NEXT_PAGE);
-        GUIS.add(this);
+        HANDLER.add(this);
     }
 
     @Override
@@ -66,17 +67,17 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
                 return;
             }
             if (ItemUtil.isSameItem(item, GUIButton.NEXT_PAGE)) {
-                p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+                p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
                 gui.nextPage();
             } else if (ItemUtil.isSameItem(item, GUIButton.PREVIOUS_PAGE)) {
-                p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
+                p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
                 gui.previousPage();
             }
         }
     }
 
     public static void updateGUI() {
-        for (PlayerListGUI gui : GUIS) {
+        for (PlayerListGUI gui : HANDLER) {
             gui.update();
         }
     }

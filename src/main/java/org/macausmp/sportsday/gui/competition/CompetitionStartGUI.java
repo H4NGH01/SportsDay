@@ -1,7 +1,8 @@
 package org.macausmp.sportsday.gui.competition;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -45,7 +46,10 @@ public class CompetitionStartGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, "start_competition")) p.playSound(p, Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING)) ? Sound.ENTITY_ARROW_HIT_PLAYER : Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+        if (ItemUtil.isSameItem(item, "start_competition")) {
+            boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING));
+            p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+        }
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {

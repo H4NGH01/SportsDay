@@ -1,9 +1,10 @@
 package org.macausmp.sportsday.gui.customize;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -62,7 +63,7 @@ public class ClothingCustomizeGUI extends AbstractGUI {
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
-            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         if (item.getType().getEquipmentSlot().isArmor()) {
@@ -71,10 +72,12 @@ public class ClothingCustomizeGUI extends AbstractGUI {
                     PlayerCustomize.setClothItem(p, item.getType());
                 } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
                     p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
+                    p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
                     return;
                 }
             } else if (ItemUtil.isSameItem(item, "cloth") && e.isRightClick()) {
                 p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
+                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             } else {
                 return;
             }
@@ -86,7 +89,7 @@ public class ClothingCustomizeGUI extends AbstractGUI {
                 case 44 -> PlayerCustomize.resetCloth(p, EquipmentSlot.FEET);
             }
         }
-        p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         update();
         PlayerCustomize.suitUp(p);
     }

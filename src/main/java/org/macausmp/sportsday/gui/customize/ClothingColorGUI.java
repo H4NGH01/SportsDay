@@ -1,10 +1,11 @@
 package org.macausmp.sportsday.gui.customize;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -18,8 +19,6 @@ import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class ClothingColorGUI extends AbstractGUI {
@@ -50,9 +49,7 @@ public class ClothingColorGUI extends AbstractGUI {
             if (color == null || DyeColor.getByColor(color) == null) return;
             if (dye == null) break;
             if (dye.getType().name().equals(Objects.requireNonNull(DyeColor.getByColor(color)).name() + "_DYE")) {
-                List<Component> lore = new ArrayList<>();
-                lore.add(TextUtil.text(Component.translatable("gui.selected")));
-                dye.lore(lore);
+                dye.editMeta(meta -> meta.displayName(TextUtil.text(Component.translatable("gui.selected"))));
                 dye.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 dye.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
@@ -64,7 +61,7 @@ public class ClothingColorGUI extends AbstractGUI {
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
         if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         String s = item.getType().name();
@@ -73,7 +70,7 @@ public class ClothingColorGUI extends AbstractGUI {
         } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.setClothColor(p, slot, null);
         }
-        p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
         PlayerCustomize.suitUp(p);
     }

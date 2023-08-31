@@ -1,8 +1,9 @@
 package org.macausmp.sportsday.gui.customize;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -60,7 +61,7 @@ public class ProjectileTrailGUI extends AbstractGUI {
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
-            p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         if (ItemUtil.isSameItem(item, "projectile_trail")) {
@@ -68,7 +69,7 @@ public class ProjectileTrailGUI extends AbstractGUI {
         } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.setProjectileTrail(p, null);
         }
-        p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
