@@ -8,12 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.CustomizeParticleEffect;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -50,6 +49,7 @@ public class WalkingEffectGUI extends AbstractGUI {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));
                 stack.lore(lore);
+                stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
             }
@@ -58,14 +58,14 @@ public class WalkingEffectGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
-        if (GUIButton.isSameItem(item, "walking_effect")) {
+        if (ItemUtil.isSameItem(item, "walking_effect")) {
             PlayerCustomize.setWalkingEffect(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
-        } else if (GUIButton.isSameItem(item, reset())) {
+        } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.setWalkingEffect(p, null);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -73,24 +73,10 @@ public class WalkingEffectGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack effect(@NotNull CustomizeParticleEffect effect) {
-        ItemStack stack = new ItemStack(effect.getMaterial());
-        stack.editMeta(meta -> {
-            meta.displayName(effect.getName());
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.select")));
-            meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "walking_effect");
-        });
-        return stack;
+        return ItemUtil.item(effect.getMaterial(), "walking_effect", effect.getName(), "gui.select");
     }
 
     private @NotNull ItemStack reset() {
-        ItemStack stack = new ItemStack(Material.BARRIER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize.walking_effect.reset")));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
-        });
-        return stack;
+        return ItemUtil.item(Material.BARRIER, "reset", "gui.customize.walking_effect.reset");
     }
 }

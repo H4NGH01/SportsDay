@@ -25,10 +25,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.command.CompetitionGUICommand;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
@@ -36,8 +34,8 @@ import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
 import org.macausmp.sportsday.util.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.util.CustomizeParticleEffect;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
-import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,22 +48,19 @@ public final class CompetitionListener implements Listener {
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
     public static final NamespacedKey GRAFFITI = Objects.requireNonNull(NamespacedKey.fromString("graffiti_frame", PLUGIN));
-    public static final ItemStack MENU = menu();
-    public static final ItemStack CUSTOMIZE = customize();
-    public static final ItemStack SPRAY = spray();
+    private static final List<UUID> EASTER_TRIGGER = new ArrayList<>();
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(3, MENU);
-        p.getInventory().setItem(4, CUSTOMIZE);
+        p.getInventory().setItem(3, ItemUtil.MENU);
+        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         IEvent current = Competitions.getCurrentlyEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        current.onEvent(e);
     }
 
     @EventHandler
@@ -74,9 +69,6 @@ public final class CompetitionListener implements Listener {
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
         PlayerListGUI.updateGUI();
-        IEvent current = Competitions.getCurrentlyEvent();
-        if (current == null || current.getStage() != Stage.STARTED) return;
-        current.onEvent(e);
     }
 
     @EventHandler
@@ -89,13 +81,13 @@ public final class CompetitionListener implements Listener {
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
         IEvent current = Competitions.getCurrentlyEvent();
-        if (current == null || current.getStage() != Stage.STARTED) return;
-        if (!Competitions.containPlayer(p) || !p.getGameMode().equals(GameMode.ADVENTURE)) return;
-        current.onEvent(e);
-        Location loc = e.getTo().clone();
-        loc.setY(loc.getY() - 0.5f);
-        if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) SPAWNPOINT_LIST.remove(p.getUniqueId());
-        if (loc.getWorld().getBlockAt(loc).getType() == DEATH) p.setHealth(0);
+        if ((current != null && current.getStage() == Stage.STARTED && Competitions.containPlayer(p)) || AbstractEvent.inPractice(p)) {
+            Location loc = e.getTo().clone();
+            loc.setY(loc.getY() - 0.5f);
+            spawnpoint(p, loc);
+            if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) SPAWNPOINT_LIST.remove(p.getUniqueId());
+            if (loc.getWorld().getBlockAt(loc).getType() == DEATH) p.setHealth(0);
+        }
     }
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
@@ -111,9 +103,10 @@ public final class CompetitionListener implements Listener {
     public void onHit(@NotNull EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
             IEvent current = Competitions.getCurrentlyEvent();
-            if (current != null && current == Competitions.SUMO) {
-                SumoRound sumo = ((Sumo) current).getSumoStage().getCurrentRound();
-                if (sumo != null && sumo.getStatus() == SumoRound.RoundStatus.STARTED && sumo.containPlayer(player) && sumo.containPlayer(damager)) {
+            if (current == Competitions.SUMO) {
+                SumoRound round = ((Sumo) current).getSumoStage().getCurrentRound();
+                boolean b = round != null && round.getStatus() == SumoRound.RoundStatus.STARTED && round.containPlayer(player) && round.containPlayer(damager);
+                if (b || AbstractEvent.inPractice(player, Competitions.SUMO)) {
                     e.setDamage(0);
                 } else {
                     e.setCancelled(true);
@@ -146,15 +139,24 @@ public final class CompetitionListener implements Listener {
     }
 
     @EventHandler
+    public void onQuitPractice(@NotNull PlayerInteractEvent e) {
+        if (e.getItem() == null) return;
+        Player p = e.getPlayer();
+        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.QUIT_PRACTICE)) {
+            AbstractEvent.quitPractice(p);
+        }
+    }
+
+    @EventHandler
     public void onSpray(@NotNull PlayerInteractEvent e) {
-        if (e.getItem() != null && GUIButton.isSameItem(e.getItem(), SPRAY)) {
+        if (e.getItem() != null && ItemUtil.isSameItem(e.getItem(), ItemUtil.SPRAY)) {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
                 p.openInventory(new GraffitiSprayGUI(p).getInventory());
             } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                if (p.getCooldown(SPRAY.getType()) > 0 && !p.isOp()) {
-                    p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
+                if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
+                    p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
                     return;
                 }
                 CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
@@ -169,7 +171,7 @@ public final class CompetitionListener implements Listener {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            if (!p.isOp()) p.setCooldown(SPRAY.getType(), 600);
+                            if (!p.isOp()) p.setCooldown(ItemUtil.SPRAY.getType(), 600);
                             ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
                             // Remove item frame that should not appear in an illegal position
                             if (!frame.getLocation().add(frame.getFacing().getOppositeFace().getDirection()).getBlock().getType().isOccluding()) {
@@ -191,12 +193,12 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onChangeSpray(@NotNull PlayerInteractEntityEvent e) {
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-        if (GUIButton.isSameItem(item, SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
+        if (ItemUtil.isSameItem(item, ItemUtil.SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
             if (!frame.getPersistentDataContainer().has(GRAFFITI)) return;
             e.setCancelled(true);
             Player p = e.getPlayer();
-            if (p.getCooldown(SPRAY.getType()) > 0 && !p.isOp()) {
-                p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
+            if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
+                p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
                 return;
             }
             CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
@@ -207,30 +209,26 @@ public final class CompetitionListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!p.isOp()) p.setCooldown(SPRAY.getType(), 600);
+                    if (!p.isOp()) p.setCooldown(ItemUtil.SPRAY.getType(), 600);
                     frame.setItem(map, false);
                 }
             }.runTaskLater(PLUGIN, 30L);
         }
     }
 
-    private static final List<UUID> EASTER_TRIGGER = new ArrayList<>();
-
     @EventHandler
     public void onOpenGUI(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
-        if (GUIButton.isSameItem(e.getItem(), MENU)) {
-            e.setCancelled(true);
+        if (ItemUtil.hasID(e.getItem())) e.setCancelled(true);
+        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.MENU)) {
             e.getPlayer().openInventory(new MenuGUI().getInventory());
             return;
         }
-        if (GUIButton.isSameItem(e.getItem(), CUSTOMIZE)) {
-            e.setCancelled(true);
+        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.CUSTOMIZE)) {
             e.getPlayer().openInventory(new CustomizeMenuGUI().getInventory());
             return;
         }
-        if (GUIButton.isSameItem(e.getItem(), CompetitionGUICommand.OP_BOOK)) {
-            e.setCancelled(true);
+        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.OP_BOOK)) {
             Player p = e.getPlayer();
             if (p.isOp()) {
                 p.openInventory(GUIManager.MENU_GUI.getInventory());
@@ -268,44 +266,5 @@ public final class CompetitionListener implements Listener {
                 }
             }.runTaskTimer(PLUGIN, 0L, 10L);
         }
-    }
-
-    private static @NotNull ItemStack menu() {
-        ItemStack menu = new ItemStack(Material.COMPASS);
-        menu.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("item.menu")));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("item.menu_lore")));
-            meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "menu");
-        });
-        return menu;
-    }
-
-    private static @NotNull ItemStack customize() {
-        ItemStack customize = new ItemStack(Material.CHEST);
-        customize.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("item.customize")));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("item.customize_lore1")));
-            lore.add(TextUtil.text(Component.translatable("item.customize_lore2")));
-            meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize");
-        });
-        return customize;
-    }
-
-    private static @NotNull ItemStack spray() {
-        ItemStack spray = new ItemStack(Material.DRAGON_BREATH);
-        spray.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("item.spray")));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("item.spray_lore1")));
-            lore.add(TextUtil.text(Component.translatable("item.spray_lore2")));
-            lore.add(TextUtil.text(Component.translatable("item.spray_lore3")));
-            meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "graffiti_spray");
-        });
-        return spray;
     }
 }

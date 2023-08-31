@@ -15,9 +15,9 @@ import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -60,20 +60,20 @@ public class ClothingCustomizeGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (item.getType().getEquipmentSlot().isArmor()) {
-            if (GUIButton.isSameItem(item, "select_cloth")) {
+            if (ItemUtil.isSameItem(item, "select_cloth")) {
                 if (e.isLeftClick()) {
                     PlayerCustomize.setClothItem(p, item.getType());
                 } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
                     p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
                     return;
                 }
-            } else if (GUIButton.isSameItem(item, "cloth") && e.isRightClick()) {
+            } else if (ItemUtil.isSameItem(item, "cloth") && e.isRightClick()) {
                 p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
             } else {
                 return;
@@ -99,7 +99,7 @@ public class ClothingCustomizeGUI extends AbstractGUI {
             lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.trim.lore")));
             meta.lore(lore);
             if (PlayerCustomize.hasClothTrim(player, slot)) meta.setTrim(new ArmorTrim(PlayerCustomize.getClothTrimMaterial(player, slot), PlayerCustomize.getClothTrimPattern(player, slot)));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "cloth");
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "cloth");
         });
         if (cloth.getItemMeta() instanceof ColorableArmorMeta) {
             cloth.editMeta(ColorableArmorMeta.class, meta -> {
@@ -118,23 +118,16 @@ public class ClothingCustomizeGUI extends AbstractGUI {
             if (cloth.getItemMeta() instanceof ColorableArmorMeta) lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "select_cloth");
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
         if (cloth.getItemMeta() instanceof ColorableArmorMeta) {
-            cloth.editMeta(ColorableArmorMeta.class, meta -> {
-                Color color = PlayerCustomize.getClothColor(player, material.getEquipmentSlot());
-                meta.setColor(color);
-            });
+            Color color = PlayerCustomize.getClothColor(player, material.getEquipmentSlot());
+            cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(color));
         }
         return cloth;
     }
 
     private @NotNull ItemStack reset(String slot) {
-        ItemStack stack = new ItemStack(Material.BARRIER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize.clothing.reset").args(Component.translatable(slot))));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
-        });
-        return stack;
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable(slot)));
     }
 }

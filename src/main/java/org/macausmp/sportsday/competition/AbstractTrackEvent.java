@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -74,21 +74,21 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         Bukkit.broadcast(c);
     }
 
-    @Override
-    public <T extends Event> void onEvent(T event) {
-        if (event instanceof PlayerMoveEvent e) {
-            Player p = e.getPlayer();
+    @EventHandler
+    public void onEvent(@NotNull PlayerMoveEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
             PlayerData data = Competitions.getPlayerData(p.getUniqueId());
             if (leaderboard.contains(data) || !lapMap.containsKey(data)) return;
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
-            CompetitionListener.spawnpoint(p, loc);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 lapMap.put(data, lapMap.get(data) + 1);
                 p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
                 if (lapMap.get(data) < laps) {
-                    p.setBedSpawnLocation(getLocation(), true);
                     p.teleport(getLocation());
+                    p.setBedSpawnLocation(getLocation(), true);
                     onCompletedLap(p);
                     Bukkit.broadcast(Component.translatable("event.player_finished_lap").args(p.displayName()).color(NamedTextColor.YELLOW));
                 } else {
@@ -108,9 +108,11 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                         Bukkit.broadcast(Component.translatable("event.third_player_finished").args(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
                         task = addRunnable(new BukkitRunnable() {
                             int i = PLUGIN.getConfig().getInt("event_end_countdown");
+
                             @Override
                             public void run() {
-                                if (i > 0) PLUGIN.getServer().sendActionBar(Component.translatable("event.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
+                                if (i > 0)
+                                    PLUGIN.getServer().sendActionBar(Component.translatable("event.end_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                                 if (i-- == 0) {
                                     PLUGIN.getServer().sendActionBar(Component.translatable("event.ended_message"));
                                     end(false);
@@ -120,6 +122,16 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                         }.runTaskTimer(PLUGIN, 0L, 20L));
                     }
                 }
+            }
+        } else if (inPractice(p, this)) {
+            Location loc = p.getLocation().clone();
+            loc.setY(loc.getY() - 0.5f);
+            if (loc.getBlock().getType() == FINISH_LINE) {
+                p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+                p.teleport(getLocation());
+                p.setBedSpawnLocation(getLocation(), true);
+                p.sendMessage(Component.translatable("player.practice.finished").args(getName()));
+                onCompletedLap(p);
             }
         }
     }

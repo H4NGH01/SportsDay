@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.competition.PlayerListGUI;
+import org.macausmp.sportsday.util.ItemUtil;
 
 public final class GUIListener implements Listener {
     @EventHandler
@@ -22,16 +23,16 @@ public final class GUIListener implements Listener {
             if (e.getInventory().getHolder() instanceof AbstractGUI gui) {
                 e.setCancelled(true);
                 ItemStack item = e.getCurrentItem();
-                if (item != null && GUIButton.hasID(item) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
-                    if (GUIButton.isSameItem(item, GUIButton.COMPETITION_INFO)) {
+                if (item != null && ItemUtil.hasID(item) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {
+                    if (ItemUtil.isSameItem(item, GUIButton.COMPETITION_INFO)) {
                         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                         p.openInventory(GUIManager.COMPETITION_INFO_GUI.getInventory());
                         return;
-                    } else if (GUIButton.isSameItem(item, GUIButton.PLAYER_LIST)) {
+                    } else if (ItemUtil.isSameItem(item, GUIButton.PLAYER_LIST)) {
                         p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f);
                         p.openInventory(new PlayerListGUI().getInventory());
                         return;
-                    } else if (GUIButton.isSameItem(item, GUIButton.START_COMPETITION)) {
+                    } else if (ItemUtil.isSameItem(item, GUIButton.START_COMPETITION)) {
                         if (Competitions.getCurrentlyEvent() != null && Competitions.getCurrentlyEvent().getStage() != Stage.ENDED) {
                             p.sendMessage(Component.translatable("competition.already_in_progress").color(NamedTextColor.RED));
                             p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
@@ -39,12 +40,13 @@ public final class GUIListener implements Listener {
                         }
                         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                         p.openInventory(GUIManager.COMPETITION_START_GUI.getInventory());
-                    } else if (GUIButton.isSameItem(item, GUIButton.END_COMPETITION)) {
+                        return;
+                    } else if (ItemUtil.isSameItem(item, GUIButton.END_COMPETITION)) {
                         boolean b = Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent().getStage() == Stage.ENDED;
                         p.playSound(p, b ? Sound.ENTITY_ENDERMAN_TELEPORT : Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                         Competitions.forceEnd(p);
                         return;
-                    } else if (GUIButton.isSameItem(item, GUIButton.COMPETITION_SETTINGS)) {
+                    } else if (ItemUtil.isSameItem(item, GUIButton.COMPETITION_SETTINGS)) {
                         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
                         p.openInventory(GUIManager.COMPETITION_SETTINGS_GUI.getInventory());
                         return;

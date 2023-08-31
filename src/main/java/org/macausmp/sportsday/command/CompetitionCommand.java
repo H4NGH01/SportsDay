@@ -90,7 +90,7 @@ public class CompetitionCommand implements IPluginCommand {
                         }
                         if (Competitions.containPlayer(p)) {
                             if (args.length == 2) {
-                                sender.sendMessage(Component.translatable("score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
+                                sender.sendMessage(Component.translatable("player.score.query").args(Component.text(p.getName()), Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
                                 return;
                             }
                             int score;
@@ -106,7 +106,7 @@ public class CompetitionCommand implements IPluginCommand {
                             }
                             PlayerData data = Competitions.getPlayerData(p.getUniqueId());
                             data.setScore(score);
-                            sender.sendMessage(Component.translatable("score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
+                            sender.sendMessage(Component.translatable("player.score.success_set").args(Component.text(p.getName()), Component.text(data.getScore())).color(NamedTextColor.GREEN));
                         } else {
                             sender.sendMessage(Component.translatable("player.unregistered").args(Component.text(p.getName())));
                         }

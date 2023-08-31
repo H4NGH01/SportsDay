@@ -7,8 +7,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.GameRule;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,6 +23,8 @@ import org.macausmp.sportsday.command.CommandManager;
 import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIListener;
+import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.ScoreboardHandler;
 
 import java.time.LocalDateTime;
@@ -31,8 +34,6 @@ import java.util.ResourceBundle;
 
 public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
-    public static NamespacedKey ITEM_ID;
-    public static NamespacedKey COMPETITION_ID;
     public static Team PLAYER;
     public static Team REFEREE;
     public static Team AUDIENCE;
@@ -54,8 +55,6 @@ public final class SportsDay extends JavaPlugin implements Listener {
         configManager.setup();
         configManager.saveConfig();
         registerTranslation();
-        ITEM_ID = NamespacedKey.fromString("item_id", this);
-        COMPETITION_ID = NamespacedKey.fromString("competition_id", this);
         Competitions.load();
         Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
         PLAYER = registerTeam(scoreboard, "player", Component.translatable("role.player"), NamedTextColor.GREEN);
@@ -119,6 +118,17 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (Competitions.getCurrentlyEvent() != null) Competitions.forceEnd(getServer().getConsoleSender());
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            p.teleport(p.getWorld().getSpawnLocation());
+            p.setGameMode(GameMode.ADVENTURE);
+        });
+        Competitions.getOnlinePlayers().forEach(d -> {
+            d.getPlayer().getInventory().clear();
+            PlayerCustomize.suitUp(d.getPlayer());
+            d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
+            d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+        });
         Competitions.save();
     }
 

@@ -2,51 +2,42 @@ package org.macausmp.sportsday.gui;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.competition.ITrackEvent;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.SkullTextureUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class GUIButton {
-    public static final ItemStack COMPETITION_INFO = item(Material.GOLD_BLOCK, "competition_info", "gui.info.title", "gui.info.lore");
-    public static final ItemStack COMPETITION_INFO_SELECTED = addEffect(COMPETITION_INFO);
-    public static final ItemStack PLAYER_LIST = item(Material.PAPER, "player_list", "gui.player_list.title", "gui.player_list.lore");
-    public static final ItemStack PLAYER_LIST_SELECTED = addEffect(PLAYER_LIST);
-    @SuppressWarnings("SpellCheckingInspection")
-    public static final ItemStack START_COMPETITION = skin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0", "start_competitions", "gui.start.title", "gui.start.lore");
-    public static final ItemStack START_COMPETITION_SELECTED = addEffect(START_COMPETITION);
-    public static final ItemStack END_COMPETITION = item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
-    public static final ItemStack COMPETITION_SETTINGS = item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");
-    public static final ItemStack COMPETITION_SETTINGS_SELECTED = addEffect(COMPETITION_SETTINGS);
+    public static final ItemStack COMPETITION_INFO = ItemUtil.item(Material.GOLD_BLOCK, "competition_info", "gui.info.title", "gui.info.lore");
+    public static final ItemStack PLAYER_LIST = ItemUtil.item(Material.PAPER, "player_list", "gui.player_list.title", "gui.player_list.lore");
+    public static final ItemStack START_COMPETITION = ItemUtil.head(SkullTextureUtil.START, "start_competitions", "gui.start.title", "gui.start.lore");
+    public static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
+    public static final ItemStack COMPETITION_SETTINGS = ItemUtil.item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");
     @SuppressWarnings("deprecation")
-    public static final ItemStack VERSION = item(Material.OAK_SIGN, "version", Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion())));
-    public static final ItemStack NEXT_PAGE = item(Material.BLUE_STAINED_GLASS_PANE, "next_page", "gui.page.next");
-    public static final ItemStack PREVIOUS_PAGE = item(Material.BLUE_STAINED_GLASS_PANE, "prev_page", "gui.page.prev");
-    public static final ItemStack BACK = item(Material.ARROW, "back", Component.translatable("gui.page.back").decoration(TextDecoration.ITALIC, false));
+    public static final ItemStack VERSION = ItemUtil.item(Material.OAK_SIGN, "version", Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion())));
+    public static final ItemStack NEXT_PAGE = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page", "gui.page.next");
+    public static final ItemStack PREVIOUS_PAGE = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page", "gui.page.prev");
+    public static final ItemStack BACK = ItemUtil.item(Material.ARROW, "back", Component.translatable("gui.page.back"));
     public static final ItemStack ELYTRA_RACING = event(Material.ELYTRA, Competitions.ELYTRA_RACING);
     public static final ItemStack ICE_BOAT_RACING = event(Material.OAK_BOAT, Competitions.ICE_BOAT_RACING);
     public static final ItemStack JAVELIN_THROW = event(Material.TRIDENT, Competitions.JAVELIN_THROW);
     public static final ItemStack OBSTACLE_COURSE = event(Material.OAK_FENCE_GATE, Competitions.OBSTACLE_COURSE);
     public static final ItemStack PARKOUR = event(Material.LEATHER_BOOTS, Competitions.PARKOUR);
     public static final ItemStack SUMO = event(Material.COD, Competitions.SUMO);
-    public static final ItemStack GUIDEBOOK = item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
-    public static final ItemStack HOME = item(Material.RED_BED, "home", Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW), "gui.menu.home.lore");
-    public static final ItemStack PRACTICE = item(Material.ARMOR_STAND, "practice", Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW), "gui.menu.practice.lore");
-    public static final ItemStack PERSONAL_SETTINGS = item(Material.REPEATER, "personal_settings", Component.translatable("gui.menu.personal_settings.title").color(NamedTextColor.YELLOW), "gui.menu.personal_settings.lore");
+    public static final ItemStack GUIDEBOOK = ItemUtil.item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
+    public static final ItemStack HOME = ItemUtil.item(Material.RED_BED, "home", Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW), "gui.menu.home.lore");
+    public static final ItemStack PRACTICE = ItemUtil.item(Material.ARMOR_STAND, "practice", Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW), "gui.menu.practice.lore");
+    public static final ItemStack PERSONAL_SETTINGS = ItemUtil.item(Material.REPEATER, "personal_settings", Component.translatable("gui.menu.personal_settings.title").color(NamedTextColor.YELLOW), "gui.menu.personal_settings.lore");
     public static final ItemStack CLOTHING = customize(Material.LEATHER_CHESTPLATE, "clothing");
     public static final ItemStack BOAT_TYPE = customize(Material.OAK_BOAT, "boat_type");
     public static final ItemStack WEAPON_SKIN = customize(Material.BONE, "weapon_skin");
@@ -54,51 +45,7 @@ public final class GUIButton {
     public static final ItemStack PROJECTILE_TRAIL = customize(Material.ARROW, "projectile_trail");
     public static final ItemStack WALKING_EFFECT = customize(Material.NETHER_STAR, "walking_effect");
     public static final ItemStack GRAFFITI_SPRAY = customize(Material.PAINTING, "graffiti_spray");
-    public static final ItemStack BOARD = item(Material.BLACK_STAINED_GLASS_PANE, null, "");
-
-    private static @NotNull ItemStack item(Material material, String id, Object display, Object... lore) {
-        ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            if (display instanceof Component c) {
-                meta.displayName(TextUtil.text(c));
-            } else if (display instanceof String s) {
-                meta.displayName(TextUtil.text(Component.translatable(s)));
-            } else {
-                throw new IllegalArgumentException("Object type must be Component or String");
-            }
-            meta.displayName(TextUtil.text(display instanceof Component ? (Component) display : Component.translatable((String) display)));
-            if (lore != null) {
-                List<Component> components = new ArrayList<>();
-                for (Object o : lore) {
-                    if (o instanceof Component c) {
-                        components.add(TextUtil.text(c));
-                    } else if (o instanceof String s) {
-                        components.add(TextUtil.text(Component.translatable(s)));
-                    } else {
-                        throw new IllegalArgumentException("Object type must be Component or String");
-                    }
-                }
-                meta.lore(components);
-            }
-            if (id != null) meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, id);
-        });
-        return stack;
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static @NotNull ItemStack skin(String skin, String id, String display, String... lore) {
-        ItemStack stack = SkullTextureUtil.getSkull(skin);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable(display)));
-            List<Component> l = new ArrayList<>();
-            for (String s : lore) {
-                l.add(TextUtil.text(Component.translatable(s)));
-            }
-            meta.lore(l);
-            if (id != null) meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, id);
-        });
-        return stack;
-    }
+    public static final ItemStack BOARD = ItemUtil.item(Material.BLACK_STAINED_GLASS_PANE, null, "");
 
     private static @NotNull ItemStack event(Material material, IEvent event) {
         ItemStack stack = new ItemStack(material);
@@ -109,8 +56,8 @@ public final class GUIButton {
                 lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
                 meta.lore(lore);
             }
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "competition");
+            meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID());
         });
         return stack;
     }
@@ -119,33 +66,8 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(material);
         stack.editMeta(meta -> {
             meta.displayName(TextUtil.text(Component.translatable("gui.customize." + customize + ".title").color(NamedTextColor.YELLOW)));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "customize_" + customize);
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "customize_" + customize);
         });
         return stack;
-    }
-
-    @Contract("_ -> param1")
-    public static @NotNull ItemStack addEffect(@NotNull ItemStack stack) {
-        ItemStack s = stack.clone();
-        s.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        s.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        return s;
-    }
-
-    public static boolean hasID(@NotNull ItemStack button) {
-        return button.hasItemMeta() && button.getItemMeta().getPersistentDataContainer().has(SportsDay.ITEM_ID, PersistentDataType.STRING);
-    }
-
-    public static boolean isSameItem(@NotNull ItemStack button, @NotNull ItemStack button2) {
-        if (!button.hasItemMeta() || !button2.hasItemMeta()) return false;
-        String id1 = button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
-        String id2 = button2.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
-        return Objects.equals(id1, id2);
-    }
-
-    public static boolean isSameItem(@NotNull ItemStack button, @NotNull String key) {
-        if (!button.hasItemMeta()) return false;
-        String id = button.getItemMeta().getPersistentDataContainer().get(SportsDay.ITEM_ID, PersistentDataType.STRING);
-        return Objects.equals(id, key);
     }
 }

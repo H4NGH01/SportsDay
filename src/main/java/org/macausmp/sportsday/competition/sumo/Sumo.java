@@ -6,16 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractEvent;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IFieldEvent;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
@@ -98,10 +96,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @Override
-    public <T extends Event> void onEvent(T event) {
-        SumoRound round = sumoStage.getCurrentRound();
-        if (event instanceof PlayerMoveEvent e) {
-            Player p = e.getPlayer();
+    protected void onPractice(Player p) {
+    }
+
+    @EventHandler
+    public void onMove(@NotNull PlayerMoveEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
+            SumoRound round = sumoStage.getCurrentRound();
             if (round == null || !round.containPlayer(p)) return;
             if (round.getStatus() == SumoRound.RoundStatus.COMING) {
                 e.setCancelled(true);
@@ -111,10 +114,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
                 onRoundEnd();
             }
-            return;
         }
-        if (event instanceof PlayerQuitEvent e) {
-            Player p = e.getPlayer();
+    }
+
+    @EventHandler
+    public void onQuit(@NotNull PlayerQuitEvent e) {
+        IEvent event = Competitions.getCurrentlyEvent();
+        Player p = e.getPlayer();
+        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
+            SumoRound round = sumoStage.getCurrentRound();
             PlayerData d = Competitions.getPlayerData(p.getUniqueId());
             if (!alive.contains(d)) return;
             if (round != null && round.containPlayer(p)) {

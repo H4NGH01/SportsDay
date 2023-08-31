@@ -11,11 +11,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -54,6 +53,7 @@ public class ClothingColorGUI extends AbstractGUI {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));
                 dye.lore(lore);
+                dye.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 dye.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
                 break;
             }
@@ -62,7 +62,7 @@ public class ClothingColorGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
@@ -70,7 +70,7 @@ public class ClothingColorGUI extends AbstractGUI {
         String s = item.getType().name();
         if (s.endsWith("_DYE")) {
             PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
-        } else if (GUIButton.isSameItem(item, reset())) {
+        } else if (ItemUtil.isSameItem(item, reset())) {
             PlayerCustomize.setClothColor(p, slot, null);
         }
         p.playSound(p, Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
@@ -79,23 +79,10 @@ public class ClothingColorGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack dye(Material material) {
-        ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.select")));
-            meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "dye");
-        });
-        return stack;
+        return ItemUtil.item(material, "dye", "gui.select");
     }
 
     private @NotNull ItemStack reset() {
-        ItemStack stack = new ItemStack(Material.BARRIER);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_color"))));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "reset");
-        });
-        return stack;
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_color")));
     }
 }

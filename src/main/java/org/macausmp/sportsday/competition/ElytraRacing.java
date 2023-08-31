@@ -14,26 +14,21 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.jetbrains.annotations.NotNull;
 
 public class ElytraRacing extends AbstractTrackEvent {
+    private static final ItemStack ELYTRA = elytra();
+    private static final ItemStack FIREWORK = firework();
+
     public ElytraRacing() {
         super("elytra_racing");
     }
 
     @Override
     protected void onSetup() {
-        ItemStack elytra = new ItemStack(Material.ELYTRA);
-        elytra.editMeta(meta -> {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-            meta.setUnbreakable(true);
-        });
-        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytra));
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, ELYTRA));
     }
 
     @Override
     protected void onStart() {
-        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
-        firework.setAmount(64);
-        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
-        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(0, firework));
+        Competitions.getOnlinePlayers().forEach(d -> d.getPlayer().getInventory().setItem(0, FIREWORK));
     }
 
     @Override
@@ -42,39 +37,42 @@ public class ElytraRacing extends AbstractTrackEvent {
 
     @Override
     protected void onPractice(@NotNull Player p) {
-        ItemStack elytra = new ItemStack(Material.ELYTRA);
-        elytra.editMeta(meta -> {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
-            meta.setUnbreakable(true);
-        });
-        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
-        firework.setAmount(64);
-        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
-        p.getInventory().setItem(EquipmentSlot.CHEST, elytra);
-        p.getInventory().setItem(0, firework);
+        p.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
+        p.getInventory().setItem(0, FIREWORK);
     }
 
     @EventHandler
     public void onElytraBoost(@NotNull PlayerElytraBoostEvent e) {
-        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
-        Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
         e.setShouldConsume(false);
     }
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
-        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
+        IEvent event = Competitions.getCurrentlyEvent();
         Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+        if ((event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) || inPractice(p, this)) {
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onDropFirework(@NotNull PlayerDropItemEvent e) {
-        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this) return;
-        Player p = e.getPlayer();
-        if (!Competitions.containPlayer(p)) return;
         if (e.getItemDrop().getItemStack().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
+    }
+
+    private static @NotNull ItemStack elytra() {
+        ItemStack elytra = new ItemStack(Material.ELYTRA);
+        elytra.editMeta(meta -> {
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
+            meta.setUnbreakable(true);
+        });
+        return elytra;
+    }
+
+    private static @NotNull ItemStack firework() {
+        ItemStack firework = new ItemStack(Material.FIREWORK_ROCKET);
+        firework.setAmount(64);
+        firework.editMeta(FireworkMeta.class, meta -> meta.setPower(3));
+        return firework;
     }
 }

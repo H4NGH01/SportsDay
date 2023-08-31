@@ -14,6 +14,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 
 import java.util.Objects;
@@ -36,21 +37,21 @@ public class MenuGUI extends AbstractGUI {
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-        if (GUIButton.isSameItem(item, GUIButton.GUIDEBOOK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);
-        } else if (GUIButton.isSameItem(item, GUIButton.HOME)) {
+        } else if (ItemUtil.isSameItem(item, GUIButton.HOME)) {
             if (Competitions.getCurrentlyEvent() == null) {
                 p.teleport(p.getWorld().getSpawnLocation());
                 p.getInventory().clear();
                 PlayerCustomize.suitUp(p);
-                p.getInventory().setItem(3, CompetitionListener.MENU);
-                p.getInventory().setItem(4, CompetitionListener.CUSTOMIZE);
+                p.getInventory().setItem(3, ItemUtil.MENU);
+                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             }
-        } else if (GUIButton.isSameItem(item, GUIButton.PRACTICE)) {
+        } else if (ItemUtil.isSameItem(item, GUIButton.PRACTICE)) {
             if (Competitions.getCurrentlyEvent() == null) {
                 p.openInventory(new PracticeGUI().getInventory());
             }
-        } else if (GUIButton.isSameItem(item, GUIButton.PERSONAL_SETTINGS)) {
+        } else if (ItemUtil.isSameItem(item, GUIButton.PERSONAL_SETTINGS)) {
             p.openInventory(new PersonalSettingsGUI(p).getInventory());
         }
     }

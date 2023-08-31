@@ -26,22 +26,16 @@ public class CustomizeMenuGUI extends AbstractGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
-        if (GUIButton.isSameItem(item, GUIButton.CLOTHING)) {
-            p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.BOAT_TYPE)) {
-            p.openInventory(new BoatTypeGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.WEAPON_SKIN)) {
-            p.openInventory(new WeaponSkinGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.MUSICKIT)) {
-            p.openInventory(new MusickitGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.PROJECTILE_TRAIL)) {
-            p.openInventory(new ProjectileTrailGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.WALKING_EFFECT)) {
-            p.openInventory(new WalkingEffectGUI(p).getInventory());
-        } else if (GUIButton.isSameItem(item, GUIButton.GRAFFITI_SPRAY)) {
-            p.openInventory(new GraffitiSprayGUI(p).getInventory());
+        switch (e.getSlot()) {
+            case 10 -> p.openInventory(new ClothingCustomizeGUI(p).getInventory());
+            case 12 -> p.openInventory(new BoatTypeGUI(p).getInventory());
+            case 14 -> p.openInventory(new WeaponSkinGUI(p).getInventory());
+            case 16 -> p.openInventory(new MusickitGUI(p).getInventory());
+            case 28 -> p.openInventory(new ProjectileTrailGUI(p).getInventory());
+            case 31 -> p.openInventory(new WalkingEffectGUI(p).getInventory());
+            case 34 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
         }
     }
 }

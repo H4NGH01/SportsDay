@@ -7,6 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 
 public class PersonalSettingsGUI extends AbstractGUI {
     private final Player player;
@@ -18,16 +19,17 @@ public class PersonalSettingsGUI extends AbstractGUI {
         }
         getInventory().setItem(8, GUIButton.BACK);
         this.player = player;
+        update();
     }
 
     @Override
     public void update() {
-
+        if (player == null) return;
     }
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
-        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
         }

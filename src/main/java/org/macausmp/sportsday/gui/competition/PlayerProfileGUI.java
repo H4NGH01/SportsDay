@@ -9,12 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerData;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -46,6 +45,14 @@ public class PlayerProfileGUI extends AbstractGUI {
     public void update() {
     }
 
+    @Override
+    public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
+        if (ItemUtil.isSameItem(item, unregister(data))) {
+            p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("player.leave").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable( "player.unregistered").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
+            p.closeInventory();
+        }
+    }
+
     private @NotNull ItemStack icon(UUID uuid) {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
@@ -62,22 +69,8 @@ public class PlayerProfileGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack unregister(PlayerData data) {
-        ItemStack stack = new ItemStack(Material.RED_CONCRETE);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.player.unregister").args(Component.text(data.getName()))).color(NamedTextColor.RED));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.player.unregister_lore")));
-            meta.lore(lore);
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "unregister");
-        });
-        return stack;
-    }
-
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
-        if (GUIButton.isSameItem(item, unregister(data))) {
-            p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("player.leave").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable( "player.unregistered").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
-            p.closeInventory();
-        }
+        Component display = Component.translatable("gui.player.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
+        Component lore = Component.translatable("gui.player.unregister_lore");
+        return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
     }
 }

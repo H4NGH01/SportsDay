@@ -37,13 +37,19 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
+    protected void onPractice(Player p) {
+
+    }
+
+    @Override
     protected void onRaceFinish(@NotNull Player p) {
         p.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent() != this || getStage() != Stage.STARTED) return;
+        IEvent event = Competitions.getCurrentlyEvent();
+        if (event != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
         if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) return;
         addRunnable(new BukkitRunnable() {

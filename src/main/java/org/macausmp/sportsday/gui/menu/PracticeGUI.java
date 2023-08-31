@@ -6,15 +6,14 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 public class PracticeGUI extends AbstractGUI {
@@ -44,16 +43,16 @@ public class PracticeGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
-        if (GUIButton.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(p, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1f, 1f);
             return;
         }
         if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent().getStage() != Stage.STARTED) {
-            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            if (GUIButton.isSameItem(item, "practice")) {
+            String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
+            if (ItemUtil.isSameItem(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
-                    if (event.getID().equals(container.get(SportsDay.COMPETITION_ID, PersistentDataType.STRING))) {
+                    if (event.getID().equals(id)) {
                         event.practice(p);
                         return;
                     }
@@ -66,8 +65,8 @@ public class PracticeGUI extends AbstractGUI {
         ItemStack stack = new ItemStack(Material.OAK_DOOR);
         stack.editMeta(meta -> {
             meta.displayName(TextUtil.text(Component.translatable("gui.menu.practice").args(event.getName())));
-            meta.getPersistentDataContainer().set(SportsDay.ITEM_ID, PersistentDataType.STRING, "practice");
-            meta.getPersistentDataContainer().set(SportsDay.COMPETITION_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "practice");
+            meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID());
         });
         return stack;
     }

@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.competition;
 
+import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 public class ObstacleCourse extends AbstractTrackEvent {
@@ -22,5 +23,10 @@ public class ObstacleCourse extends AbstractTrackEvent {
             d.getPlayer().setCollidable(true);
             d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });
+    }
+
+    @Override
+    protected void onPractice(Player p) {
+
     }
 }

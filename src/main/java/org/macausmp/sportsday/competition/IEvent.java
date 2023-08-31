@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.macausmp.sportsday.util.PlayerHolder;
 
@@ -65,12 +64,6 @@ public interface IEvent extends Listener {
      * @param force True if end the event via command or gui instead of natural end
      */
     void end(boolean force);
-
-    /**
-     * Listener call from {@link CompetitionListener}
-     * @param event {@link Event} given from {@link CompetitionListener}
-     */
-    <T extends Event> void onEvent(T event);
 
     /**
      * Get the current event stage
