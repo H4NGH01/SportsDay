@@ -16,9 +16,9 @@ public final class TextUtil {
     }
 
     /**
-     * Convert class instanceof {@link Component} to {@link net.kyori.adventure.text.TextComponent}
+     * Convert {@link Component} to plain text {@link Component}
      * @param component Component
-     * @return Text component
+     * @return Plain text component
      */
     public static @NotNull Component text(@NotNull Component component) {
         return Component.text(LegacyComponentSerializer.legacySection().serialize(component)).decoration(TextDecoration.ITALIC, false);

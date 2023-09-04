@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public final class PlayerCustomize {
-    private static final FileConfiguration CONFIG = SportsDay.getInstance().getConfigManager().getCustomizeConfig();
+    private static final FileConfiguration CONFIG = SportsDay.getInstance().getConfigManager().getPlayerdataConfig();
     private static final HashMap<Material, TrimMaterial> TRIM_MATERIAL = new HashMap<>();
     private static final HashMap<String, TrimPattern> TRIM_PATTERN = new HashMap<>();
 

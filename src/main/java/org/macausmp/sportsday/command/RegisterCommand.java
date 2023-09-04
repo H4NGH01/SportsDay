@@ -22,7 +22,7 @@ public class RegisterCommand implements IPluginCommand {
                     try {
                         number = Integer.parseInt(args[0]);
                         if (number < 0) {
-                            sender.sendMessage(Component.translatable("argument.register.negative").color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("argument.number.negative").color(NamedTextColor.RED));
                             return;
                         }
                     } catch (Exception e) {
@@ -32,9 +32,9 @@ public class RegisterCommand implements IPluginCommand {
                 } else {
                     number = Competitions.genNumber();
                 }
-                if (!Competitions.join(p, number)) sender.sendMessage(Component.translatable("player.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
+                if (!Competitions.join(p, number)) sender.sendMessage(Component.translatable("command.competition.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
             } else {
-                sender.sendMessage(Component.translatable("player.registered_message").args(p.displayName()).color(NamedTextColor.RED));
+                sender.sendMessage(Component.translatable("command.competition.register.failed.self").args(p.displayName()).color(NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));

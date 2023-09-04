@@ -28,7 +28,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @Override
     protected void onSetup() {
         getLocation().getWorld().getEntitiesByClass(Boat.class).forEach(Boat::remove);
-        getPlayerDataList().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
+        getCompetitors().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
     }
 
     @Override
@@ -47,9 +47,9 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
-        IEvent event = Competitions.getCurrentlyEvent();
+        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        boolean b = event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        boolean b = event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
         if ((b || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) bounce(p);
     }
 
@@ -74,8 +74,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            IEvent event = Competitions.getCurrentlyEvent();
-            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+            IEvent event = Competitions.getCurrentEvent();
+            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
             if (bl || AbstractEvent.inPractice(p)) {
                 e.setCancelled(true);
             } else {
@@ -87,17 +87,17 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onMount(@NotNull EntityMountEvent e) {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            IEvent event = Competitions.getCurrentlyEvent();
-            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+            IEvent event = Competitions.getCurrentEvent();
+            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
             if (bl || AbstractEvent.inPractice(p)) boatMap.put(p, b);
         }
     }
 
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent e) {
-        IEvent event = Competitions.getCurrentlyEvent();
+        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
         if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) {
             boatMap.get(p).remove();
             boatMap.put(p, boat(p));
@@ -107,8 +107,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onFall(@NotNull EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player p)) return;
-        IEvent event = Competitions.getCurrentlyEvent();
-        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()));
+        IEvent event = Competitions.getCurrentEvent();
+        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
         if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
     }
 

@@ -15,12 +15,12 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        getPlayerDataList().forEach(data -> data.getPlayer().setCollidable(false));
+        getCompetitors().forEach(data -> data.getPlayer().setCollidable(false));
     }
 
     @Override
     protected void onStart() {
-        Competitions.getOnlinePlayers().forEach(d -> {
+        Competitions.getOnlineCompetitors().forEach(d -> {
             d.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
             d.getPlayer().getInventory().setHelmet(null);
             d.getPlayer().getInventory().setChestplate(null);
@@ -30,7 +30,7 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        Competitions.getOnlinePlayers().forEach(d -> {
+        Competitions.getOnlineCompetitors().forEach(d -> {
             d.getPlayer().setCollidable(true);
             d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });
@@ -48,10 +48,10 @@ public class Parkour extends AbstractTrackEvent {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        IEvent event = Competitions.getCurrentlyEvent();
+        IEvent event = Competitions.getCurrentEvent();
         if (event != this || getStage() != Stage.STARTED) return;
         Player p = e.getPlayer();
-        if (getLeaderboard().contains(Competitions.getPlayerData(p.getUniqueId()))) return;
+        if (getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()))) return;
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {

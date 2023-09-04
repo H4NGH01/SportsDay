@@ -18,7 +18,7 @@ import java.util.List;
 
 public final class GUIButton {
     public static final ItemStack COMPETITION_INFO = ItemUtil.item(Material.GOLD_BLOCK, "competition_info", "gui.info.title", "gui.info.lore");
-    public static final ItemStack PLAYER_LIST = ItemUtil.item(Material.PAPER, "player_list", "gui.player_list.title", "gui.player_list.lore");
+    public static final ItemStack PLAYER_LIST = ItemUtil.item(Material.PAPER, "player_list", "gui.competitor_list.title", "gui.competitor_list.lore");
     public static final ItemStack START_COMPETITION = ItemUtil.head(ItemUtil.START, "start_competitions", "gui.start.title", "gui.start.lore");
     public static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
     public static final ItemStack COMPETITION_SETTINGS = ItemUtil.item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");

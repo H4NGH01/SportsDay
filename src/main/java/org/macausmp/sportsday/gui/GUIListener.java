@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
-import org.macausmp.sportsday.gui.competition.PlayerListGUI;
+import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 public final class GUIListener implements Listener {
@@ -31,11 +31,11 @@ public final class GUIListener implements Listener {
                         return;
                     } else if (ItemUtil.isSameItem(item, GUIButton.PLAYER_LIST)) {
                         p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-                        p.openInventory(new PlayerListGUI().getInventory());
+                        p.openInventory(new CompetitorListGUI().getInventory());
                         return;
                     } else if (ItemUtil.isSameItem(item, GUIButton.START_COMPETITION)) {
-                        if (Competitions.getCurrentlyEvent() != null && Competitions.getCurrentlyEvent().getStage() != Stage.ENDED) {
-                            p.sendMessage(Component.translatable("competition.already_in_progress").color(NamedTextColor.RED));
+                        if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStage() != Stage.ENDED) {
+                            p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
                             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
                             return;
                         }
@@ -43,7 +43,7 @@ public final class GUIListener implements Listener {
                         p.openInventory(GUIManager.COMPETITION_START_GUI.getInventory());
                         return;
                     } else if (ItemUtil.isSameItem(item, GUIButton.END_COMPETITION)) {
-                        boolean b = Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent().getStage() == Stage.ENDED;
+                        boolean b = Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() == Stage.ENDED;
                         p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
                         Competitions.forceEnd(p);
                         return;

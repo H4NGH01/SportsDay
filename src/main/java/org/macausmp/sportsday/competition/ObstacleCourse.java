@@ -10,7 +10,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        getPlayerDataList().forEach(data -> data.getPlayer().setCollidable(false));
+        getCompetitors().forEach(data -> data.getPlayer().setCollidable(false));
     }
 
     @Override
@@ -19,7 +19,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        Competitions.getOnlinePlayers().forEach(d -> {
+        Competitions.getOnlineCompetitors().forEach(d -> {
             d.getPlayer().setCollidable(true);
             d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         });

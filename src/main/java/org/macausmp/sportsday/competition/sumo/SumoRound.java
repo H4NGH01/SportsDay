@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SumoRound {
-    private final List<Player> players = new ArrayList<>();
+    private final List<Player> competitors = new ArrayList<>();
     private RoundStatus status = RoundStatus.IDLE;
     private Player winner;
     private Player loser;
 
-    public SumoRound(Player... players) {
-        this.players.addAll(List.of(players));
+    public SumoRound(Player p1, Player p2) {
+        this.competitors.addAll(List.of(p1, p2));
     }
 
     public void setResult(Player winner, Player loser) {
@@ -22,12 +22,12 @@ public class SumoRound {
         setStatus(RoundStatus.END);
     }
 
-    public List<Player> getPlayers() {
-        return players;
+    public List<Player> getCompetitors() {
+        return competitors;
     }
 
-    public boolean containPlayer(@NotNull Player player) {
-        return getPlayers().contains(player);
+    public boolean contain(@NotNull Player player) {
+        return getCompetitors().contains(player);
     }
 
     public RoundStatus getStatus() {

@@ -40,7 +40,7 @@ public class MenuGUI extends AbstractGUI {
         if (ItemUtil.isSameItem(item, GUIButton.GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);
         } else if (ItemUtil.isSameItem(item, GUIButton.HOME)) {
-            if (Competitions.getCurrentlyEvent() == null) {
+            if (Competitions.getCurrentEvent() == null) {
                 p.teleport(p.getWorld().getSpawnLocation());
                 p.playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:entity.bat.takeoff"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), net.kyori.adventure.sound.Sound.Emitter.self());
                 p.getInventory().clear();
@@ -49,7 +49,7 @@ public class MenuGUI extends AbstractGUI {
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             }
         } else if (ItemUtil.isSameItem(item, GUIButton.PRACTICE)) {
-            if (Competitions.getCurrentlyEvent() == null) {
+            if (Competitions.getCurrentEvent() == null) {
                 p.openInventory(new PracticeGUI().getInventory());
             }
         }

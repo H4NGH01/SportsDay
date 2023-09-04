@@ -13,17 +13,17 @@ import java.util.logging.Level;
  */
 public final class ConfigManager {
     private final SportsDay plugin = SportsDay.getInstance();
-    private File playerFile;
-    private FileConfiguration playerConfig;
-    private File customizeFile;
-    private FileConfiguration customizeConfig;
+    private File competitorFile;
+    private FileConfiguration competitorConfig;
+    private File playerdataFile;
+    private FileConfiguration playerdataConfig;
 
     void setup() {
         if (!plugin.getDataFolder().exists() && plugin.getDataFolder().mkdir()) plugin.getLogger().log(Level.INFO, "Data folder created");
-        playerFile = new File(plugin.getDataFolder(), "player.yml");
-        customizeFile = new File(plugin.getDataFolder(), "customize.yml");
-        playerConfig = loadFile(playerFile, "player.yml");
-        customizeConfig = loadFile(customizeFile, "customize.yml");
+        competitorFile = new File(plugin.getDataFolder(), "competitor.yml");
+        playerdataFile = new File(plugin.getDataFolder(), "playerdata.yml");
+        competitorConfig = loadFile(competitorFile, "competitor.yml");
+        playerdataConfig = loadFile(playerdataFile, "playerdata.yml");
     }
 
     private @NotNull FileConfiguration loadFile(@NotNull File file, String name) {
@@ -38,31 +38,31 @@ public final class ConfigManager {
     }
 
     /**
-     * Get the config that store players' data
-     * @return players config file
+     * Get the config that store competitors' data
+     * @return competitors data file
      */
-    public FileConfiguration getPlayerConfig() {
-        return playerConfig;
+    public FileConfiguration getCompetitorConfig() {
+        return competitorConfig;
     }
 
     /**
-     * Get the config that store players' customize data
-     * @return players' customize config file
+     * Get the config that store players' data
+     * @return players data file
      */
-    public FileConfiguration getCustomizeConfig() {
-        return customizeConfig;
+    public FileConfiguration getPlayerdataConfig() {
+        return playerdataConfig;
     }
 
     public void saveConfig() {
         try {
-            playerConfig.save(playerFile);
+            competitorConfig.save(competitorFile);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save the player.yml file", e);
+            plugin.getLogger().log(Level.SEVERE, "Could not save the competitor.yml file", e);
         }
         try {
-            customizeConfig.save(customizeFile);
+            playerdataConfig.save(playerdataFile);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save the customize.yml file", e);
+            plugin.getLogger().log(Level.SEVERE, "Could not save the playerdata.yml file", e);
         }
     }
 }

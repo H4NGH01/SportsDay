@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 
 public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
-    public static Team PLAYER;
+    public static Team COMPETITOR;
     public static Team REFEREE;
     public static Team AUDIENCE;
     private static BossBar BOSSBAR;
@@ -57,7 +57,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         registerTranslation();
         Competitions.load();
         Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
-        PLAYER = registerTeam(scoreboard, "player", Component.translatable("role.player"), NamedTextColor.GREEN);
+        COMPETITOR = registerTeam(scoreboard, "competitor", Component.translatable("role.competitor"), NamedTextColor.GREEN);
         REFEREE = registerTeam(scoreboard, "referee", Component.translatable("role.referee"), NamedTextColor.GOLD);
         AUDIENCE = registerTeam(scoreboard, "audience", Component.translatable("role.audience"), NamedTextColor.GRAY);
         BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
@@ -118,12 +118,12 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (Competitions.getCurrentlyEvent() != null) Competitions.forceEnd(getServer().getConsoleSender());
+        if (Competitions.getCurrentEvent() != null) Competitions.forceEnd(getServer().getConsoleSender());
         Bukkit.getOnlinePlayers().forEach(p -> {
             p.teleport(p.getWorld().getSpawnLocation());
             p.setGameMode(GameMode.ADVENTURE);
         });
-        Competitions.getOnlinePlayers().forEach(d -> {
+        Competitions.getOnlineCompetitors().forEach(d -> {
             d.getPlayer().getInventory().clear();
             PlayerCustomize.suitUp(d.getPlayer());
             d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
@@ -153,9 +153,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     @Override
                     public void run() {
                         header = Component.translatable("tablist.title").appendNewline();
-                        if (Competitions.getCurrentlyEvent() != null) {
-                            Component cn = Competitions.getCurrentlyEvent().getName();
-                            Component sn = Competitions.getCurrentlyEvent().getStage().getName();
+                        if (Competitions.getCurrentEvent() != null) {
+                            Component cn = Competitions.getCurrentEvent().getName();
+                            Component sn = Competitions.getCurrentEvent().getStage().getName();
                             competition = Component.translatable("tablist.current").args(cn, sn);
                         } else {
                             competition = Component.translatable("tablist.idle");

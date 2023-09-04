@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
-    private static final List<PlayerListGUI> HANDLER = new ArrayList<>();
+public class CompetitorListGUI extends AbstractGUI implements IPageableGUI {
+    private static final List<CompetitorListGUI> HANDLER = new ArrayList<>();
     private int page = 0;
 
-    public PlayerListGUI() {
-        super(54, Component.translatable("gui.player_list.title"));
+    public CompetitorListGUI() {
+        super(54, Component.translatable("gui.competitor_list.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
@@ -53,17 +53,17 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
             getInventory().setItem(i, null);
         }
         for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getPlayerData().size()) break;
-            getInventory().setItem(i + getStartSlot(), icon(Competitions.getPlayerData().get(i + getPage() * getSize()).getUUID()));
+            if (i >= Competitions.getCompetitors().size()) break;
+            getInventory().setItem(i + getStartSlot(), icon(Competitions.getCompetitors().get(i + getPage() * getSize()).getUUID()));
         }
     }
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
-        if (event.getInventory().getHolder() instanceof PlayerListGUI gui) {
+        if (event.getInventory().getHolder() instanceof CompetitorListGUI gui) {
             if (ItemUtil.isSameItem(item, "player_icon")) {
                 SkullMeta meta = (SkullMeta) item.getItemMeta();
-                p.openInventory(new PlayerProfileGUI(Competitions.getPlayerData(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
+                p.openInventory(new CompetitorProfileGUI(Competitions.getCompetitor(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
                 return;
             }
             if (ItemUtil.isSameItem(item, GUIButton.NEXT_PAGE)) {
@@ -77,7 +77,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
     }
 
     public static void updateGUI() {
-        for (PlayerListGUI gui : HANDLER) {
+        for (CompetitorListGUI gui : HANDLER) {
             gui.update();
         }
     }
@@ -90,14 +90,14 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            Component online = Component.translatable(player.isOnline() ? "player.online" : "player.offline");
+            Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
             meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.text(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore()))).color(NamedTextColor.YELLOW));
             lore.add(Component.text(""));
-            lore.add(TextUtil.text(Component.translatable("gui.player_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("gui.competitor_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "player_icon");
         });
@@ -121,7 +121,7 @@ public class PlayerListGUI extends AbstractGUI implements IPageableGUI {
 
     @Override
     public int getMaxPage() throws ArithmeticException {
-        return Competitions.getPlayerData().isEmpty() ? 1 : Competitions.getPlayerData().size() % getSize() == 0 ? Competitions.getPlayerData().size() / getSize() : Competitions.getPlayerData().size() / getSize() + 1;
+        return Competitions.getCompetitors().isEmpty() ? 1 : Competitions.getCompetitors().size() % getSize() == 0 ? Competitions.getCompetitors().size() / getSize() : Competitions.getCompetitors().size() / getSize() + 1;
     }
 
     @Override
