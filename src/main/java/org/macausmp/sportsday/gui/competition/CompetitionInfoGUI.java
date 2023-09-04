@@ -38,15 +38,15 @@ public class CompetitionInfoGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack status() {
-        boolean b = Competitions.getCurrentlyEvent() != null;
-        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getName() : Component.translatable("gui.none"));
-        Component lore = Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentlyEvent().getStage().getName() : Stage.IDLE.getName());
+        boolean b = Competitions.getCurrentEvent() != null;
+        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.none"));
+        Component lore = Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getStage().getName() : Stage.IDLE.getName());
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 
     private @NotNull ItemStack player() {
-        Component display = Component.translatable("competition.players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getPlayerData().size()).color(NamedTextColor.YELLOW));
-        Component lore = Component.translatable("competition.online_players").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlinePlayers().size()).color(NamedTextColor.YELLOW));
+        Component display = Component.translatable("competition.competitors.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getCompetitors().size()).color(NamedTextColor.YELLOW));
+        Component lore = Component.translatable("competition.competitors.online").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlineCompetitors().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display, lore);
     }
 }

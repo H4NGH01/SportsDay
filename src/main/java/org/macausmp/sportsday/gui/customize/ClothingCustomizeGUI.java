@@ -5,6 +5,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -24,6 +25,7 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ClothingCustomizeGUI extends AbstractGUI {
     private static final String[] MATERIAL = {"LEATHER", "CHAINMAIL", "IRON", "GOLDEN", "DIAMOND", "NETHERITE"};
@@ -49,8 +51,17 @@ public class ClothingCustomizeGUI extends AbstractGUI {
     public void update() {
         if (player == null) return;
         for (int i = 0; i < 4; i++) {
+            ItemStack selected = PlayerCustomize.getClothItem(player, EquipmentSlot.values()[5 - i]);
             for (int j = 0; j < 6; j++) {
-                getInventory().setItem(11 + i * 9 + j, select(Material.getMaterial(MATERIAL[j] + "_" + ARMOR[i])));
+                Material type = Material.getMaterial(MATERIAL[j] + "_" + ARMOR[i]);
+                ItemStack stack = select(type);
+                if (selected != null && selected.getType().equals(type)) {
+                    List<Component> lore = Objects.requireNonNull(stack.lore());
+                    lore.set(0, TextUtil.text(Component.translatable("gui.selected")));
+                    stack.lore(lore);
+                    stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+                }
+                getInventory().setItem(11 + i * 9 + j, stack);
             }
         }
         getInventory().setItem(9, present(EquipmentSlot.HEAD));

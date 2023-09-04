@@ -28,7 +28,7 @@ public class ScoreboardHandler {
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
                 Entry comp = new Entry(o, "competition", "scoreboard.competition");
                 Entry stage = new Entry(o, "stage", "scoreboard.stage");
-                Entry count = new Entry(o, "player_count", "scoreboard.player_count").setScore(8);
+                Entry count = new Entry(o, "competitor_count", "scoreboard.competitor_count").setScore(8);
                 Entry number = new Entry(o, "number", "scoreboard.number");
                 Entry score = new Entry(o, "score", "scoreboard.score");
                 newline(o).setScore(5);
@@ -40,9 +40,9 @@ public class ScoreboardHandler {
                     final Score line = newline(o);
                     @Override
                     public void run() {
-                        if (Competitions.getCurrentlyEvent() != null) {
-                            comp.suffix(Competitions.getCurrentlyEvent().getName());
-                            stage.suffix(Competitions.getCurrentlyEvent().getStage().getName());
+                        if (Competitions.getCurrentEvent() != null) {
+                            comp.suffix(Competitions.getCurrentEvent().getName());
+                            stage.suffix(Competitions.getCurrentEvent().getStage().getName());
                             comp.setScore(11);
                             stage.setScore(10);
                             line.setScore(9);
@@ -51,10 +51,10 @@ public class ScoreboardHandler {
                             stage.resetScore();
                             line.resetScore();
                         }
-                        count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlinePlayers().size()), Component.text(plugin.getServer().getOnlinePlayers().size())));
+                        count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(plugin.getServer().getOnlinePlayers().size())));
                         if (Competitions.containPlayer(p)) {
-                            number.suffix(Component.text(Competitions.getPlayerData(p.getUniqueId()).getNumber()));
-                            score.suffix(Component.text(Competitions.getPlayerData(p.getUniqueId()).getScore()));
+                            number.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getNumber()));
+                            score.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getScore()));
                             number.setScore(7);
                             score.setScore(6);
                         } else {

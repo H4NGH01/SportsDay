@@ -49,7 +49,7 @@ public class PracticeGUI extends AbstractGUI {
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (Competitions.getCurrentlyEvent() == null || Competitions.getCurrentlyEvent().getStage() != Stage.STARTED) {
+        if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() != Stage.STARTED) {
             String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
             if (ItemUtil.isSameItem(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {

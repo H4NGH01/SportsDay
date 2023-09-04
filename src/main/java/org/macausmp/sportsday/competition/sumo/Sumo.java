@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.util.PlayerCustomize;
-import org.macausmp.sportsday.util.PlayerData;
+import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -24,9 +24,9 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Sumo extends AbstractEvent implements IFieldEvent {
-    private final List<PlayerData> leaderboard = new ArrayList<>();
-    private final List<PlayerData> alive = new ArrayList<>();
-    private final List<PlayerData> queue = new ArrayList<>();
+    private final List<CompetitorData> leaderboard = new ArrayList<>();
+    private final List<CompetitorData> alive = new ArrayList<>();
+    private final List<CompetitorData> queue = new ArrayList<>();
     private SumoStage sumoStage = SumoStage.ELIMINATE;
     private final Player[] grandFinal = new Player[2];
     private final Player[] thirdPlace = new Player[2];
@@ -40,7 +40,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     @Override
     public void onSetup() {
         alive.clear();
-        alive.addAll(getPlayerDataList());
+        alive.addAll(getCompetitors());
         queue.clear();
         queue.addAll(alive);
         SumoStage.FINAL.resetStage();
@@ -70,7 +70,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         Component c = Component.translatable("event.sumo.current_stage").args(sumoStage.getName());
         for (int i = 0; i < sumoStage.getRoundList().size();) {
             SumoRound r = sumoStage.getRoundList().get(i++);
-            c = c.append(Component.translatable("event.sumo.queue").args(Component.text(i), r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
+            c = c.append(Component.translatable("event.sumo.queue").args(Component.text(i), r.getCompetitors().get(0).displayName(), r.getCompetitors().get(1).displayName()));
             if (i < sumoStage.getRoundList().size() - 1) c = c.appendNewline();
         }
         Bukkit.broadcast(c);
@@ -86,7 +86,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         if (force) return;
         Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
-            PlayerData data = leaderboard.get(i++);
+            CompetitorData data = leaderboard.get(i++);
             c = c.append(Component.translatable("event.sumo.rank").args(Component.text(i), Component.text(data.getName())));
             if (i < leaderboard.size()) c = c.appendNewline();
             if (i <= 3) data.addScore(4 - i);
@@ -101,17 +101,17 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
-        IEvent event = Competitions.getCurrentlyEvent();
+        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
         if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
             SumoRound round = sumoStage.getCurrentRound();
-            if (round == null || !round.containPlayer(p)) return;
+            if (round == null || !round.contain(p)) return;
             if (round.getStatus() == SumoRound.RoundStatus.COMING) {
                 e.setCancelled(true);
                 return;
             }
             if (p.getLocation().getBlock().getType() == Material.WATER && round.getStatus() == SumoRound.RoundStatus.STARTED) {
-                round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
+                round.setResult(round.getCompetitors().get(0).equals(p) ? round.getCompetitors().get(1) : round.getCompetitors().get(0), p);
                 onRoundEnd();
             }
         }
@@ -119,21 +119,21 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
-        IEvent event = Competitions.getCurrentlyEvent();
+        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
         if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
             SumoRound round = sumoStage.getCurrentRound();
-            PlayerData d = Competitions.getPlayerData(p.getUniqueId());
+            CompetitorData d = Competitions.getCompetitor(p.getUniqueId());
             if (!alive.contains(d)) return;
-            if (round != null && round.containPlayer(p)) {
-                round.setResult(round.getPlayers().get(0).equals(p) ? round.getPlayers().get(1) : round.getPlayers().get(0), p);
+            if (round != null && round.contain(p)) {
+                round.setResult(round.getCompetitors().get(0).equals(p) ? round.getCompetitors().get(1) : round.getCompetitors().get(0), p);
                 onRoundEnd();
             }
         }
     }
 
     private @NotNull Player getFromQueue() {
-        PlayerData data = queue.get(new Random().nextInt(queue.size()));
+        CompetitorData data = queue.get(new Random().nextInt(queue.size()));
         queue.remove(data);
         return data.getPlayer();
     }
@@ -141,11 +141,11 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     @Override
     public void onRoundStart() {
         SumoRound round = sumoStage.getCurrentRound();
-        if (round != null) round.getPlayers().forEach(p -> p.teleport(getLocation()));
+        if (round != null) round.getCompetitors().forEach(p -> p.teleport(getLocation()));
         sumoStage.nextRound();
         assert round != null;
         round.setStatus(SumoRound.RoundStatus.COMING);
-        List<Player> pl = sumoStage.getCurrentRound().getPlayers();
+        List<Player> pl = sumoStage.getCurrentRound().getCompetitors();
         Player p1 = pl.get(0);
         Player p2 = pl.get(1);
         if (p1.isOnline() && p2.isOnline()) {
@@ -181,10 +181,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                         cancel();
                         return;
                     }
-                    if (i <= 15 && i % 5 == 0 && i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
+                    if (i <= 15 && i % 5 == 0 && i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                     if (i-- == 0) {
-                        sumoStage.getCurrentRound().getPlayers().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
-                        Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick_given"));
+                        sumoStage.getCurrentRound().getCompetitors().forEach(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
+                        Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.given"));
                         cancel();
                     }
                 }
@@ -210,10 +210,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         if (round.getLoser().isOnline()) getWorld().strikeLightningEffect(round.getLoser().getLocation());
         Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.round_end"));
         Bukkit.broadcast(Component.translatable("event.sumo.round_winner").args(round.getWinner().displayName()).color(NamedTextColor.YELLOW));
-        round.getPlayers().forEach(p -> p.getInventory().clear());
+        round.getCompetitors().forEach(p -> p.getInventory().clear());
         // eliminate loser
         if (sumoStage != SumoStage.SEMI_FINAL) {
-            for (PlayerData data : alive) {
+            for (CompetitorData data : alive) {
                 if (data.getUUID().equals(round.getLoser().getUniqueId())) {
                     leaderboard.add(0, data);
                     alive.remove(data);
@@ -223,9 +223,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         }
         // Pre-assign players to next round
         if (sumoStage == SumoStage.FINAL) {
-            leaderboard.add(0, Competitions.getPlayerData(round.getWinner().getUniqueId()));
+            leaderboard.add(0, Competitions.getCompetitor(round.getWinner().getUniqueId()));
         } else if (sumoStage == SumoStage.THIRD_PLACE) {
-            leaderboard.add(0, Competitions.getPlayerData(round.getWinner().getUniqueId()));
+            leaderboard.add(0, Competitions.getCompetitor(round.getWinner().getUniqueId()));
         } else if (sumoStage == SumoStage.SEMI_FINAL) {
             grandFinal[sumoStage.getRoundIndex() - 1] = round.getWinner();
             thirdPlace[sumoStage.getRoundIndex() - 1] = round.getLoser();
@@ -235,7 +235,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         // If this stage is not over
         if (sumoStage.getRoundRemaining() != 0) {
             SumoRound r = sumoStage.getRoundList().get(sumoStage.getRoundIndex());
-            Bukkit.broadcast(Component.translatable("event.sumo.next_queue").args(r.getPlayers().get(0).displayName(), r.getPlayers().get(1).displayName()));
+            Bukkit.broadcast(Component.translatable("event.sumo.next_queue").args(r.getCompetitors().get(0).displayName(), r.getCompetitors().get(1).displayName()));
             nextRound();
         } else {
             if (sumoStage != SumoStage.FINAL) {
@@ -263,7 +263,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     private void nextSumoStage() {
         // If this is not the first stage of the event, it means there are some players in the arena
-        if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getPlayers().forEach(p -> p.teleport(getLocation()));
+        if (sumoStage.getCurrentRound() != null) sumoStage.getCurrentRound().getCompetitors().forEach(p -> p.teleport(getLocation()));
         // If the number of players is less than 8 go to the next stage
         if (alive.size() <= 8 && sumoStage.hasNextStage()) sumoStage = sumoStage.getNextStage();
         // Assign players to their round
@@ -305,7 +305,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @Override
-    public List<PlayerData> getLeaderboard() {
+    public List<CompetitorData> getLeaderboard() {
         return leaderboard;
     }
 }

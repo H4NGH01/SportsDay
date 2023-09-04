@@ -29,7 +29,7 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
 import org.macausmp.sportsday.gui.GUIManager;
-import org.macausmp.sportsday.gui.competition.PlayerListGUI;
+import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
@@ -57,11 +57,11 @@ public final class CompetitionListener implements Listener {
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(3, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        IEvent current = Competitions.getCurrentlyEvent();
+        IEvent current = Competitions.getCurrentEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
-        PlayerListGUI.updateGUI();
+        CompetitorListGUI.updateGUI();
     }
 
     @EventHandler
@@ -69,7 +69,7 @@ public final class CompetitionListener implements Listener {
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
         GUIManager.COMPETITION_INFO_GUI.update();
-        PlayerListGUI.updateGUI();
+        CompetitorListGUI.updateGUI();
     }
 
     @EventHandler
@@ -81,7 +81,7 @@ public final class CompetitionListener implements Listener {
             loc.setY(loc.y() + 0.3);
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
-        IEvent current = Competitions.getCurrentlyEvent();
+        IEvent current = Competitions.getCurrentEvent();
         if ((current instanceof ITrackEvent && current.getStage() == Stage.STARTED && Competitions.containPlayer(p)) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
             Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
@@ -103,10 +103,10 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onHit(@NotNull EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
-            IEvent current = Competitions.getCurrentlyEvent();
+            IEvent current = Competitions.getCurrentEvent();
             if (current == Competitions.SUMO) {
                 SumoRound round = ((Sumo) current).getSumoStage().getCurrentRound();
-                boolean b = round != null && round.getStatus() == SumoRound.RoundStatus.STARTED && round.containPlayer(player) && round.containPlayer(damager);
+                boolean b = round != null && round.getStatus() == SumoRound.RoundStatus.STARTED && round.contain(player) && round.contain(damager);
                 if (b || AbstractEvent.inPractice(player, Competitions.SUMO)) {
                     e.setDamage(0);
                 } else {
@@ -121,7 +121,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            IEvent current = Competitions.getCurrentlyEvent();
+            IEvent current = Competitions.getCurrentEvent();
             if (current == null || !Competitions.containPlayer(player) || current.getStage() == Stage.STARTED) return;
             e.setCancelled(true);
         }

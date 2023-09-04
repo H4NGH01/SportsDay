@@ -14,7 +14,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.PlayerData;
+import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayerProfileGUI extends AbstractGUI {
-    private final PlayerData data;
+public class CompetitorProfileGUI extends AbstractGUI {
+    private final CompetitorData data;
 
-    public PlayerProfileGUI(@NotNull PlayerData data) {
-        super(54, Component.translatable("gui.player_profile.title").args(Component.text(data.getName())));
+    public CompetitorProfileGUI(@NotNull CompetitorData data) {
+        super(54, Component.translatable("gui.competitor_profile.title").args(Component.text(data.getName())));
         this.data = data;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
@@ -48,7 +48,7 @@ public class PlayerProfileGUI extends AbstractGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
         if (ItemUtil.isSameItem(item, unregister(data))) {
-            p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("player.leave").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable( "player.unregistered").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
+            p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("command.competition.unregister.success.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
             p.closeInventory();
         }
     }
@@ -57,20 +57,20 @@ public class PlayerProfileGUI extends AbstractGUI {
         ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
         icon.editMeta(SkullMeta.class, meta -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            Component online = Component.translatable(player.isOnline() ? "player.online" : "player.offline");
+            Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
             meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
             meta.setOwningPlayer(player);
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("player.number").args(Component.text(Competitions.getPlayerData(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.text(Component.translatable("player.score").args(Component.text(Competitions.getPlayerData(uuid).getScore()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber()))).color(NamedTextColor.YELLOW));
+            lore.add(TextUtil.text(Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore()))).color(NamedTextColor.YELLOW));
             meta.lore(lore);
         });
         return icon;
     }
 
-    private @NotNull ItemStack unregister(PlayerData data) {
-        Component display = Component.translatable("gui.player.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
-        Component lore = Component.translatable("gui.player.unregister_lore");
+    private @NotNull ItemStack unregister(CompetitorData data) {
+        Component display = Component.translatable("gui.competitor.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
+        Component lore = Component.translatable("gui.competitor.unregister_lore");
         return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
     }
 }

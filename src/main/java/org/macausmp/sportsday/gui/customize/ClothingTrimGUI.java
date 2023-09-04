@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ClothingTrimGUI extends AbstractGUI {
-    private static final FileConfiguration CONFIG = PLUGIN.getConfigManager().getCustomizeConfig();
+    private static final FileConfiguration CONFIG = PLUGIN.getConfigManager().getPlayerdataConfig();
     private final Player player;
     private final EquipmentSlot slot;
     private final String source;

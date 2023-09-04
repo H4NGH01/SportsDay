@@ -26,7 +26,7 @@ public abstract class AbstractEvent implements IEvent {
     private final Location location;
     private final World world;
     private Stage stage = Stage.IDLE;
-    private final List<PlayerData> players = new ArrayList<>();
+    private final List<CompetitorData> Competitors = new ArrayList<>();
     private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
 
     public AbstractEvent(String id) {
@@ -72,11 +72,11 @@ public abstract class AbstractEvent implements IEvent {
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
-        players.clear();
+        Competitors.clear();
         getLeaderboard().clear();
         setStage(Stage.COMING);
-        players.addAll(Competitions.getOnlinePlayers());
-        players.forEach(data -> {
+        Competitors.addAll(Competitions.getOnlineCompetitors());
+        Competitors.forEach(data -> {
             Player p = data.getPlayer();
             p.setBedSpawnLocation(location, true);
             if (!SportsDay.REFEREE.hasPlayer(p)) p.getInventory().clear();
@@ -93,7 +93,7 @@ public abstract class AbstractEvent implements IEvent {
             @Override
             public void run() {
                 if (i % 5 == 0 || (i <= 5 && i > 0)) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.start_countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER,  1f, 0.5f));
                 }
                 if (i-- == 0) {
@@ -102,7 +102,7 @@ public abstract class AbstractEvent implements IEvent {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Component.translatable("event.ready_message").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.ready.broadcast").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
         Bukkit.broadcast(Component.translatable("event.rule." + id));
         onSetup();
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").args(name));
@@ -112,7 +112,7 @@ public abstract class AbstractEvent implements IEvent {
     public void start() {
         setStage(Stage.STARTED);
         onStart();
-        Bukkit.getServer().sendActionBar(Component.translatable("event.start_message"));
+        Bukkit.getServer().sendActionBar(Component.translatable("event.start.broadcast"));
         Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
@@ -125,13 +125,13 @@ public abstract class AbstractEvent implements IEvent {
             @Override
             public void run() {
                 if (stage == Stage.ENDED) {
-                    Competitions.setCurrentlyEvent(null);
+                    Competitions.setCurrentEvent(null);
                     setStage(Stage.IDLE);
                     Bukkit.getOnlinePlayers().forEach(p -> {
                         p.teleport(location);
                         p.setGameMode(GameMode.ADVENTURE);
                     });
-                    Competitions.getOnlinePlayers().forEach(d -> {
+                    Competitions.getOnlineCompetitors().forEach(d -> {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
                         d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
@@ -148,10 +148,10 @@ public abstract class AbstractEvent implements IEvent {
             CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
             if (musickit != null) {
                 Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_musickit").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
+                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
             }
         }
-        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.ended_message"));
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.end.broadcast"));
         PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
     }
 
@@ -195,7 +195,7 @@ public abstract class AbstractEvent implements IEvent {
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
-        p.sendMessage(Component.translatable("player.practice.teleport.venue").args(name));
+        p.sendMessage(Component.translatable("competitor.practice.teleport.venue").args(name));
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         onPractice(p);
     }
@@ -226,11 +226,11 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * Get the list of {@link PlayerData} of current event
-     * @return list of {@link PlayerData} of current event
+     * Get the list of {@link CompetitorData} of current event
+     * @return list of {@link CompetitorData} of current event
      */
-    public final List<PlayerData> getPlayerDataList() {
-        return players;
+    public final List<CompetitorData> getCompetitors() {
+        return Competitors;
     }
 
     /**

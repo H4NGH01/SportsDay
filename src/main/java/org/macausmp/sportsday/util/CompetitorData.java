@@ -6,19 +6,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 /**
- * {@link Player} extra data for the plugin
+ * Represents a competitor data
  */
-public final class PlayerData implements PlayerHolder {
+public final class CompetitorData implements PlayerHolder {
     private final UUID uuid;
     private final int number;
     private int score = 0;
 
-    public PlayerData(UUID uuid, int number) {
+    public CompetitorData(UUID uuid, int number) {
         this.uuid = uuid;
         this.number = number;
     }
 
-    public PlayerData(UUID uuid, int number, int score) {
+    public CompetitorData(UUID uuid, int number, int score) {
         this.uuid = uuid;
         this.number = number;
         this.score = score;
