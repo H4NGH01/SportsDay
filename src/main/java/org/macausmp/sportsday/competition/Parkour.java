@@ -19,7 +19,7 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onStart() {
-        Competitions.getOnlineCompetitors().forEach(d -> {
+        Competitions.getOnlineContestants().forEach(d -> {
             Player p = d.getPlayer();
             p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
             p.getInventory().setHelmet(null);
@@ -30,7 +30,7 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        Competitions.getOnlineCompetitors().forEach(d -> d.getPlayer().clearActivePotionEffects());
+        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().clearActivePotionEffects());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class Parkour extends AbstractTrackEvent {
     public void onRespawn(@NotNull PlayerRespawnEvent e) {
         IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if (event == this && getStatus() == Status.STARTED && Competitions.isCompetitor(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId())) || inPractice(p, this)) {
+        if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p) && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId())) || inPractice(p, this)) {
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {

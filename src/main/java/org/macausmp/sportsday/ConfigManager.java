@@ -12,35 +12,35 @@ import java.util.logging.Level;
  */
 public final class ConfigManager {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    private File competitorFile;
-    private FileConfiguration competitorConfig;
+    private File contestantsFile;
+    private FileConfiguration contestantsConfig;
 
     void setup() {
         if (!PLUGIN.getDataFolder().exists() && PLUGIN.getDataFolder().mkdir()) PLUGIN.getLogger().log(Level.INFO, "Data folder created");
-        competitorFile = new File(PLUGIN.getDataFolder(), "competitor.yml");
-        if (!competitorFile.exists()) {
+        contestantsFile = new File(PLUGIN.getDataFolder(), "contestants.yml");
+        if (!contestantsFile.exists()) {
             try {
-                if (competitorFile.createNewFile()) PLUGIN.getLogger().log(Level.INFO, "competitor.yml file has been created");
+                if (contestantsFile.createNewFile()) PLUGIN.getLogger().log(Level.INFO, "contestants.yml file has been created");
             } catch (IOException e) {
-                PLUGIN.getLogger().log(Level.SEVERE, "Could not create the competitor.yml file");
+                PLUGIN.getLogger().log(Level.SEVERE, "Could not create the contestants.yml file");
             }
         }
-        competitorConfig = YamlConfiguration.loadConfiguration(competitorFile);
+        contestantsConfig = YamlConfiguration.loadConfiguration(contestantsFile);
     }
 
     /**
-     * Get the config that store competitors' data
-     * @return competitors data file
+     * Get the config that store contestants data
+     * @return contestants data config
      */
-    public FileConfiguration getCompetitorConfig() {
-        return competitorConfig;
+    public FileConfiguration getContestantsConfig() {
+        return contestantsConfig;
     }
 
     public void saveConfig() {
         try {
-            competitorConfig.save(competitorFile);
+            contestantsConfig.save(contestantsFile);
         } catch (IOException e) {
-            PLUGIN.getLogger().log(Level.SEVERE, "Could not save the competitor.yml file", e);
+            PLUGIN.getLogger().log(Level.SEVERE, "Could not save the contestants.yml file", e);
         }
     }
 }

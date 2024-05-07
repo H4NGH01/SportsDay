@@ -27,9 +27,9 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
-import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
-import org.macausmp.sportsday.gui.competition.CompetitorProfileGUI;
-import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.gui.competition.ContestantProfileGUI;
+import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
+import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.time.LocalDateTime;
@@ -42,9 +42,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
     private ConfigManager configManager;
     private CommandManager commandManager;
-    public static Team COMPETITOR;
-    public static Team REFEREE;
-    public static Team AUDIENCE;
+    public static Team CONTESTANTS;
+    public static Team REFEREES;
+    public static Team AUDIENCES;
     private static BossBar BOSSBAR;
 
     public static SportsDay getInstance() {
@@ -61,11 +61,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
         configManager.saveConfig();
         registerTranslation();
         Competitions.load();
-        Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
-        COMPETITOR = registerTeam(scoreboard, "competitor", Component.translatable("role.competitor"), NamedTextColor.GREEN);
-        REFEREE = registerTeam(scoreboard, "referee", Component.translatable("role.referee"), NamedTextColor.GOLD);
-        AUDIENCE = registerTeam(scoreboard, "audience", Component.translatable("role.audience"), NamedTextColor.GRAY);
-        BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+        CONTESTANTS = registerTeam("contestants", Component.translatable("role.contestants"), NamedTextColor.GREEN);
+        REFEREES = registerTeam("referees", Component.translatable("role.referees"), NamedTextColor.GOLD);
+        AUDIENCES = registerTeam("audiences", Component.translatable("role.audiences"), NamedTextColor.GRAY);
+        if (BOSSBAR == null) BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
         setGameRules();
         registerCommand();
         registerListener();
@@ -80,7 +79,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
         GlobalTranslator.translator().addSource(registry);
     }
 
-    private Team registerTeam(@NotNull Scoreboard scoreboard, String name, Component display, NamedTextColor color) {
+    private Team registerTeam(String name, Component display, NamedTextColor color) {
+        Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
         if (scoreboard.getTeam(name) == null) {
             Team team = scoreboard.registerNewTeam(name);
             team.displayName(display);
@@ -128,6 +128,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
             });
         }
         Competitions.save();
+        Bukkit.getOnlinePlayers().forEach(CompetitionListener::cancelJudgementCut);
     }
 
     /**
@@ -149,8 +150,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
                         Component header = getHeader();
                         Component time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                         for (Player p : getServer().getOnlinePlayers()) {
-                            if (Competitions.isCompetitor(p)) {
-                                CompetitorData data = Competitions.getCompetitor(p.getUniqueId());
+                            if (Competitions.isContestant(p)) {
+                                ContestantData data = Competitions.getContestant(p.getUniqueId());
                                 Component number = Component.translatable("tablist.number").args(Component.text(data.getNumber()));
                                 Component score = Component.translatable("tablist.score").args(Component.text(data.getScore()));
                                 header = header.appendNewline().append(number).appendNewline().append(score);
@@ -165,7 +166,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     private @NotNull Component getHeader() {
                         IEvent event = Competitions.getCurrentEvent();
                         Component competition = event == null ? Component.translatable("tablist.idle") : Component.translatable("tablist.current").args(event.getName(), event.getStatus().getName());
-                        Component count = Component.translatable("tablist.competitor_count").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(getServer().getOnlinePlayers().size()));
+                        Component count = Component.translatable("tablist.contestants_count").args(Component.text(Competitions.getOnlineContestants().size()), Component.text(getServer().getOnlinePlayers().size()));
                         return Component.translatable("tablist.title").appendNewline().append(competition).appendNewline().append(count);
                     }
                 }.runTaskTimer(instance, 0L, 20L);
@@ -177,7 +178,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BOSSBAR.addViewer(p);
-        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
+        if (!p.hasPlayedBefore()) SportsDay.AUDIENCES.addPlayer(p);
         if (p.getPersistentDataContainer().has(AbstractEvent.IN_GAME)) {
             IEvent curr = Competitions.getCurrentEvent();
             long last = Objects.requireNonNull(p.getPersistentDataContainer().get(AbstractEvent.IN_GAME, PersistentDataType.LONG));
@@ -195,23 +196,24 @@ public final class SportsDay extends JavaPlugin implements Listener {
                 p.getPersistentDataContainer().remove(AbstractEvent.IN_GAME);
             }
         }
-        if (!Competitions.isCompetitor(p)) return;
+        if (!Competitions.isContestant(p)) return;
         CompetitionInfoGUI.updateGUI();
-        CompetitorListGUI.updateGUI();
-        CompetitorProfileGUI.updateProfile(p.getUniqueId());
+        ContestantsListGUI.updateGUI();
+        ContestantProfileGUI.updateProfile(p.getUniqueId());
     }
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
         AbstractEvent.leavePractice(p);
-        if (!Competitions.isCompetitor(p)) return;
+        CompetitionListener.cancelJudgementCut(p);
+        if (!Competitions.isContestant(p)) return;
         new BukkitRunnable() {
             @Override
             public void run() {
                 CompetitionInfoGUI.updateGUI();
-                CompetitorListGUI.updateGUI();
-                CompetitorProfileGUI.updateProfile(p.getUniqueId());
+                ContestantsListGUI.updateGUI();
+                ContestantProfileGUI.updateProfile(p.getUniqueId());
             }
         }.runTaskLater(this, 1L);
     }

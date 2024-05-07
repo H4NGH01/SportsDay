@@ -15,7 +15,7 @@ public class RegisterCommand implements IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {
-            if (!Competitions.isCompetitor(p)) {
+            if (!Competitions.isContestant(p)) {
                 int number;
                 if (args.length >= 1) {
                     try {

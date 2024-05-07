@@ -17,22 +17,22 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.Pageable;
-import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.*;
 
-public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageable {
-    private static final Set<CompetitorListGUI> HANDLER = new HashSet<>();
+public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageable {
+    private static final Set<ContestantsListGUI> HANDLER = new HashSet<>();
     private int page = 0;
 
-    public CompetitorListGUI() {
-        super(54, Component.translatable("gui.competitor_list.title"));
+    public ContestantsListGUI() {
+        super(54, Component.translatable("gui.contestants_list.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, ItemUtil.addWrapper(GUIButton.COMPETITOR_LIST));
+        getInventory().setItem(1, ItemUtil.addWrapper(GUIButton.CONTESTANTS_LIST));
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
@@ -49,19 +49,19 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
             getInventory().setItem(i, null);
         }
         for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getCompetitors().size()) break;
-            getInventory().setItem(i + getStartSlot(), icon(Competitions.getCompetitors().stream().sorted(Comparator.comparingInt(CompetitorData::getNumber)).toList().get(i + getPage() * getSize()).getUUID()));
+            if (i >= Competitions.getContestants().size()) break;
+            getInventory().setItem(i + getStartSlot(), icon(Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList().get(i + getPage() * getSize()).getUUID()));
         }
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(CompetitorListGUI::update);
+        HANDLER.forEach(ContestantsListGUI::update);
     }
 
     @ButtonHandler("player_icon")
     public void profile(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         SkullMeta meta = (SkullMeta) item.getItemMeta();
-        p.openInventory(new CompetitorProfileGUI(Competitions.getCompetitor(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
+        p.openInventory(new ContestantProfileGUI(Competitions.getContestant(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
     }
 
     @ButtonHandler("next_page")
@@ -84,11 +84,11 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
 
     private @NotNull ItemStack icon(UUID uuid) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
+        Component online = Component.translatable(player.isOnline() ? "contestant.online" : "contestant.offline");
         Component display = Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online);
-        Component number = Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber())).color(NamedTextColor.YELLOW);
-        Component score = Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore())).color(NamedTextColor.YELLOW);
-        Component detail = Component.translatable("gui.competitor_profile.detail").args(Component.text(player.getName())).color(NamedTextColor.YELLOW);
+        Component number = Component.translatable("contestant.number").args(Component.text(Competitions.getContestant(uuid).getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("contestant.score").args(Component.text(Competitions.getContestant(uuid).getScore())).color(NamedTextColor.YELLOW);
+        Component detail = Component.translatable("gui.contestant_profile.detail").args(Component.text(player.getName())).color(NamedTextColor.YELLOW);
         ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display, number, score, "", detail);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(player));
         return icon;
@@ -116,8 +116,8 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
 
     @Override
     public int getMaxPage() throws ArithmeticException {
-        if (Competitions.getCompetitors().isEmpty()) return 1;
-        int i = Competitions.getCompetitors().size();
+        if (Competitions.getContestants().isEmpty()) return 1;
+        int i = Competitions.getContestants().size();
         return i % getSize() == 0 ? i / getSize() : i / getSize() + 1;
     }
 

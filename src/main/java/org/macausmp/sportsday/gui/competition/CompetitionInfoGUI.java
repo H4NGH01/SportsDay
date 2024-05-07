@@ -27,7 +27,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, ItemUtil.addWrapper(GUIButton.COMPETITION_INFO));
-        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
+        getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, GUIButton.START_COMPETITION);
@@ -72,8 +72,8 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack player() {
-        Component display = Component.translatable("competition.competitors.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getCompetitors().size()).color(NamedTextColor.YELLOW));
-        Component lore = Component.translatable("competition.competitors.online").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlineCompetitors().size()).color(NamedTextColor.YELLOW));
+        Component display = Component.translatable("competition.contestants.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getContestants().size()).color(NamedTextColor.YELLOW));
+        Component lore = Component.translatable("competition.contestants.online").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlineContestants().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display, lore);
     }
 

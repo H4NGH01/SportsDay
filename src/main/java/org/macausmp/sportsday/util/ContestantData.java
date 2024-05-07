@@ -6,19 +6,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 /**
- * Represents a competitor data
+ * Represents a contestant data
  */
-public final class CompetitorData implements PlayerHolder {
+public final class ContestantData implements PlayerHolder {
     private final UUID uuid;
     private final int number;
     private int score;
     private boolean removed;
 
-    public CompetitorData(UUID uuid, int number) {
+    public ContestantData(UUID uuid, int number) {
         this(uuid, number, 0);
     }
 
-    public CompetitorData(UUID uuid, int number, int score) {
+    public ContestantData(UUID uuid, int number, int score) {
         this.uuid = uuid;
         this.number = number;
         this.score = score;
@@ -76,15 +76,15 @@ public final class CompetitorData implements PlayerHolder {
     }
 
     /**
-     * Returns {@code True} if this {@link CompetitorData} has been marked for removal
-     * @return {@code True} if this {@link CompetitorData} is removed
+     * Returns {@code True} if this {@link ContestantData} has been marked for removal
+     * @return {@code True} if this {@link ContestantData} is removed
      */
     public boolean isRemoved() {
         return removed;
     }
 
     /**
-     * Mark the {@link CompetitorData} removal
+     * Mark the {@link ContestantData} removal
      */
     public void remove() {
         if (removed) return;

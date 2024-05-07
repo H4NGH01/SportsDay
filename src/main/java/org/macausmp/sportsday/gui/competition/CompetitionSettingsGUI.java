@@ -28,7 +28,7 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
+        getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, ItemUtil.addWrapper(GUIButton.COMPETITION_SETTINGS));
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, GUIButton.ELYTRA_RACING);

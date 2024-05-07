@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashSet;
@@ -21,18 +21,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class CompetitorProfileGUI extends AbstractCompetitionGUI {
-    private static final Set<CompetitorProfileGUI> HANDLER = new HashSet<>();
-    private final CompetitorData data;
+public class ContestantProfileGUI extends AbstractCompetitionGUI {
+    private static final Set<ContestantProfileGUI> HANDLER = new HashSet<>();
+    private final ContestantData data;
 
-    public CompetitorProfileGUI(@NotNull CompetitorData data) {
-        super(54, Component.translatable("gui.competitor_profile.title").args(Component.text(data.getName())));
+    public ContestantProfileGUI(@NotNull ContestantData data) {
+        super(54, Component.translatable("gui.contestant_profile.title").args(Component.text(data.getName())));
         this.data = data;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
+        getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, icon());
@@ -50,7 +50,7 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateProfile(UUID uuid) {
-        for (CompetitorProfileGUI gui : HANDLER) {
+        for (ContestantProfileGUI gui : HANDLER) {
             if (gui.data.getUUID().equals(uuid)) gui.update();
         }
     }
@@ -86,29 +86,29 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack icon() {
-        Component online = Component.translatable(data.isOnline() ? "competitor.online" : "competitor.offline");
+        Component online = Component.translatable(data.isOnline() ? "contestant.online" : "contestant.offline");
         Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").args(online);
-        Component number = Component.translatable("competitor.number").args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
-        Component score = Component.translatable("competitor.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        Component number = Component.translatable("contestant.number").args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
         ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, null, display, number, score);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return icon;
     }
 
     private @NotNull ItemStack unregister() {
-        Component display = Component.translatable("gui.competitor.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
-        Component lore = Component.translatable("gui.competitor.unregister_lore");
+        Component display = Component.translatable("gui.contestant.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
+        Component lore = Component.translatable("gui.contestant.unregister_lore");
         return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
     }
 
     private @NotNull ItemStack increase() {
-        Component score = Component.translatable("competitor.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, "increase", "gui.competitor.increase", score, "gui.competitor.increase_lore1", "gui.competitor.increase_lore2");
+        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, "increase", "gui.contestant.increase", score, "gui.contestant.increase_lore1", "gui.contestant.increase_lore2");
     }
 
     private @NotNull ItemStack decrease() {
-        Component score = Component.translatable("competitor.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.competitor.decrease", score, "gui.competitor.decrease_lore1", "gui.competitor.decrease_lore2");
+        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.contestant.decrease", score, "gui.contestant.decrease_lore1", "gui.contestant.decrease_lore2");
     }
 
     @Override

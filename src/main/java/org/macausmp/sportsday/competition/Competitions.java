@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
-import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
-import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
+import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.*;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public final class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    private static final FileConfiguration COMPETITOR_CONFIG = PLUGIN.getConfigManager().getCompetitorConfig();
+    private static final FileConfiguration CONTESTANTS_CONFIG = PLUGIN.getConfigManager().getContestantsConfig();
     public static final Map<String, IEvent> EVENTS = new LinkedHashMap<>();
     public static final IEvent ELYTRA_RACING = register(new ElytraRacing());
     public static final IEvent ICE_BOAT_RACING = register(new IceBoatRacing());
@@ -28,7 +28,7 @@ public final class Competitions {
     public static final IEvent PARKOUR = register(new Parkour());
     public static final IEvent SUMO = register(new Sumo());
     private static IEvent CURRENT_EVENT;
-    private static final Set<CompetitorData> COMPETITORS = new HashSet<>();
+    private static final Set<ContestantData> CONTESTANTS = new HashSet<>();
     private static final Set<Integer> REGISTERED_NUMBER_LIST = new HashSet<>();
     private static int NUMBER = 1;
 
@@ -43,27 +43,27 @@ public final class Competitions {
     }
 
     /**
-     * Load competitors' data
+     * Load contestants data
      */
     public static void load() {
-        COMPETITORS.clear();
-        Set<String> keys = COMPETITOR_CONFIG.getKeys(false);
+        CONTESTANTS.clear();
+        Set<String> keys = CONTESTANTS_CONFIG.getKeys(false);
         for (String key : keys) {
             UUID uuid = UUID.fromString(key);
-            int number = COMPETITOR_CONFIG.getInt(key + ".number");
-            int score = COMPETITOR_CONFIG.getInt((key + ".score"));
-            COMPETITORS.add(new CompetitorData(uuid, number, score));
+            int number = CONTESTANTS_CONFIG.getInt(key + ".number");
+            int score = CONTESTANTS_CONFIG.getInt((key + ".score"));
+            CONTESTANTS.add(new ContestantData(uuid, number, score));
         }
     }
 
     /**
-     * Save competitors' data
+     * Save contestants data
      */
     public static void save() {
-        for (CompetitorData data : COMPETITORS) {
-            COMPETITOR_CONFIG.set(data.getUUID() + ".name", data.getName());
-            COMPETITOR_CONFIG.set(data.getUUID() + ".number", data.getNumber());
-            COMPETITOR_CONFIG.set(data.getUUID() + ".score", data.getScore());
+        for (ContestantData data : CONTESTANTS) {
+            CONTESTANTS_CONFIG.set(data.getUUID() + ".name", data.getName());
+            CONTESTANTS_CONFIG.set(data.getUUID() + ".number", data.getNumber());
+            CONTESTANTS_CONFIG.set(data.getUUID() + ".score", data.getScore());
         }
         PLUGIN.getConfigManager().saveConfig();
     }
@@ -88,7 +88,7 @@ public final class Competitions {
             sender.sendMessage(Component.translatable("command.competition.disabled").color(NamedTextColor.RED));
             return false;
         }
-        if (getOnlineCompetitors().size() < event.getLeastPlayersRequired()) {
+        if (getOnlineContestants().size() < event.getLeastPlayersRequired()) {
             sender.sendMessage(Component.translatable("command.competition.not_enough_player_required").args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
             return false;
         }
@@ -128,41 +128,41 @@ public final class Competitions {
     }
 
     /**
-     * Add competitor to competitor list
-     * @param competitor Competitor to add to the competitor list
-     * @param number Competitor number
-     * @return {@code True} if competitor successfully added to the competitor list
+     * Add a player to contestants list
+     * @param player Player to add to the contestants list
+     * @param number Player's entry number
+     * @return {@code True} if player successfully added to the contestants list
      */
-    public static boolean join(@NotNull Player competitor, int number) {
-        for (CompetitorData data : COMPETITORS) {
+    public static boolean join(@NotNull Player player, int number) {
+        for (ContestantData data : CONTESTANTS) {
             if (data.getNumber() == number) return false;
         }
-        COMPETITORS.add(new CompetitorData(competitor.getUniqueId(), number));
+        CONTESTANTS.add(new ContestantData(player.getUniqueId(), number));
         CompetitionInfoGUI.updateGUI();
-        CompetitorListGUI.updateGUI();
-        competitor.sendMessage(Component.translatable("command.competition.register.success.self").args(Component.text(number)).color(NamedTextColor.GREEN));
-        SportsDay.COMPETITOR.addPlayer(competitor);
+        ContestantsListGUI.updateGUI();
+        player.sendMessage(Component.translatable("command.competition.register.success.self").args(Component.text(number)).color(NamedTextColor.GREEN));
+        SportsDay.CONTESTANTS.addPlayer(player);
         return true;
     }
 
     /**
-     * Remove competitor from competitor list
-     * @param competitor Competitor to remove from the competitor list
-     * @return {@code True} if competitor successfully removed from the competitor list
+     * Remove a specific player from contestants list
+     * @param player Player to remove from the contestants list
+     * @return {@code True} if player successfully removed from the contestants list
      */
-    public static boolean leave(OfflinePlayer competitor) {
-        if (isCompetitor(competitor)) {
-            for (CompetitorData data : COMPETITORS) {
-                if (data.getUUID().equals(competitor.getUniqueId())) {
+    public static boolean leave(OfflinePlayer player) {
+        if (isContestant(player)) {
+            for (ContestantData data : CONTESTANTS) {
+                if (data.getUUID().equals(player.getUniqueId())) {
                     data.remove();
-                    if (competitor.isOnline() && getCurrentEvent() != null) getCurrentEvent().onDisqualification(data);
-                    COMPETITOR_CONFIG.set(data.getUUID().toString(), null);
+                    if (player.isOnline() && getCurrentEvent() != null) getCurrentEvent().onDisqualification(data);
+                    CONTESTANTS_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove(data.getNumber());
-                    COMPETITORS.remove(data);
+                    CONTESTANTS.remove(data);
                     CompetitionInfoGUI.updateGUI();
-                    CompetitorListGUI.updateGUI();
-                    if (competitor.isOnline()) Objects.requireNonNull(competitor.getPlayer()).sendMessage(Component.translatable("command.competition.unregister.success.self"));
-                    SportsDay.AUDIENCE.addPlayer(competitor);
+                    ContestantsListGUI.updateGUI();
+                    if (player.isOnline()) Objects.requireNonNull(player.getPlayer()).sendMessage(Component.translatable("command.competition.unregister.success.self"));
+                    SportsDay.AUDIENCES.addPlayer(player);
                     return true;
                 }
             }
@@ -171,11 +171,11 @@ public final class Competitions {
     }
 
     /**
-     * Generate unoccupied competitor numbers
-     * @return Unoccupied competitor number
+     * Generate unoccupied contestant numbers
+     * @return Unoccupied contestant number
      */
     public static int genNumber() {
-        COMPETITORS.forEach(data -> REGISTERED_NUMBER_LIST.add(data.getNumber()));
+        CONTESTANTS.forEach(data -> REGISTERED_NUMBER_LIST.add(data.getNumber()));
         while (REGISTERED_NUMBER_LIST.contains(NUMBER)) {
             NUMBER++;
         }
@@ -184,42 +184,42 @@ public final class Competitions {
     }
 
     /**
-     * Gets a view of all registered competitors
-     * @return a view of registered competitors
+     * Gets a view of all registered contestants
+     * @return a view of registered contestants
      */
-    public static @NotNull Collection<CompetitorData> getCompetitors() {
-        return new HashSet<>(COMPETITORS);
+    public static @NotNull Collection<ContestantData> getContestants() {
+        return new HashSet<>(CONTESTANTS);
     }
 
     /**
-     * Gets a view of all currently logged in registered competitors
-     * @return a view of currently online registered competitors
+     * Gets a view of all currently logged in registered contestants
+     * @return a view of currently online registered contestants
      */
-    public static @NotNull Collection<CompetitorData> getOnlineCompetitors() {
-        return COMPETITORS.stream().filter(PlayerHolder::isOnline).collect(Collectors.toSet());
+    public static @NotNull Collection<ContestantData> getOnlineContestants() {
+        return CONTESTANTS.stream().filter(PlayerHolder::isOnline).collect(Collectors.toSet());
     }
 
     /**
-     * Checks if this player is in competitor list
+     * Checks if this player is in contestants list
      * @param player Specified player
-     * @return {@code True} if the player is in competitor list
+     * @return {@code True} if the player is in contestants list
      */
-    public static boolean isCompetitor(OfflinePlayer player) {
-        return COMPETITORS.stream().anyMatch(data -> data.getUUID().equals(player.getUniqueId()));
+    public static boolean isContestant(OfflinePlayer player) {
+        return CONTESTANTS.stream().anyMatch(data -> data.getUUID().equals(player.getUniqueId()));
     }
 
     /**
-     * Get competitor data by uuid
+     * Get {@link ContestantData} by uuid
      *
-     * <p>Plugins should check that {@link #isCompetitor(OfflinePlayer)} returns {@code True} before calling this method.</p>
+     * <p>Plugins should check that {@link #isContestant(OfflinePlayer)} returns {@code True} before calling this method.</p>
      *
      * @param uuid Player uuid
-     * @return Competitor data of uuid
+     * @return {@link ContestantData} of uuid
      */
-    public static @NotNull CompetitorData getCompetitor(UUID uuid) {
-        for (CompetitorData data : COMPETITORS) {
+    public static @NotNull ContestantData getContestant(UUID uuid) {
+        for (ContestantData data : CONTESTANTS) {
             if (data.getUUID().equals(uuid)) return data;
         }
-        throw new IllegalArgumentException("Competitor data list does not contain this data");
+        throw new IllegalArgumentException("Contestants data list does not contain this data");
     }
 }

@@ -1,14 +1,18 @@
 package org.macausmp.sportsday;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +30,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.competition.sumo.Sumo;
@@ -40,10 +46,7 @@ import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class CompetitionListener implements Listener {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
@@ -63,7 +66,7 @@ public final class CompetitionListener implements Listener {
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
         IEvent current = Competitions.getCurrentEvent();
-        if (current instanceof ITrackEvent && current.getStatus() == Status.STARTED && Competitions.isCompetitor(p) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
+        if (current instanceof ITrackEvent && current.getStatus() == Status.STARTED && Competitions.isContestant(p) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
             Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
             spawnpoint(p, loc);
@@ -89,10 +92,8 @@ public final class CompetitionListener implements Listener {
                 boolean b = match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED && match.contain(player.getUniqueId()) && match.contain(damager.getUniqueId());
                 if (b || AbstractEvent.inPractice(player, Competitions.SUMO)) {
                     e.setDamage(0);
-                } else {
-                    e.setCancelled(true);
+                    return;
                 }
-                return;
             }
             e.setCancelled(true);
         }
@@ -102,8 +103,8 @@ public final class CompetitionListener implements Listener {
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             IEvent current = Competitions.getCurrentEvent();
-            if (AbstractEvent.inPractice(player)) return;
-            if (current == null || Competitions.isCompetitor(player) && current.getStatus() != Status.STARTED) e.setCancelled(true);
+            if (current != null && current.getStatus() == Status.STARTED || AbstractEvent.inPractice(player)) return;
+            e.setCancelled(true);
         }
     }
 
@@ -267,6 +268,7 @@ public final class CompetitionListener implements Listener {
                 @Override
                 public void run() {
                     if (!p.isOnline()) {
+                        EASTER_EGG.remove(p.getUniqueId());
                         cancel();
                         return;
                     }
@@ -290,6 +292,158 @@ public final class CompetitionListener implements Listener {
                     i++;
                 }
             }.runTaskTimer(PLUGIN, 0L, 10L);
+        }
+    }
+
+    private static final Map<UUID, JudgementCut> JUDGEMENT_CUT = new HashMap<>();
+
+    @SuppressWarnings({"SpellCheckingInspection", "deprecation"})
+    @EventHandler
+    public void onJudgementCut(@NotNull PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+        Player p = e.getPlayer();
+        if (item == null || !item.hasItemMeta() || p.hasCooldown(item.getType()) || !e.getAction().isRightClick()) return;
+        if (Boolean.TRUE.equals(item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "yamato"), PersistentDataType.BOOLEAN))) {
+            UUID uuid = p.getUniqueId();
+            JUDGEMENT_CUT.putIfAbsent(uuid, new JudgementCut(Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).getBaseValue()));
+            final JudgementCut jc = JUDGEMENT_CUT.get(uuid);
+            final Map<Integer, Boolean> times = jc.times;
+
+            // Set holding
+            jc.holding = true;
+
+            // The first click
+            if (jc.task == null || jc.task.isCancelled()) {
+                jc.task = new BukkitRunnable() {
+                    int i = 0;
+                    @Override
+                    public void run() {
+                        if (!JUDGEMENT_CUT.containsKey(uuid) || p.hasCooldown(item.getType())) {
+                            cancel();
+                            return;
+                        }
+
+                        if (++i > 3) {
+                            // Make yamato sparkles
+                            if (Enchantment.DURABILITY.canEnchantItem(item)) item.addEnchantment(Enchantment.DURABILITY, 1);
+
+                            boolean perfect = i == 4;
+
+                            // Cancel this if this is not first judgement cut and perfect judgement cut
+                            if (!times.isEmpty() && !perfect) {
+                                p.setCooldown(item.getType(), 20);
+                                item.removeEnchantment(Enchantment.DURABILITY);
+                                times.clear();
+                                cancel();
+                                return;
+                            }
+
+                            // Release success
+                            if (!jc.holding) {
+                                Location loc = p.getEyeLocation().add(p.getLocation().getDirection().multiply(50));
+                                if (p.getTargetEntity(100, true) instanceof LivingEntity le) {
+                                    loc = le.getEyeLocation();
+                                } else {
+                                    Block b = p.getTargetBlockExact(100);
+                                    BlockFace bf = p.getTargetBlockFace(100);
+                                    if (b != null && bf != null) loc = b.getLocation().add(bf.getDirection().multiply(2));
+                                }
+                                ParticleBuilder builder = new ParticleBuilder(Particle.FLASH);
+                                builder.location(loc);
+
+                                boolean shift = !perfect && p.isOnGround();
+                                if (shift) {
+                                    p.setVelocity(new Vector(Math.sin(Math.toRadians(p.getYaw())), 0, -Math.cos(Math.toRadians(p.getYaw()))));
+                                    Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).setBaseValue(0);
+                                }
+                                Collection<LivingEntity> le = loc.getNearbyLivingEntities(3);
+                                World world = p.getWorld();
+                                Location finalLoc = loc;
+
+                                // Do judgement cut
+                                new BukkitRunnable() {
+                                    int j = perfect ? 3 : 1;
+                                    final int k = j;
+                                    @Override
+                                    public void run() {
+                                        if (k == j) {
+                                            jc.lock = true;
+                                            Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).setBaseValue(0);
+                                            p.spawnParticle(Particle.SWEEP_ATTACK, p.getLocation().add(p.getLocation().getDirection().setY(0)).add(0, 1, 0), 1);
+                                        }
+                                        le.forEach(e -> {
+                                            e.damage(5, p);
+                                            e.setVelocity(new Vector());
+                                            e.setNoDamageTicks(1);
+                                        });
+                                        builder.spawn();
+                                        world.playSound(Sound.sound(Key.key("minecraft:entity.player.attack.sweep"), Sound.Source.MASTER, 5f, 1f), finalLoc.x(), finalLoc.y(), finalLoc.z());
+                                        if (--j <= 0) {
+                                            Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).setBaseValue(jc.baseSpeed);
+                                            if (times.values().stream().filter(b -> b).count() >= 3) {
+                                                p.setCooldown(item.getType(), 20);
+                                                times.clear();
+                                                p.sendActionBar(Component.text("Jackpot!").color(NamedTextColor.GOLD));
+                                            }
+                                            item.removeEnchantment(Enchantment.DURABILITY);
+                                            cancel();
+                                            new BukkitRunnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (!jc.holding) {
+                                                        p.setCooldown(item.getType(), 20);
+                                                        item.removeEnchantment(Enchantment.DURABILITY);
+                                                        times.clear();
+                                                    }
+                                                    jc.lock = false;
+                                                }
+                                            }.runTaskLater(PLUGIN, 4L);
+                                        }
+                                    }
+                                }.runTaskTimer(PLUGIN, shift ? 10L : 0L, 2L);
+                                jc.task.cancel();
+                                times.put(times.size(), perfect);
+                                cancel();
+                                return;
+                            }
+                        }
+
+                        // Release fail
+                        if (!jc.holding) {
+                            if (!times.isEmpty()) {
+                                p.setCooldown(item.getType(), 20);
+                                item.removeEnchantment(Enchantment.DURABILITY);
+                                times.clear();
+                            }
+                            cancel();
+                        }
+
+                        // Init right-clicking status for next times
+                        if (!jc.lock) jc.holding = false;
+                    }
+                }.runTaskTimer(PLUGIN, 0L, 4L);
+            }
+        }
+    }
+
+    static void cancelJudgementCut(@NotNull Player p) {
+        UUID uuid = p.getUniqueId();
+        if (JUDGEMENT_CUT.containsKey(uuid)) {
+            Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).setBaseValue(JUDGEMENT_CUT.get(uuid).baseSpeed);
+            p.getInventory().getItemInMainHand().removeEnchantment(Enchantment.DURABILITY);
+            JUDGEMENT_CUT.remove(uuid);
+        }
+    }
+
+    private static class JudgementCut {
+        boolean holding = false;
+        boolean lock = false;
+        final Map<Integer, Boolean> times = new HashMap<>();
+        final double baseSpeed;
+        BukkitTask task;
+
+        private JudgementCut(double baseSpeed) {
+            this.baseSpeed = baseSpeed;
         }
     }
 }

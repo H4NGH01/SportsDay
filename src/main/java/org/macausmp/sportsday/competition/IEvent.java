@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.Collection;
@@ -80,10 +80,10 @@ public interface IEvent extends Listener {
     Status getStatus();
 
     /**
-     * Gets a view of {@link CompetitorData} of current event
-     * @return a view of {@link CompetitorData} of current event
+     * Gets a view of {@link ContestantData} of current event
+     * @return a view of {@link ContestantData} of current event
      */
-    Collection<CompetitorData> getCompetitors();
+    Collection<ContestantData> getContestants();
 
     /**
      * Get the leaderboard of event
@@ -92,10 +92,10 @@ public interface IEvent extends Listener {
     List<? extends PlayerHolder> getLeaderboard();
 
     /**
-     * Disqualification of competitor
-     * @param competitor Who is going to be disqualified
+     * Disqualification of contestant
+     * @param contestant Who is going to be disqualified
      */
-    void onDisqualification(CompetitorData competitor);
+    void onDisqualification(ContestantData contestant);
 
     /**
      * Teleport player to event location and sets up practice environment for the player

@@ -12,7 +12,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        SportsDay.COMPETITOR.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.ALWAYS);
+        SportsDay.CONTESTANTS.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.FOR_OWN_TEAM);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        SportsDay.COMPETITOR.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        SportsDay.CONTESTANTS.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
     }
 
     @Override

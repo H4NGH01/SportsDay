@@ -30,7 +30,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @Override
     protected void onSetup() {
         getLocation().getWorld().getEntitiesByClass(Boat.class).forEach(Boat::remove);
-        getCompetitors().forEach(data -> boatMap.put(data.getUUID(), boat(data.getPlayer())));
+        getContestants().forEach(data -> boatMap.put(data.getUUID(), boat(data.getPlayer())));
     }
 
     @Override
@@ -130,6 +130,6 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     private boolean checkStatus(Player p) {
-        return Competitions.getCurrentEvent() == this && Competitions.isCompetitor(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
+        return Competitions.getCurrentEvent() == this && Competitions.isContestant(p) && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId()));
     }
 }
