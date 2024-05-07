@@ -24,9 +24,8 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
 
     public CompetitionSettingsGUI() {
         super(54, Component.translatable("gui.settings.title"));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, ItemUtil.addWrapper(GUIButton.COMPETITION_SETTINGS));
@@ -58,7 +57,8 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     @ButtonHandler("status_toggle")
     public void toggle(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
-        if (event == null) return;
+        if (event == null)
+            return;
         PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
         PLUGIN.saveConfig();
         updateGUI();
@@ -66,7 +66,10 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack status(@NotNull IEvent event) {
-        ItemStack stack = ItemUtil.item(event.isEnable() ? Material.LIME_DYE : Material.BARRIER, "status_toggle", event.isEnable() ? "gui.enabled" : "gui.disabled", "gui.toggle");
+        ItemStack stack = ItemUtil.item(
+                event.isEnable() ? Material.LIME_DYE : Material.BARRIER,
+                "status_toggle",
+                event.isEnable() ? "gui.enabled" : "gui.disabled", "gui.toggle");
         stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }

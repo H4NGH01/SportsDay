@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.ConfirmGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -23,9 +24,8 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
 
     public CompetitionInfoGUI() {
         super(36, Component.translatable("gui.info.title"));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        }
         getInventory().setItem(0, ItemUtil.addWrapper(GUIButton.COMPETITION_INFO));
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
@@ -33,13 +33,13 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
         getInventory().setItem(18, GUIButton.START_COMPETITION);
         getInventory().setItem(19, GUIButton.END_COMPETITION);
         update();
-        HANDLER.add(this);
     }
 
     @Override
     public void update() {
         getInventory().setItem(27, status());
         getInventory().setItem(28, player());
+        HANDLER.add(this);
     }
 
     public static void updateGUI() {
@@ -59,21 +59,27 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("end_competition")
     public void end(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        boolean b = Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED;
-        p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        Competitions.forceEnd(p);
+        p.openInventory(new ConfirmGUI(this, player -> {
+            boolean b = Competitions.forceEnd(p);
+            p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            return b;
+        }).getInventory());
     }
 
     private @NotNull ItemStack status() {
         boolean b = Competitions.getCurrentEvent() != null;
-        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.text.none"));
-        Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getStatus().getName() : Status.IDLE.getName());
+        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN)
+                .args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.text.none"));
+        Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN)
+                .args(b ? Competitions.getCurrentEvent().getStatus().getName() : Status.IDLE.getName());
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 
     private @NotNull ItemStack player() {
-        Component display = Component.translatable("competition.contestants.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getContestants().size()).color(NamedTextColor.YELLOW));
-        Component lore = Component.translatable("competition.contestants.online").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlineContestants().size()).color(NamedTextColor.YELLOW));
+        Component display = Component.translatable("competition.contestants.total").color(NamedTextColor.GREEN)
+                .args(Component.text(Competitions.getContestants().size()).color(NamedTextColor.YELLOW));
+        Component lore = Component.translatable("competition.contestants.online").color(NamedTextColor.GREEN)
+                .args(Component.text(Competitions.getOnlineContestants().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display, lore);
     }
 

@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.ConfirmGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -28,18 +29,14 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
     public ContestantProfileGUI(@NotNull ContestantData data) {
         super(54, Component.translatable("gui.contestant_profile.title").args(Component.text(data.getName())));
         this.data = data;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
-        getInventory().setItem(18, icon());
-        getInventory().setItem(19, increase());
-        getInventory().setItem(20, decrease());
         getInventory().setItem(26, unregister());
-        HANDLER.add(this);
+        update();
     }
 
     @Override
@@ -47,18 +44,20 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         getInventory().setItem(18, icon());
         getInventory().setItem(19, increase());
         getInventory().setItem(20, decrease());
+        HANDLER.add(this);
     }
 
     public static void updateProfile(UUID uuid) {
-        for (ContestantProfileGUI gui : HANDLER) {
-            if (gui.data.getUUID().equals(uuid)) gui.update();
-        }
+        for (ContestantProfileGUI gui : HANDLER)
+            if (gui.data.getUUID().equals(uuid))
+                gui.update();
     }
 
     @ButtonHandler("increase")
     public void increase(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (data.isRemoved()) {
-            p.sendMessage(Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getName())).color(NamedTextColor.RED));
+            p.sendMessage(Component.translatable("command.competition.unregister.failed.other")
+                    .args(Component.text(data.getName())).color(NamedTextColor.RED));
             p.closeInventory();
             return;
         }
@@ -70,7 +69,8 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
     @ButtonHandler("decrease")
     public void decrease(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (data.isRemoved()) {
-            p.sendMessage(Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getName())).color(NamedTextColor.RED));
+            p.sendMessage(Component.translatable("command.competition.unregister.failed.other")
+                    .args(Component.text(data.getName())).color(NamedTextColor.RED));
             p.closeInventory();
             return;
         }
@@ -81,34 +81,48 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("unregister")
     public void unregister(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("command.competition.unregister.success.other").args(Component.text(data.getName())).color(NamedTextColor.GREEN) : Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getName())).color(NamedTextColor.RED));
-        p.closeInventory();
+        p.openInventory(new ConfirmGUI(this, player -> {
+            boolean b = Competitions.leave(data.getPlayer());
+            player.sendMessage(b
+                    ? Component.translatable("command.competition.unregister.success.other")
+                    .args(Component.text(data.getName())).color(NamedTextColor.GREEN)
+                    : Component.translatable("command.competition.unregister.failed.other")
+                    .args(Component.text(data.getName())).color(NamedTextColor.RED));
+            return b;
+        }).getInventory());
     }
 
     private @NotNull ItemStack icon() {
         Component online = Component.translatable(data.isOnline() ? "contestant.online" : "contestant.offline");
         Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").args(online);
-        Component number = Component.translatable("contestant.number").args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
-        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        Component number = Component.translatable("contestant.number")
+                .args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("contestant.score")
+                .args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
         ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, null, display, number, score);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return icon;
     }
 
     private @NotNull ItemStack unregister() {
-        Component display = Component.translatable("gui.contestant.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
+        Component display = Component.translatable("gui.contestant.unregister")
+                .args(Component.text(data.getName())).color(NamedTextColor.RED);
         Component lore = Component.translatable("gui.contestant.unregister_lore");
         return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
     }
 
     private @NotNull ItemStack increase() {
-        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, "increase", "gui.contestant.increase", score, "gui.contestant.increase_lore1", "gui.contestant.increase_lore2");
+        Component score = Component.translatable("contestant.score")
+                .args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE,"increase", "gui.contestant.increase",
+                score, "gui.contestant.increase_lore1", "gui.contestant.increase_lore2");
     }
 
     private @NotNull ItemStack decrease() {
-        Component score = Component.translatable("contestant.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.contestant.decrease", score, "gui.contestant.decrease_lore1", "gui.contestant.decrease_lore2");
+        Component score = Component.translatable("contestant.score")
+                .args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.contestant.decrease",
+                score, "gui.contestant.decrease_lore1", "gui.contestant.decrease_lore2");
     }
 
     @Override

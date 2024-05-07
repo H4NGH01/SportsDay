@@ -16,8 +16,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onStart() {
-    }
+    protected void onStart() {}
 
     @Override
     protected void onEnd(boolean force) {
@@ -25,7 +24,5 @@ public class ObstacleCourse extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {
-
-    }
+    protected void onPractice(@NotNull Player p) {}
 }

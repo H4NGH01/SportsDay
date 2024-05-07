@@ -31,9 +31,8 @@ public class GraffitiSprayGUI extends PluginGUI {
     public GraffitiSprayGUI(Player player) {
         super(54, Component.translatable("gui.customize.graffiti_spray.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
         update();
@@ -41,14 +40,15 @@ public class GraffitiSprayGUI extends PluginGUI {
 
     @Override
     public void update() {
-        for (int i = 0; i < CustomizeGraffitiSpray.values().length; i++) {
+        for (int i = 0; i < CustomizeGraffitiSpray.values().length; i++)
             getInventory().setItem(i + START_INDEX, graffiti(CustomizeGraffitiSpray.values()[i]));
-        }
         CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
-        if (graffiti == null) return;
+        if (graffiti == null)
+            return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             String key = stack.getItemMeta().getPersistentDataContainer().get(GRAFFITI_SPRAY, PersistentDataType.STRING);
             if (key != null && key.equals(graffiti.name())) {
                 List<Component> lore = new ArrayList<>();

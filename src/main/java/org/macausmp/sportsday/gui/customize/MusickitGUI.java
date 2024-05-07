@@ -31,9 +31,8 @@ public class MusickitGUI extends PluginGUI {
     public MusickitGUI(Player player) {
         super(54, Component.translatable("gui.customize.musickit.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
         update();
@@ -41,14 +40,15 @@ public class MusickitGUI extends PluginGUI {
 
     @Override
     public void update() {
-        for (int i = 0; i < CustomizeMusickit.values().length; i++) {
+        for (int i = 0; i < CustomizeMusickit.values().length; i++)
             getInventory().setItem(i + START_INDEX, musickit(CustomizeMusickit.values()[i]));
-        }
         CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
-        if (musickit == null) return;
+        if (musickit == null)
+            return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             String key = stack.getItemMeta().getPersistentDataContainer().get(MUSICKIT, PersistentDataType.STRING);
             if (key != null && key.equals(musickit.name())) {
                 List<Component> lore = new ArrayList<>();

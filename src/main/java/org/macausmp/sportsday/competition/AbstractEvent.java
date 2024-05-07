@@ -112,8 +112,10 @@ public abstract class AbstractEvent implements IEvent {
             @Override
             public void run() {
                 if (i % 5 == 0 || (i <= 5 && i > 0)) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
-                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 0.5f));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown")
+                            .args(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                            Sound.Source.MASTER, 1f, 0.5f));
                 }
                 if (i-- == 0) {
                     start();
@@ -121,7 +123,8 @@ public abstract class AbstractEvent implements IEvent {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Component.translatable("event.ready.broadcast").args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.ready.broadcast")
+                .args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
         Bukkit.broadcast(Component.translatable("event.rule." + id));
         onSetup();
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").args(name));
@@ -146,7 +149,8 @@ public abstract class AbstractEvent implements IEvent {
                 CustomizeMusickit musickit = contestantToMusickit.get(mvp.getUniqueId());
                 if (musickit != null) {
                     Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                    Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
+                    Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
+                            .args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
                 }
             }
             addRunnable(new BukkitRunnable() {
@@ -179,7 +183,8 @@ public abstract class AbstractEvent implements IEvent {
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             });
             getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
-                if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
+                if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI))
+                    e.remove();
             });
         }
     }
@@ -225,7 +230,8 @@ public abstract class AbstractEvent implements IEvent {
         contestants.remove(contestant);
         getLeaderboard().remove(contestant);
         Player p = contestant.getPlayer();
-        if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
+        if (p.isInsideVehicle())
+            Objects.requireNonNull(p.getVehicle()).remove();
         p.clearActivePotionEffects();
         p.setFireTicks(0);
         p.getInventory().clear();
@@ -263,7 +269,8 @@ public abstract class AbstractEvent implements IEvent {
     public static void leavePractice(@NotNull Player p) {
         if (!PRACTICE.containsKey(p)) return;
         PRACTICE.remove(p);
-        if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
+        if (p.isInsideVehicle())
+            Objects.requireNonNull(p.getVehicle()).remove();
         p.clearActivePotionEffects();
         p.setFireTicks(0);
         p.getInventory().clear();

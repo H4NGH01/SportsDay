@@ -9,7 +9,7 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionGUICommand implements IPluginCommand {
+public class CompetitionGUICommand extends IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {
@@ -29,7 +29,8 @@ public class CompetitionGUICommand implements IPluginCommand {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         List<String> list = new ArrayList<>();
-        if (args.length == 1) list.add("book");
+        if (args.length == 1)
+            list.add("book");
         return list;
     }
 }

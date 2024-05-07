@@ -17,9 +17,8 @@ import org.macausmp.sportsday.util.ItemUtil;
 public class CompetitionStartGUI extends AbstractCompetitionGUI {
     public CompetitionStartGUI() {
         super(54, Component.translatable("gui.start.title"));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
@@ -45,8 +44,8 @@ public class CompetitionStartGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("start_competition")
     public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
-        if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+        if (!Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING)))
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {

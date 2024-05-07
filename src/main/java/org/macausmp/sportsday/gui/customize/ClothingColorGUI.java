@@ -31,9 +31,8 @@ public class ClothingColorGUI extends PluginGUI {
         super(27, Component.translatable("gui.customize.clothing.color.title"));
         this.player = player;
         this.slot = slot;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
         update();
@@ -41,16 +40,18 @@ public class ClothingColorGUI extends PluginGUI {
 
     @Override
     public void update() {
-        for (int i = 0; i < DyeColor.values().length; i++) {
+        for (int i = 0; i < DyeColor.values().length; i++)
             getInventory().setItem(i + START_INDEX, dye(Material.getMaterial(DyeColor.values()[i].name() + "_DYE")));
-        }
         for (int i = START_INDEX; i < START_INDEX + DyeColor.values().length; i++) {
             ItemStack dye = getInventory().getItem(i);
             PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, slot);
-            if (cloth == null) return;
+            if (cloth == null)
+                return;
             Color color = cloth.getColor();
-            if (DyeColor.getByColor(color) == null) return;
-            if (dye == null) break;
+            if (DyeColor.getByColor(color) == null)
+                return;
+            if (dye == null)
+                break;
             if (dye.getType().name().equals(Objects.requireNonNull(DyeColor.getByColor(color)).name() + "_DYE")) {
                 dye.editMeta(meta -> meta.displayName(TextUtil.text(Component.translatable("gui.selected"))));
                 dye.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -88,6 +89,7 @@ public class ClothingColorGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack reset() {
-        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_color")));
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
+                .args(Component.translatable("gui.customize.clothing.reset_color")));
     }
 }

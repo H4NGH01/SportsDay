@@ -63,7 +63,8 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     private static @NotNull ItemStack trident() {
         String display = "item.sportsday.javelin";
-        Component lore = Component.translatable("enchantment.sportsday.range").args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY);
+        Component lore = Component.translatable("enchantment.sportsday.range")
+                .args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY);
         ItemStack trident = ItemUtil.setBind(ItemUtil.item(Material.TRIDENT, null, display, lore));
         trident.editMeta(meta -> {
             meta.setUnbreakable(true);
@@ -77,14 +78,18 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     public void onEnd(boolean force) {
         Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().remove(TRIDENT));
         getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
-        if (force) return;
+        if (force)
+            return;
         Collections.sort(leaderboard);
         Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
             ScoreResult result = leaderboard.get(i++);
-            c = c.append(Component.translatable("event.javelin.rank").args(Component.text(i), Component.text(Competitions.getContestant(result.uuid).getName()), Component.text(result.getDistance())));
-            if (i < leaderboard.size()) c = c.appendNewline();
-            if (i <= 3) Competitions.getContestant(result.uuid).addScore(4 - i);
+            c = c.append(Component.translatable("event.javelin.rank")
+                    .args(Component.text(i), Component.text(Competitions.getContestant(result.uuid).getName()), Component.text(result.getDistance())));
+            if (i < leaderboard.size())
+                c = c.appendNewline();
+            if (i <= 3)
+                Competitions.getContestant(result.uuid).addScore(4 - i);
             Competitions.getContestant(result.uuid).addScore(1);
         }
         Bukkit.broadcast(c);
@@ -93,7 +98,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @EventHandler
     public void onThrow(@NotNull ProjectileLaunchEvent e) {
         if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
-            if (checkStatus(p) || inPractice(p, this)) {
+            if (check(p) || inPractice(p, this)) {
                 resultMap.put(p.getUniqueId(), new ScoreResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
@@ -116,10 +121,11 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @EventHandler
     public void onArrived(@NotNull ProjectileHitEvent e) {
         if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
-            if (checkStatus(p) && currentPlayer.getUUID().equals(p.getUniqueId())) {
+            if (check(p) && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 ScoreResult result = resultMap.get(p.getUniqueId());
                 resultMap.remove(p.getUniqueId());
-                if (result == null) return;
+                if (result == null)
+                    return;
                 result.setTridentLocation(trident);
                 leaderboard.add(result);
                 trident.customName(Component.translatable("event.javelin.javelin_name").args(p.displayName(), Component.text(result.getDistance())));
@@ -129,11 +135,14 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
             } else if (resultMap.containsKey(p.getUniqueId())) {
                 ScoreResult result = resultMap.get(p.getUniqueId());
                 resultMap.remove(p.getUniqueId());
-                if (result == null) return;
+                if (result == null)
+                    return;
                 result.setTridentLocation(trident);
                 trident.remove();
-                if (p.isOnline()) p.sendMessage(Component.translatable("event.javelin.practice_result").args(Component.text(result.getDistance())));
-                if (inPractice(p, this)) p.getInventory().setItem(0, TRIDENT);
+                if (p.isOnline())
+                    p.sendMessage(Component.translatable("event.javelin.practice_result").args(Component.text(result.getDistance())));
+                if (inPractice(p, this))
+                    p.getInventory().setItem(0, TRIDENT);
             }
         }
     }
@@ -141,8 +150,9 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (checkStatus(p)) {
-            if (resultMap.containsKey(p.getUniqueId())) return;
+        if (check(p)) {
+            if (resultMap.containsKey(p.getUniqueId()))
+                return;
             if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 reconnectTask.cancel();
                 p.getInventory().setItem(0, TRIDENT);
@@ -157,15 +167,18 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (checkStatus(p)) {
-            if (resultMap.containsKey(p.getUniqueId())) return;
+        if (check(p)) {
+            if (resultMap.containsKey(p.getUniqueId()))
+                return;
             if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 p.getInventory().clear();
                 reconnectTask = addRunnable(new BukkitRunnable() {
                     int i = PLUGIN.getConfig().getInt("reconnect_time");
                     @Override
                     public void run() {
-                        if (i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW));
+                        if (i > 0)
+                            Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected")
+                                    .args(Component.text(i)).color(NamedTextColor.YELLOW));
                         if (i-- == 0) {
                             onMatchEnd();
                             cancel();
@@ -176,7 +189,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         }
     }
 
-    private boolean checkStatus(Player p) {
+    private boolean check(Player p) {
         return Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isContestant(p);
     }
 
@@ -184,7 +197,8 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     public void onDisqualification(@NotNull ContestantData contestant) {
         super.onDisqualification(contestant);
         queue.remove(contestant);
-        if (currentPlayer != null && currentPlayer.getUUID().equals(contestant.getUUID())) onMatchEnd();
+        if (currentPlayer != null && currentPlayer.getUUID().equals(contestant.getUUID()))
+            onMatchEnd();
     }
 
     @Override
@@ -216,7 +230,9 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                 int i = PLUGIN.getConfig().getInt("reconnect_time");
                 @Override
                 public void run() {
-                    if (i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW));
+                    if (i > 0)
+                        Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected")
+                                .args(Component.text(i)).color(NamedTextColor.YELLOW));
                     if (i-- == 0) {
                         queue.remove(currentPlayer);
                         onMatchEnd();
@@ -230,11 +246,10 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @Override
     public void onMatchEnd() {
         currentPlayer = null;
-        if (!queue.isEmpty()) {
+        if (!queue.isEmpty())
             nextMatch();
-        } else {
+        else
             end(false);
-        }
     }
 
     @Override
@@ -243,7 +258,9 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
             int i = 3;
             @Override
             public void run() {
-                if (i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.next_round_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
+                if (i > 0)
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.next_round_countdown")
+                            .args(Component.text(i)).color(NamedTextColor.YELLOW));
                 if (i-- == 0) {
                     onMatchStart();
                     cancel();

@@ -12,12 +12,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PingCommand implements IPluginCommand {
+public class PingCommand extends IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String @NotNull [] args) {
         if (args.length >= 1) {
             Player p = Bukkit.getPlayerExact(args[0]);
-            sender.sendMessage(p == null ? Component.translatable("argument.player.unknown").color(NamedTextColor.RED) : Component.translatable("%s's ping is %sms").args(p.displayName(), Component.text(p.getPing())));
+            sender.sendMessage(p == null
+                    ? Component.translatable("argument.player.unknown").color(NamedTextColor.RED)
+                    : Component.translatable("%s's ping is %sms").args(p.displayName(), Component.text(p.getPing())));
         } else {
             requirePlayer(sender, p -> p.sendMessage("Your ping is %sms".formatted(p.getPing())));
         }

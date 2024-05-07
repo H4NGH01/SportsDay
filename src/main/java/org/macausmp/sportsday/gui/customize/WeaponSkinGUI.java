@@ -26,9 +26,8 @@ public class WeaponSkinGUI extends PluginGUI {
     public WeaponSkinGUI(Player player) {
         super(18, Component.translatable("gui.customize.weapon_skin.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         update();
     }
@@ -45,7 +44,8 @@ public class WeaponSkinGUI extends PluginGUI {
         Material weapon = PlayerCustomize.getWeaponSkin(player);
         for (int i = 9; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             if (weapon == null || weapon.equals(stack.getType())) {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));

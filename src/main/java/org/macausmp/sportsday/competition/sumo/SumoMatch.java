@@ -15,7 +15,8 @@ public class SumoMatch {
     private UUID loser;
 
     public void setPlayer(UUID uuid) {
-        if (isSet()) return;
+        if (isSet())
+            return;
         contestants[contestants[0] == null ? 0 : 1] = uuid;
     }
 
@@ -24,9 +25,11 @@ public class SumoMatch {
     }
 
     public void setResult(UUID defeated) {
-        if (status == MatchStatus.END) return;
+        if (status == MatchStatus.END)
+            return;
         int i = indexOf(defeated);
-        if (i == -1) return;
+        if (i == -1)
+            return;
         winner = contestants[i ^ 1];
         loser = contestants[i];
         status = MatchStatus.END;
@@ -37,20 +40,25 @@ public class SumoMatch {
     }
 
     public boolean contain(@NotNull UUID uuid) {
-        if (!isSet()) return false;
+        if (!isSet())
+            return false;
         return contestants[0].equals(uuid) || contestants[1].equals(uuid);
     }
 
     @MagicConstant(intValues = {-1, 0, 1})
     public int indexOf(UUID uuid) {
-        if (!isSet()) return -1;
-        if (contestants[0].equals(uuid)) return 0;
-        if (contestants[1].equals(uuid)) return 1;
+        if (!isSet())
+            return -1;
+        if (contestants[0].equals(uuid))
+            return 0;
+        if (contestants[1].equals(uuid))
+            return 1;
         return -1;
     }
 
     public void forEachPlayer(@NotNull Consumer<Player> consumer) {
-        if (!isSet()) return;
+        if (!isSet())
+            return;
         consumer.accept(Bukkit.getPlayer(contestants[0]));
         consumer.accept(Bukkit.getPlayer(contestants[1]));
     }

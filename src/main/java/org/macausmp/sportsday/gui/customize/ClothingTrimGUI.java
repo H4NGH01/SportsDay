@@ -33,9 +33,8 @@ public class ClothingTrimGUI extends PluginGUI {
         super(54, Component.translatable("gui.customize.clothing.trim.title"));
         this.player = player;
         this.slot = slot;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         update();
     }
@@ -55,16 +54,17 @@ public class ClothingTrimGUI extends PluginGUI {
         getInventory().setItem(22, present());
         getInventory().setItem(40, reset());
         List<Material> patterns = new ArrayList<>();
-        for (Field field : TrimPattern.class.getFields()) {
+        for (Field field : TrimPattern.class.getFields())
             patterns.add(Material.getMaterial(field.getName() + "_ARMOR_TRIM_SMITHING_TEMPLATE"));
-        }
         Iterator<Material> iterator = patterns.iterator();
         for (int i = 10; i < 44; i++) {
-            if (i % 9 == 1 || i % 9 == 2 || i % 9 == 6 || i % 9 == 7) getInventory().setItem(i, pattern(iterator.next()));
+            int j = i % 9;
+            if (j == 1 || j == 2 || j == 6 || j == 7)
+                getInventory().setItem(i, pattern(iterator.next()));
         }
         PlayerCustomize.Cloth cloth = Objects.requireNonNull(PlayerCustomize.getCloth(player, slot));
         String material = cloth.getTrimMaterial();
-        if (!material.equals(PlayerCustomize.Cloth.NONE)) {
+        if (!material.equals(PlayerCustomize.Cloth.NONE))
             for (int i = 9; i < 54; i++) {
                 ItemStack material2 = getInventory().getItem(i);
                 if (material2 != null && material2.getType().name().equals(material)) {
@@ -76,9 +76,8 @@ public class ClothingTrimGUI extends PluginGUI {
                     break;
                 }
             }
-        }
         String pattern = cloth.getTrimPattern();
-        if (!pattern.equals(PlayerCustomize.Cloth.NONE)) {
+        if (!pattern.equals(PlayerCustomize.Cloth.NONE))
             for (int i = 10; i < 45; i++) {
                 ItemStack pattern2 = getInventory().getItem(i);
                 if (pattern2 != null && pattern2.getType().name().startsWith(pattern)) {
@@ -90,7 +89,6 @@ public class ClothingTrimGUI extends PluginGUI {
                     break;
                 }
             }
-        }
     }
 
     @ButtonHandler("back")
@@ -136,6 +134,7 @@ public class ClothingTrimGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack reset() {
-        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable("gui.customize.clothing.reset_trim")));
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
+                .args(Component.translatable("gui.customize.clothing.reset_trim")));
     }
 }

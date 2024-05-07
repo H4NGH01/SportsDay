@@ -89,7 +89,8 @@ public final class Competitions {
             return false;
         }
         if (getOnlineContestants().size() < event.getLeastPlayersRequired()) {
-            sender.sendMessage(Component.translatable("command.competition.not_enough_player_required").args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
+            sender.sendMessage(Component.translatable("command.competition.not_enough_player_required")
+                    .args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
             return false;
         }
         sender.sendMessage(Component.translatable("command.competition.start.success").color(NamedTextColor.GREEN));
@@ -101,14 +102,16 @@ public final class Competitions {
     /**
      * Force end current competition
      * @param sender who end the competition
+     * @return {@code True} if competition successfully end
      */
-    public static void forceEnd(CommandSender sender) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.ENDED) {
-            getCurrentEvent().end(true);
-            sender.sendMessage(Component.translatable("command.competition.end.success").color(NamedTextColor.GREEN));
-        } else {
+    public static boolean forceEnd(CommandSender sender) {
+        if (getCurrentEvent() == null || getCurrentEvent().getStatus() == Status.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.end.failed").color(NamedTextColor.RED));
+            return false;
         }
+        getCurrentEvent().end(true);
+        sender.sendMessage(Component.translatable("command.competition.end.success").color(NamedTextColor.GREEN));
+        return true;
     }
 
     /**
@@ -134,9 +137,9 @@ public final class Competitions {
      * @return {@code True} if player successfully added to the contestants list
      */
     public static boolean join(@NotNull Player player, int number) {
-        for (ContestantData data : CONTESTANTS) {
-            if (data.getNumber() == number) return false;
-        }
+        for (ContestantData data : CONTESTANTS)
+            if (data.getNumber() == number)
+                return false;
         CONTESTANTS.add(new ContestantData(player.getUniqueId(), number));
         CompetitionInfoGUI.updateGUI();
         ContestantsListGUI.updateGUI();
@@ -151,22 +154,22 @@ public final class Competitions {
      * @return {@code True} if player successfully removed from the contestants list
      */
     public static boolean leave(OfflinePlayer player) {
-        if (isContestant(player)) {
-            for (ContestantData data : CONTESTANTS) {
+        if (isContestant(player))
+            for (ContestantData data : CONTESTANTS)
                 if (data.getUUID().equals(player.getUniqueId())) {
                     data.remove();
-                    if (player.isOnline() && getCurrentEvent() != null) getCurrentEvent().onDisqualification(data);
+                    if (player.isOnline() && getCurrentEvent() != null)
+                        getCurrentEvent().onDisqualification(data);
                     CONTESTANTS_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove(data.getNumber());
                     CONTESTANTS.remove(data);
                     CompetitionInfoGUI.updateGUI();
                     ContestantsListGUI.updateGUI();
-                    if (player.isOnline()) Objects.requireNonNull(player.getPlayer()).sendMessage(Component.translatable("command.competition.unregister.success.self"));
+                    if (player.isOnline())
+                        Objects.requireNonNull(player.getPlayer()).sendMessage(Component.translatable("command.competition.unregister.success.self"));
                     SportsDay.AUDIENCES.addPlayer(player);
                     return true;
                 }
-            }
-        }
         return false;
     }
 
@@ -217,9 +220,9 @@ public final class Competitions {
      * @return {@link ContestantData} of uuid
      */
     public static @NotNull ContestantData getContestant(UUID uuid) {
-        for (ContestantData data : CONTESTANTS) {
-            if (data.getUUID().equals(uuid)) return data;
-        }
+        for (ContestantData data : CONTESTANTS)
+            if (data.getUUID().equals(uuid))
+                return data;
         throw new IllegalArgumentException("Contestants data list does not contain this data");
     }
 }

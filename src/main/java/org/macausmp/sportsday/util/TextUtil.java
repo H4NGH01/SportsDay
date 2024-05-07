@@ -12,7 +12,9 @@ public final class TextUtil {
      * @return Component with color and style
      */
     public static @NotNull Component convert(@NotNull Component origin) {
-        return LegacyComponentSerializer.legacySection().deserialize(LegacyComponentSerializer.legacySection().serialize(origin)).decoration(TextDecoration.ITALIC, false);
+        return LegacyComponentSerializer.legacySection()
+                .deserialize(LegacyComponentSerializer.legacySection().serialize(origin))
+                .decoration(TextDecoration.ITALIC, false);
     }
 
     /**
@@ -21,6 +23,7 @@ public final class TextUtil {
      * @return Plain text component
      */
     public static @NotNull Component text(@NotNull Component component) {
-        return Component.text(LegacyComponentSerializer.legacySection().serialize(component)).decoration(TextDecoration.ITALIC, false);
+        return Component.text(LegacyComponentSerializer.legacySection().serialize(component))
+                .decoration(TextDecoration.ITALIC, false);
     }
 }

@@ -21,9 +21,8 @@ import org.macausmp.sportsday.util.TextUtil;
 public class PracticeGUI extends PluginGUI {
     public PracticeGUI() {
         super(27, Component.translatable("gui.menu.practice.title"));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, GUIButton.ELYTRA_RACING);
         getInventory().setItem(10, GUIButton.ICE_BOAT_RACING);
@@ -54,7 +53,8 @@ public class PracticeGUI extends PluginGUI {
     public void practice(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() == null) {
             IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
-            if (event == null) return;
+            if (event == null)
+                return;
             AbstractEvent.leavePractice(p);
             event.joinPractice(p);
         }

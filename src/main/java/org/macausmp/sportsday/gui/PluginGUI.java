@@ -38,9 +38,8 @@ public abstract class PluginGUI implements InventoryHolder {
             Method[] methods = this.getClass().getMethods();
             for (Method method : methods) {
                 ButtonHandler handler = method.getAnnotation(ButtonHandler.class);
-                if (handler != null && !BUTTON_HANDLER.get(clazz).containsKey(handler.value())) {
+                if (handler != null && !BUTTON_HANDLER.get(clazz).containsKey(handler.value()))
                     BUTTON_HANDLER.get(clazz).put(handler.value(), method);
-                }
             }
         }
         inventory = Bukkit.createInventory(this, size, title);
@@ -62,14 +61,16 @@ public abstract class PluginGUI implements InventoryHolder {
 
     public final void click(@NotNull InventoryClickEvent event, @NotNull Player player, @NotNull ItemStack item) {
         try {
-            Map<String, Method> map = BUTTON_HANDLER.get(this.getClass());
+            Map<String, Method> map = BUTTON_HANDLER.get(getClass());
             Method method = map.get("default");
-            if (method != null) method.invoke(this, event, player, item);
+            if (method != null)
+                method.invoke(this, event, player, item);
             String id = ItemUtil.getID(item);
-            if (id != null) {
-                method = map.get(id);
-                if (method != null) method.invoke(this, event, player, item);
-            }
+            if (id == null)
+                return;
+            method = map.get(id);
+            if (method != null)
+                method.invoke(this, event, player, item);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

@@ -16,11 +16,13 @@ public final class ConfigManager {
     private FileConfiguration contestantsConfig;
 
     void setup() {
-        if (!PLUGIN.getDataFolder().exists() && PLUGIN.getDataFolder().mkdir()) PLUGIN.getLogger().log(Level.INFO, "Data folder created");
+        if (!PLUGIN.getDataFolder().exists() && PLUGIN.getDataFolder().mkdir())
+            PLUGIN.getLogger().log(Level.INFO, "Data folder created");
         contestantsFile = new File(PLUGIN.getDataFolder(), "contestants.yml");
         if (!contestantsFile.exists()) {
             try {
-                if (contestantsFile.createNewFile()) PLUGIN.getLogger().log(Level.INFO, "contestants.yml file has been created");
+                if (contestantsFile.createNewFile())
+                    PLUGIN.getLogger().log(Level.INFO, "contestants.yml file has been created");
             } catch (IOException e) {
                 PLUGIN.getLogger().log(Level.SEVERE, "Could not create the contestants.yml file");
             }

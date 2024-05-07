@@ -5,9 +5,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,9 +26,8 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
 
     public ContestantsListGUI() {
         super(54, Component.translatable("gui.contestants_list.title"));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, ItemUtil.addWrapper(GUIButton.CONTESTANTS_LIST));
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
@@ -39,19 +36,20 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
         getInventory().setItem(13, pages());
         getInventory().setItem(17, GUIButton.NEXT_PAGE);
         update();
-        HANDLER.add(this);
     }
 
     @Override
     public void update() {
         getInventory().setItem(13, pages());
-        for (int i = getStartSlot(); i < getEndSlot(); i++) {
+        for (int i = getStartSlot(); i < getEndSlot(); i++)
             getInventory().setItem(i, null);
-        }
+        List<ContestantData> list = Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList();
         for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getContestants().size()) break;
-            getInventory().setItem(i + getStartSlot(), icon(Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList().get(i + getPage() * getSize()).getUUID()));
+            if (i >= Competitions.getContestants().size())
+                break;
+            getInventory().setItem(i + getStartSlot(), icon(list.get(i + getPage() * getSize()).getUUID()));
         }
+        HANDLER.add(this);
     }
 
     public static void updateGUI() {
@@ -60,8 +58,8 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
 
     @ButtonHandler("player_icon")
     public void profile(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        SkullMeta meta = (SkullMeta) item.getItemMeta();
-        p.openInventory(new ContestantProfileGUI(Competitions.getContestant(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
+        UUID uuid = Objects.requireNonNull(((SkullMeta) item.getItemMeta()).getOwningPlayer()).getUniqueId();
+        p.openInventory(new ContestantProfileGUI(Competitions.getContestant(uuid)).getInventory());
     }
 
     @ButtonHandler("next_page")
@@ -78,19 +76,24 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
 
     private @NotNull ItemStack pages() {
         ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
-        stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
+        stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator")
+                .args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
         return stack;
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
-        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        Component online = Component.translatable(player.isOnline() ? "contestant.online" : "contestant.offline");
-        Component display = Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online);
-        Component number = Component.translatable("contestant.number").args(Component.text(Competitions.getContestant(uuid).getNumber())).color(NamedTextColor.YELLOW);
-        Component score = Component.translatable("contestant.score").args(Component.text(Competitions.getContestant(uuid).getScore())).color(NamedTextColor.YELLOW);
-        Component detail = Component.translatable("gui.contestant_profile.detail").args(Component.text(player.getName())).color(NamedTextColor.YELLOW);
-        ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display, number, score, "", detail);
-        icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(player));
+        ContestantData data = Competitions.getContestant(uuid);
+        Component online = Component.translatable(data.isOnline() ? "contestant.online" : "contestant.offline");
+        Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").args(online);
+        Component number = Component.translatable("contestant.number")
+                .args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("contestant.score")
+                .args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        Component detail = Component.translatable("gui.contestant_profile.detail")
+                .args(Component.text(data.getName())).color(NamedTextColor.YELLOW);
+        ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display,
+                number, score, "", detail);
+        icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return icon;
     }
 
@@ -100,12 +103,14 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
     }
 
     public void nextPage() {
-        if (getPage() < getMaxPage() - 1) page++;
+        if (getPage() < getMaxPage() - 1)
+            page++;
         update();
     }
 
     public void previousPage() {
-        if (getPage() > 0) page--;
+        if (getPage() > 0)
+            page--;
         update();
     }
 
@@ -116,9 +121,10 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
 
     @Override
     public int getMaxPage() throws ArithmeticException {
-        if (Competitions.getContestants().isEmpty()) return 1;
-        int i = Competitions.getContestants().size();
-        return i % getSize() == 0 ? i / getSize() : i / getSize() + 1;
+        if (Competitions.getContestants().isEmpty())
+            return 1;
+        double i = (double) Competitions.getContestants().size() / getSize();
+        return (int) (i == (int) i ? i : i + 1);
     }
 
     @Override

@@ -8,39 +8,47 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a plugin command
  */
-public interface IPluginCommand extends CommandExecutor, TabCompleter {
+public abstract class IPluginCommand implements CommandExecutor, TabCompleter {
     /**
      * Execute command
      * @param sender command sender
      * @param args arguments
      */
-    void onCommand(CommandSender sender, String[] args);
+    abstract void onCommand(CommandSender sender, String[] args);
 
     /**
      * Command name
      * @return name of command
      */
-    String name();
+    abstract String name();
 
     @Override
-    default boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         onCommand(sender, args);
         return true;
     }
 
-    default void requirePlayer(@NotNull CommandSender sender, @NotNull Function<Player> function) {
-        if (sender instanceof Player p) {
-            function.apply(p);
-        } else {
-            sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
-        }
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        return new ArrayList<>();
     }
 
-    interface Function<T> {
-        void apply(T p);
+    protected void requirePlayer(@NotNull CommandSender sender, @NotNull Function function) {
+        if (sender instanceof Player p)
+            function.apply(p);
+        else
+            sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
+    }
+
+    protected interface Function {
+        void apply(Player p);
     }
 }

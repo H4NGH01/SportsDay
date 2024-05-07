@@ -27,9 +27,8 @@ public class BoatTypeGUI extends PluginGUI {
     public BoatTypeGUI(Player player) {
         super(18, Component.translatable("gui.customize.boat_type.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i, GUIButton.BOARD);
-        }
         getInventory().setItem(8, GUIButton.BACK);
         update();
     }
@@ -47,7 +46,8 @@ public class BoatTypeGUI extends PluginGUI {
         Boat.Type type = PlayerCustomize.getBoatType(player);
         for (int i = 9; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             if (type == null || stack.getType().name().startsWith(type.name())) {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));

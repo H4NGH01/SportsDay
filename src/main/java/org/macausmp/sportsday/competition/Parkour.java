@@ -14,8 +14,7 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onSetup() {
-    }
+    protected void onSetup() {}
 
     @Override
     protected void onStart() {
@@ -50,7 +49,9 @@ public class Parkour extends AbstractTrackEvent {
     public void onRespawn(@NotNull PlayerRespawnEvent e) {
         IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p) && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId())) || inPractice(p, this)) {
+        if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p)
+                && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId()))
+                || inPractice(p, this)) {
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
