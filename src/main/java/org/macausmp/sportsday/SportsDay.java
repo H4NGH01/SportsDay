@@ -47,7 +47,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     private static BossBar BOSSBAR;
 
     /**
-     * Get the instance of plugin
+     * Get the instance of plugin.
      * @return instance of plugin
      */
     public static SportsDay getInstance() {
@@ -77,7 +77,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     /**
-     * Get the config manager
+     * Get the config manager.
      * @return config manager
      */
     public ConfigManager getConfigManager() {

@@ -35,9 +35,9 @@ public class ElytraRacing extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {
-        p.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
-        p.getInventory().setItem(0, FIREWORK);
+    protected void onPractice(@NotNull Player player) {
+        player.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
+        player.getInventory().setItem(0, FIREWORK);
     }
 
     @EventHandler

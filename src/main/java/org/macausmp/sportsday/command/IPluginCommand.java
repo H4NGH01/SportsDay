@@ -14,18 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a plugin command
+ * Represents a plugin command.
  */
 public abstract class IPluginCommand implements CommandExecutor, TabCompleter {
     /**
-     * Execute command
+     * Execute command.
      * @param sender command sender
      * @param args arguments
      */
     abstract void onCommand(CommandSender sender, String[] args);
 
     /**
-     * Command name
+     * Command name.
      * @return name of command
      */
     abstract String name();

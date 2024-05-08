@@ -24,5 +24,5 @@ public class ObstacleCourse extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {}
+    protected void onPractice(@NotNull Player player) {}
 }

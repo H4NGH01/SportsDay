@@ -15,11 +15,13 @@ public class RegisterCommand extends IPluginCommand {
                     try {
                         number = Integer.parseInt(args[0]);
                         if (number < 0) {
-                            sender.sendMessage(Component.translatable("argument.number.negative").color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("argument.number.negative")
+                                    .color(NamedTextColor.RED));
                             return;
                         }
                     } catch (Exception e) {
-                        sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[0])).color(NamedTextColor.RED));
+                        sender.sendMessage(Component.translatable("parsing.int.invalid")
+                                .args(Component.text(args[0])).color(NamedTextColor.RED));
                         return;
                     }
                 } else {

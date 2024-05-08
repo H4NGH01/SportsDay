@@ -34,7 +34,8 @@ public class CompetitionCommand extends IPluginCommand {
                     if (args.length >= 2) {
                         Player p = Bukkit.getPlayer(args[1]);
                         if (p == null) {
-                            sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("argument.player.unknown")
+                                    .color(NamedTextColor.RED));
                             return;
                         }
                         if (Competitions.isContestant(p)) {
@@ -47,7 +48,8 @@ public class CompetitionCommand extends IPluginCommand {
                             try {
                                 number = Integer.parseInt(args[2]);
                                 if (number < 0) {
-                                    sender.sendMessage(Component.translatable("argument.number.negative").color(NamedTextColor.RED));
+                                    sender.sendMessage(Component.translatable("argument.number.negative")
+                                            .color(NamedTextColor.RED));
                                     return;
                                 }
                             } catch (Exception e) {
@@ -71,7 +73,8 @@ public class CompetitionCommand extends IPluginCommand {
                     if (args.length >= 2) {
                         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
                         if (p.getName() == null || !p.hasPlayedBefore()) {
-                            sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("argument.player.unknown")
+                                    .color(NamedTextColor.RED));
                             return;
                         }
                         sender.sendMessage(Competitions.leave(p)
@@ -82,7 +85,8 @@ public class CompetitionCommand extends IPluginCommand {
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p))
-                                sender.sendMessage(Component.translatable("command.competition.unregister.failed.self").color(NamedTextColor.RED));
+                                sender.sendMessage(Component.translatable("command.competition.unregister.failed.self")
+                                        .color(NamedTextColor.RED));
                             return;
                         }
                         sender.sendMessage(Component.text("/competition leave <player>"));
@@ -92,7 +96,8 @@ public class CompetitionCommand extends IPluginCommand {
                     if (args.length >= 2) {
                         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
                         if (p.getName() == null || p.getFirstPlayed() == 0L) {
-                            sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
+                            sender.sendMessage(Component.translatable("argument.player.unknown")
+                                    .color(NamedTextColor.RED));
                             return;
                         }
                         if (Competitions.isContestant(p)) {
@@ -107,7 +112,8 @@ public class CompetitionCommand extends IPluginCommand {
                             try {
                                 score = Integer.parseInt(args[2]);
                                 if (score < 0) {
-                                    sender.sendMessage(Component.translatable("argument.score.negative").color(NamedTextColor.RED));
+                                    sender.sendMessage(Component.translatable("argument.score.negative")
+                                            .color(NamedTextColor.RED));
                                     return;
                                 }
                             } catch (Exception e) {
@@ -153,7 +159,8 @@ public class CompetitionCommand extends IPluginCommand {
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN)
                             .args(Component.text(Arrays.toString(el.toArray())).color(NamedTextColor.YELLOW)));
                 }
-                default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
+                default -> sender.sendMessage(Component.translatable("command.unknown.argument")
+                        .color(NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.text("/competition (start|end|join|leave|score|info) <argument>"));

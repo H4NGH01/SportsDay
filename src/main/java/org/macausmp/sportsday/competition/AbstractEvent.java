@@ -33,10 +33,11 @@ public abstract class AbstractEvent implements IEvent {
     private final Location location;
     private final World world;
     private Status status = Status.IDLE;
+    private long time;
     private final Collection<ContestantData> contestants = new HashSet<>();
+    private final List<ContestantData> leaderboard = new ArrayList<>();
     private final Map<UUID, CustomizeMusickit> contestantToMusickit = new HashMap<>();
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
-    private long time;
 
     public AbstractEvent(String id) {
         this.id = id;
@@ -77,8 +78,32 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     @Override
+    public final Status getStatus() {
+        return status;
+    }
+
+    /**
+     * Set the current event status.
+     * @param status new status
+     */
+    protected final void setStatus(Status status) {
+        this.status = status;
+        CompetitionInfoGUI.updateGUI();
+    }
+
+    @Override
     public final long getLastTime() {
         return time;
+    }
+
+    @Override
+    public final Collection<ContestantData> getContestants() {
+        return contestants;
+    }
+
+    @Override
+    public final List<ContestantData> getLeaderboard() {
+        return leaderboard;
     }
 
     @Override
@@ -190,40 +215,22 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     /**
-     * Called when the event sets up
+     * Called when the event sets up.
      * @see #setup()
      */
     protected abstract void onSetup();
 
     /**
-     * Called when the event starts
+     * Called when the event starts.
      * @see #start()
      */
     protected abstract void onStart();
 
     /**
-     * Called when the event ends
+     * Called when the event ends.
      * @see #end(boolean)
      */
     protected abstract void onEnd(boolean force);
-
-    @Override
-    public final Status getStatus() {
-        return status;
-    }
-
-    /**
-     * Set the current event status
-     * @param status new status
-     */
-    protected final void setStatus(Status status) {
-        this.status = status;
-        CompetitionInfoGUI.updateGUI();
-    }
-
-    public final Collection<ContestantData> getContestants() {
-        return contestants;
-    }
 
     @Override
     public void onDisqualification(@NotNull ContestantData contestant) {
@@ -242,78 +249,78 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     @Override
-    public void joinPractice(@NotNull Player p) {
-        PRACTICE.put(p, this);
-        p.clearActivePotionEffects();
-        p.setFireTicks(0);
-        p.getInventory().clear();
-        PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
-        p.setBedSpawnLocation(location, true);
-        p.teleport(location);
-        p.sendMessage(Component.translatable("contestant.practice.teleport.venue").args(name));
-        onPractice(p);
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+    public void joinPractice(@NotNull Player player) {
+        PRACTICE.put(player, this);
+        player.clearActivePotionEffects();
+        player.setFireTicks(0);
+        player.getInventory().clear();
+        PlayerCustomize.suitUp(player);
+        player.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
+        player.setBedSpawnLocation(location, true);
+        player.teleport(location);
+        player.sendMessage(Component.translatable("contestant.practice.teleport.venue").args(name));
+        onPractice(player);
+        player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
     /**
-     * Called when a player participates in practice
-     * @param p Who going to practice this event
+     * Called when a player participates in practice.
+     * @param player who going to practice this event
      */
-    protected abstract void onPractice(@NotNull Player p);
+    protected abstract void onPractice(@NotNull Player player);
 
     /**
-     * Let players leave this practice
-     * @param p Who leave practicing this event
+     * Let players leave this practice.
+     * @param player who leave practicing this event
      */
-    public static void leavePractice(@NotNull Player p) {
-        if (!PRACTICE.containsKey(p)) return;
-        PRACTICE.remove(p);
-        if (p.isInsideVehicle())
-            Objects.requireNonNull(p.getVehicle()).remove();
-        p.clearActivePotionEffects();
-        p.setFireTicks(0);
-        p.getInventory().clear();
-        PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(0, ItemUtil.MENU);
-        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
-        p.teleport(p.getWorld().getSpawnLocation());
+    public static void leavePractice(@NotNull Player player) {
+        if (!PRACTICE.containsKey(player)) return;
+        PRACTICE.remove(player);
+        if (player.isInsideVehicle())
+            Objects.requireNonNull(player.getVehicle()).remove();
+        player.clearActivePotionEffects();
+        player.setFireTicks(0);
+        player.getInventory().clear();
+        PlayerCustomize.suitUp(player);
+        player.getInventory().setItem(0, ItemUtil.MENU);
+        player.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+        player.setBedSpawnLocation(player.getWorld().getSpawnLocation(), true);
+        player.teleport(player.getWorld().getSpawnLocation());
     }
 
     /**
-     * Check if player is practicing
-     * @param p Who going to be checked
-     * @return True if player is practicing
+     * Check if player is practicing.
+     * @param player who going to be checked
+     * @return {@code True} if player is practicing
      */
-    public static boolean inPractice(Player p) {
-        return PRACTICE.containsKey(p);
+    public static boolean inPractice(Player player) {
+        return PRACTICE.containsKey(player);
     }
 
     /**
-     * Check if player is practicing at specified event
-     * @param p Who going to be checked
-     * @param event The specified event
-     * @return True if player is practicing at specified event
-     * @param <T> The event type
+     * Check if player is practicing at specified event.
+     * @param player who going to be checked
+     * @param event the specified event
+     * @return {@code True} if player is practicing at specified event
+     * @param <T> the event type
      */
-    public static <T extends IEvent> boolean inPractice(Player p, T event) {
-        return PRACTICE.containsKey(p) && PRACTICE.get(p) == event;
+    public static <T extends IEvent> boolean inPractice(Player player, T event) {
+        return PRACTICE.containsKey(player) && PRACTICE.get(player) == event;
     }
 
     /**
-     * Get the event the player is practice on
-     * @param p Who is practicing
-     * @return Event the player is practice on
-     * @param <T> The event type
+     * Get the event the player is practice on.
+     * @param player who is practicing
+     * @return event the player is practice on
+     * @param <T> the event type
      */
-    public static <T extends IEvent> T getPracticeEvent(Player p) {
+    public static <T extends IEvent> T getPracticeEvent(Player player) {
         //noinspection unchecked
-        return (T) PRACTICE.get(p);
+        return (T) PRACTICE.get(player);
     }
 
     /**
-     * Add a {@link BukkitTask} to this event
+     * Add a {@link BukkitTask} to this event.
      * @param task {@link BukkitTask} to add
      */
     protected final BukkitTask addRunnable(BukkitTask task) {

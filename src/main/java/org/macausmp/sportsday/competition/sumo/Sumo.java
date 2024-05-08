@@ -24,7 +24,6 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.*;
 
 public class Sumo extends AbstractEvent implements IFieldEvent {
-    private final List<ContestantData> leaderboard = new ArrayList<>();
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
@@ -68,9 +67,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     private void stageSetup() {
         Component c = Component.translatable("event.sumo.current_stage").args(getSumoStage().getName());
         for (int i = 0; i < getSumoStage().getMatchList().size();) {
-            SumoMatch m = getSumoStage().getMatchList().get(i++);
+            SumoMatch m = getSumoStage().getMatchList().get(i);
             c = c.appendNewline().append(Component.translatable("event.sumo.queue")
-                    .args(Component.text(i), m.getPlayers()[0].displayName(), m.getPlayers()[1].displayName()));
+                    .args(Component.text(++i), m.getPlayers()[0].displayName(), m.getPlayers()[1].displayName()));
         }
         Bukkit.broadcast(c);
     }
@@ -84,12 +83,11 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     public void onEnd(boolean force) {
         if (force)
             return;
-        Component c = Component.text().build();
-        for (int i = 0; i < leaderboard.size();) {
-            ContestantData data = leaderboard.get(i++);
-            c = c.append(Component.translatable("event.sumo.rank").args(Component.text(i), Component.text(data.getName())));
-            if (i < leaderboard.size())
-                c = c.appendNewline();
+        Component c = Component.translatable("event.result");
+        for (int i = 0; i < getLeaderboard().size();) {
+            ContestantData data = getLeaderboard().get(i);
+            c = c.appendNewline().append(Component.translatable("event.sumo.rank")
+                    .args(Component.text(++i), Component.text(data.getName())));
             if (i <= 3)
                 data.addScore(4 - i);
             data.addScore(1);
@@ -108,7 +106,8 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 e.setCancelled(true);
                 return;
             }
-            if (p.getLocation().getBlock().getType() == Material.WATER && match.getStatus() == SumoMatch.MatchStatus.STARTED) {
+            if (p.getLocation().getBlock().getType() == Material.WATER
+                    && match.getStatus() == SumoMatch.MatchStatus.STARTED) {
                 match.setResult(p.getUniqueId());
                 onMatchEnd();
             }
@@ -237,7 +236,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         if (getSumoStage().getStage() != SumoStage.Stage.SEMI_FINAL) {
             for (ContestantData data : alive)
                 if (data.getUUID().equals(match.getLoser())) {
-                    leaderboard.addFirst(data);
+                    getLeaderboard().addFirst(data);
                     alive.remove(data);
                     break;
                 }
@@ -247,7 +246,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         }
         // if stage == THIRD_PLACE or FINAL
         if (stageIndex >= stages.length - 2)
-            leaderboard.addFirst(Competitions.getContestant(match.getWinner()));
+            getLeaderboard().addFirst(Competitions.getContestant(match.getWinner()));
         // If this stage is not over
         if (getSumoStage().hasNextMatch()) {
             SumoMatch m = getSumoStage().getCurrentMatch();
@@ -321,11 +320,5 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {
-    }
-
-    @Override
-    public List<ContestantData> getLeaderboard() {
-        return leaderboard;
-    }
+    protected void onPractice(@NotNull Player player) {}
 }

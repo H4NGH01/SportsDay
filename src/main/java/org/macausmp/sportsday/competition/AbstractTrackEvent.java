@@ -16,14 +16,11 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.ContestantData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
     public static final @NotNull Material FINISH_LINE = getMaterial("finish_line_block");
-    private final List<ContestantData> leaderboard = new ArrayList<>();
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
     private final int laps;
@@ -41,7 +38,8 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         lapMap.clear();
         record.clear();
         endCountdown = false;
-        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(),
+                Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));
         super.setup();
         getContestants().forEach(data -> lapMap.put(data, 0));
         Bukkit.broadcast(Component.translatable("event.track.laps").args(Component.text(laps)).color(NamedTextColor.GREEN));
@@ -50,7 +48,8 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     @Override
     public void start() {
         super.start();
-        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".start_command")));
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(),
+                Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".start_command")));
         time = 0;
         addRunnable(new BukkitRunnable() {
             @Override
@@ -69,13 +68,11 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         super.end(force);
         if (force)
             return;
-        Component c = Component.text().build();
-        for (int i = 0; i < leaderboard.size();) {
-            ContestantData data = leaderboard.get(i++);
-            c = c.append(Component.translatable("event.track.rank")
-                    .args(Component.text(i), Component.text(data.getName()), Component.text(record.get(data))));
-            if (i < leaderboard.size())
-                c = c.appendNewline();
+        Component c = Component.translatable("event.result");
+        for (int i = 0; i < getLeaderboard().size();) {
+            ContestantData data = getLeaderboard().get(i);
+            c = c.appendNewline().append(Component.translatable("event.track.rank")
+                    .args(Component.text(++i), Component.text(data.getName()), Component.text(record.get(data))));
             if (i <= 3)
                 data.addScore(4 - i);
             data.addScore(1);
@@ -89,7 +86,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         Player p = e.getPlayer();
         if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p)) {
             ContestantData data = Competitions.getContestant(p.getUniqueId());
-            if (leaderboard.contains(data) || !lapMap.containsKey(data))
+            if (getLeaderboard().contains(data) || !lapMap.containsKey(data))
                 return;
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
@@ -105,18 +102,18 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 } else {
                     record.put(data, time / 20f);
                     p.setGameMode(GameMode.SPECTATOR);
-                    leaderboard.add(Competitions.getContestant(p.getUniqueId()));
+                    getLeaderboard().add(Competitions.getContestant(p.getUniqueId()));
                     onRaceFinish(p);
                     Bukkit.broadcast(Component.translatable("event.track.contestant.completed_all")
                             .args(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
-                    if (leaderboard.size() == getContestants().size()) {
+                    if (getLeaderboard().size() == getContestants().size()) {
                         if (task != null && !task.isCancelled())
                             task.cancel();
                         PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.all_completed"));
                         end(false);
                         return;
                     }
-                    if (leaderboard.size() >= 3 && !endCountdown) {
+                    if (getLeaderboard().size() >= 3 && !endCountdown) {
                         endCountdown = true;
                         Bukkit.broadcast(Component.translatable("event.track.end.countdown.notice")
                                 .args(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
@@ -153,7 +150,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     @Override
     public void onDisqualification(@NotNull ContestantData contestant) {
         super.onDisqualification(contestant);
-        if (leaderboard.size() == getContestants().size()) {
+        if (getLeaderboard().size() == getContestants().size()) {
             if (task != null && !task.isCancelled())
                 task.cancel();
             end(false);
@@ -167,11 +164,6 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     @Override
     public int getMaxLaps() {
         return laps;
-    }
-
-    @Override
-    public final List<ContestantData> getLeaderboard() {
-        return leaderboard;
     }
 
     public static @NotNull Material getMaterial(@NotNull String path) {

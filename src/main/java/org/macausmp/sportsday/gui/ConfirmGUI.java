@@ -13,12 +13,21 @@ import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.function.Function;
 
+/**
+ * Represents a confirmation gui.
+ */
 public class ConfirmGUI extends PluginGUI {
     private static final ItemStack CONFIRM = ItemUtil.item(Material.GREEN_CONCRETE, "confirm", Component.translatable("gui.confirm.confirm").color(NamedTextColor.GREEN));
     private static final ItemStack CANCEL = ItemUtil.item(Material.GREEN_CONCRETE, "cancel", Component.translatable("gui.confirm.cancel").color(NamedTextColor.RED));
     private final PluginGUI prev;
     private final Function<Player, Boolean> function;
 
+    /**
+     * Construct a {@code ConfirmGUI} with previous gui and a function.
+     * <p>If the function returns {@code True} then close the inventory, otherwise fall back to the previous gui.</p>
+     * @param prev previous gui
+     * @param function function executed after confirmation
+     */
     public ConfirmGUI(PluginGUI prev, Function<Player, Boolean> function) {
         super(27, Component.translatable("gui.confirm.title"));
         this.prev = prev;

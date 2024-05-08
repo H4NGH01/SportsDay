@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TextUtil {
     /**
-     * Convert legacy color code '§' to {@link net.kyori.adventure.text.format.TextColor}
-     * @param origin Origin component
-     * @return Component with color and style
+     * Convert legacy color code '§' to {@link net.kyori.adventure.text.format.TextColor}.
+     * @param origin origin component
+     * @return component with color and style
      */
     public static @NotNull Component convert(@NotNull Component origin) {
         return LegacyComponentSerializer.legacySection()
@@ -18,9 +18,9 @@ public final class TextUtil {
     }
 
     /**
-     * Convert {@link Component} to plain text {@link Component}
-     * @param component Component
-     * @return Plain text component
+     * Convert {@link Component} to plain text {@link Component}.
+     * @param component component
+     * @return plain text component
      */
     public static @NotNull Component text(@NotNull Component component) {
         return Component.text(LegacyComponentSerializer.legacySection().serialize(component))

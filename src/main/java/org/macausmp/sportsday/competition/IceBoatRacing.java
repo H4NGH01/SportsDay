@@ -42,8 +42,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {
-        boatMap.put(p.getUniqueId(), boat(p));
+    protected void onPractice(@NotNull Player player) {
+        boatMap.put(player.getUniqueId(), boat(player));
     }
 
     @EventHandler
@@ -119,9 +119,9 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     /**
-     * Create a new boat at player's spawnpoint and put player on it
-     * @param p The player
-     * @return A new boat containing the player
+     * Create a new boat at player's spawnpoint and put player on it.
+     * @param p the player
+     * @return a new boat containing the player
      */
     private @NotNull Boat boat(@NotNull Player p) {
         Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);

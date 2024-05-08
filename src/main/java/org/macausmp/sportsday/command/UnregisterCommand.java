@@ -11,9 +11,11 @@ public class UnregisterCommand extends IPluginCommand {
         requirePlayer(sender, p -> {
             if (args.length == 1 && args[0].equals("confirm")) {
                 if (!Competitions.leave(p))
-                    sender.sendMessage(Component.translatable("command.competition.unregister.failed.self").color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("command.competition.unregister.failed.self")
+                            .color(NamedTextColor.RED));
             } else {
-                sender.sendMessage(Component.translatable("command.competition.unregister_confirm").color(NamedTextColor.RED));
+                sender.sendMessage(Component.translatable("command.competition.unregister_confirm")
+                        .color(NamedTextColor.RED));
             }
         });
     }

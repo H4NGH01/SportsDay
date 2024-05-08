@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 /**
- * Config files for storing players' plugin data
+ * Config files for storing players' plugin data.
  */
 public final class ConfigManager {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
@@ -31,7 +31,7 @@ public final class ConfigManager {
     }
 
     /**
-     * Get the config that store contestants data
+     * Get the config that store contestants' data.
      * @return contestants data config
      */
     public FileConfiguration getContestantsConfig() {

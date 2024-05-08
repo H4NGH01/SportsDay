@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents a plugin gui
+ * Represents a plugin gui.
  */
 public abstract class PluginGUI implements InventoryHolder {
     private static final Map<Class<? extends PluginGUI>, Map<String, Method>> BUTTON_HANDLER = new HashMap<>();
@@ -27,7 +27,7 @@ public abstract class PluginGUI implements InventoryHolder {
     private final Inventory inventory;
 
     /**
-     * A plugin gui with the specified size and title
+     * A plugin gui with the specified size and title.
      * @param size gui size
      * @param title gui title
      */
@@ -46,8 +46,8 @@ public abstract class PluginGUI implements InventoryHolder {
     }
 
     /**
-     * Get the GUI {@link Inventory} content
-     * @return GUI {@link Inventory} content
+     * Get the gui {@link Inventory} content.
+     * @return gui {@link Inventory} content
      */
     @Override
     public final @NotNull Inventory getInventory() {
@@ -55,7 +55,7 @@ public abstract class PluginGUI implements InventoryHolder {
     }
 
     /**
-     * Update GUI content
+     * Update gui content.
      */
     public void update() {}
 
@@ -77,7 +77,7 @@ public abstract class PluginGUI implements InventoryHolder {
     }
 
     /**
-     * Listener call from {@link CompetitionListener#onClose(InventoryCloseEvent)}
+     * Listener call from {@link CompetitionListener#onClose(InventoryCloseEvent)}.
      */
     public void onClose() {}
 }
