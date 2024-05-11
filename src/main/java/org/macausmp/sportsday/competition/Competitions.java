@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.PlayerHolder;
@@ -142,7 +142,7 @@ public final class Competitions {
         if (CONTESTANTS.containsKey(uuid))
             return false;
         CONTESTANTS.put(uuid, new ContestantData(uuid, number));
-        CompetitionInfoGUI.updateGUI();
+        CompetitionConsoleGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         player.sendMessage(Component.translatable("command.competition.register.success.self")
                 .args(Component.text(number)).color(NamedTextColor.GREEN));
@@ -170,7 +170,7 @@ public final class Competitions {
         CONTESTANTS_CONFIG.set(data.getUUID().toString(), null);
         REGISTERED_NUMBER_LIST.remove(data.getNumber());
         CONTESTANTS.remove(uuid);
-        CompetitionInfoGUI.updateGUI();
+        CompetitionConsoleGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         SportsDay.AUDIENCES.addPlayer(player);
         return true;

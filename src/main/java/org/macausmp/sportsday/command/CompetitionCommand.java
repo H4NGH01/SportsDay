@@ -134,7 +134,7 @@ public class CompetitionCommand extends IPluginCommand {
                     }
                 }
                 case "info" -> {
-                    sender.sendMessage(Component.translatable("gui.info.title"));
+                    sender.sendMessage(Component.translatable("competition.info"));
                     IEvent event = Competitions.getCurrentEvent();
                     boolean b = event != null;
                     sender.sendMessage(Component.translatable("competition.current")

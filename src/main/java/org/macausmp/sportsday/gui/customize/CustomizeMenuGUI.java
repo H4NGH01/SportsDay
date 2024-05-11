@@ -146,7 +146,7 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack musickit() {
         ItemStack stack = customize(Material.JUKEBOX, "musickit");
-        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
+        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
         List<Component> lore = new ArrayList<>();
         Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));

@@ -19,14 +19,14 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CompetitionInfoGUI extends AbstractCompetitionGUI {
-    private static final Set<CompetitionInfoGUI> HANDLER = new HashSet<>();
+public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
+    private static final Set<CompetitionConsoleGUI> HANDLER = new HashSet<>();
 
-    public CompetitionInfoGUI() {
-        super(36, Component.translatable("gui.info.title"));
+    public CompetitionConsoleGUI() {
+        super(36, Component.translatable("gui.console.title"));
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        getInventory().setItem(0, ItemUtil.addWrapper(GUIButton.COMPETITION_INFO));
+        getInventory().setItem(0, ItemUtil.addWrapper(GUIButton.COMPETITION_CONSOLE));
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
@@ -43,7 +43,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(CompetitionInfoGUI::update);
+        HANDLER.forEach(CompetitionConsoleGUI::update);
     }
 
     @ButtonHandler("start_competitions")
@@ -59,9 +59,15 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("end_competition")
     public void end(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.end.failed").color(NamedTextColor.RED));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            return;
+        }
         p.openInventory(new ConfirmGUI(this, player -> {
             boolean b = Competitions.forceEnd(p);
-            p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            p.playSound(Sound.sound(Key.key(b ?
+                    "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return b;
         }).getInventory());
     }

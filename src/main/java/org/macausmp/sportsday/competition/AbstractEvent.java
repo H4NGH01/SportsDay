@@ -8,6 +8,7 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.*;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -16,7 +17,7 @@ import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -36,7 +37,7 @@ public abstract class AbstractEvent implements IEvent {
     private long time;
     private final Collection<ContestantData> contestants = new HashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
-    private final Map<UUID, CustomizeMusickit> contestantToMusickit = new HashMap<>();
+    private final Map<UUID, PersistentDataContainer> contestantToMusickit = new HashMap<>();
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
     public AbstractEvent(String id) {
@@ -88,7 +89,7 @@ public abstract class AbstractEvent implements IEvent {
      */
     protected final void setStatus(Status status) {
         this.status = status;
-        CompetitionInfoGUI.updateGUI();
+        CompetitionConsoleGUI.updateGUI();
     }
 
     @Override
@@ -122,7 +123,8 @@ public abstract class AbstractEvent implements IEvent {
         contestants.addAll(Competitions.getOnlineContestants());
         contestants.forEach(data -> {
             Player p = data.getPlayer();
-            if (!SportsDay.REFEREES.hasPlayer(p)) p.getInventory().clear();
+            if (!SportsDay.REFEREES.hasPlayer(p))
+                p.getInventory().clear();
             p.clearActivePotionEffects();
             p.setFireTicks(0);
             p.setGameMode(GameMode.ADVENTURE);
@@ -130,7 +132,7 @@ public abstract class AbstractEvent implements IEvent {
             p.getInventory().setItem(4, ItemUtil.SPRAY);
             p.setBedSpawnLocation(location, true);
             p.teleport(location);
-            contestantToMusickit.put(data.getUUID(), PlayerCustomize.getMusickit(p));
+            contestantToMusickit.put(data.getUUID(), p.getPersistentDataContainer());
         });
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
@@ -171,7 +173,7 @@ public abstract class AbstractEvent implements IEvent {
         if (!force) {
             if (!getLeaderboard().isEmpty()) {
                 OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
-                CustomizeMusickit musickit = contestantToMusickit.get(mvp.getUniqueId());
+                CustomizeMusickit musickit = PlayerCustomize.getMusickit(contestantToMusickit.get(mvp.getUniqueId()));
                 if (musickit != null) {
                     Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
                     Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")

@@ -25,11 +25,12 @@ import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.ContestantProfileGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -92,16 +93,17 @@ public final class SportsDay extends JavaPlugin implements Listener {
         GlobalTranslator.translator().addSource(registry);
     }
 
-    private Team registerTeam(String name, Component display, NamedTextColor color) {
+    private @NotNull Team registerTeam(String name, Component display, NamedTextColor color) {
         Scoreboard scoreboard = getServer().getScoreboardManager().getMainScoreboard();
-        if (scoreboard.getTeam(name) == null) {
-            Team team = scoreboard.registerNewTeam(name);
-            team.displayName(display);
+        Team team = scoreboard.getTeam(name);
+        if (team == null) {
+            team = scoreboard.registerNewTeam(name);
+            team.displayName(TextUtil.text(display));
             team.color(color);
-            team.prefix(Component.translatable("[%s]").args(display));
+            team.prefix(TextUtil.text(Component.translatable("[%s]").args(display)));
             team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         }
-        return scoreboard.getTeam(name);
+        return team;
     }
 
     private void registerCommand() {
@@ -215,7 +217,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         }
         if (!Competitions.isContestant(p))
             return;
-        CompetitionInfoGUI.updateGUI();
+        CompetitionConsoleGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         ContestantProfileGUI.updateProfile(p.getUniqueId());
     }
@@ -230,7 +232,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                CompetitionInfoGUI.updateGUI();
+                CompetitionConsoleGUI.updateGUI();
                 ContestantsListGUI.updateGUI();
                 ContestantProfileGUI.updateProfile(p.getUniqueId());
             }

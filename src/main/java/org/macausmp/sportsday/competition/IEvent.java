@@ -6,7 +6,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.macausmp.sportsday.util.ContestantData;
-import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.Collection;
 import java.util.List;
@@ -71,9 +70,10 @@ public interface IEvent extends Listener {
 
     /**
      * Get the leaderboard of event.
+     *
      * @return leaderboard of event
      */
-    List<? extends PlayerHolder> getLeaderboard();
+    List<ContestantData> getLeaderboard();
 
     /**
      * Set up the event and make it get ready to start.

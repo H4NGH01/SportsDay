@@ -128,6 +128,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
                 lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
         PlayerCustomize.Cloth cloth1 = PlayerCustomize.getCloth(player, material.getEquipmentSlot());

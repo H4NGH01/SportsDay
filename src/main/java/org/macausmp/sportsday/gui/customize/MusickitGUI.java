@@ -42,7 +42,7 @@ public class MusickitGUI extends PluginGUI {
     public void update() {
         for (int i = 0; i < CustomizeMusickit.values().length; i++)
             getInventory().setItem(i + START_INDEX, musickit(CustomizeMusickit.values()[i]));
-        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
+        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
         if (musickit == null)
             return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {

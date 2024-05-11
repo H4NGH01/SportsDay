@@ -15,10 +15,10 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
         super(size, title);
     }
 
-    @ButtonHandler("competition_info")
+    @ButtonHandler("competition_console")
     public void info(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        p.openInventory(new CompetitionInfoGUI().getInventory());
+        p.openInventory(new CompetitionConsoleGUI().getInventory());
     }
 
     @ButtonHandler("contestants_list")

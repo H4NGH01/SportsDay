@@ -19,7 +19,7 @@ public class CompetitionStartGUI extends AbstractCompetitionGUI {
         super(54, Component.translatable("gui.start.title"));
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, GUIButton.BOARD);
-        getInventory().setItem(0, GUIButton.COMPETITION_INFO);
+        getInventory().setItem(0, GUIButton.COMPETITION_CONSOLE);
         getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
         getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(3, GUIButton.VERSION);
