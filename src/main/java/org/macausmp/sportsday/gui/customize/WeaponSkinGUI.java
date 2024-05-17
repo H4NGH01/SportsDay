@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -27,8 +26,8 @@ public class WeaponSkinGUI extends PluginGUI {
         super(18, Component.translatable("gui.customize.weapon_skin.title"));
         this.player = player;
         for (int i = 0; i < 9; i++)
-            getInventory().setItem(i, GUIButton.BOARD);
-        getInventory().setItem(8, GUIButton.BACK);
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         update();
     }
 

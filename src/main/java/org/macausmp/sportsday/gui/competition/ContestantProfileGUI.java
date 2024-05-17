@@ -12,8 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.ConfirmGUI;
-import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -30,11 +29,11 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         super(54, Component.translatable("gui.contestant_profile.title").args(Component.text(data.getName())));
         this.data = data;
         for (int i = 0; i < 9; i++)
-            getInventory().setItem(i + 9, GUIButton.BOARD);
-        getInventory().setItem(0, GUIButton.COMPETITION_CONSOLE);
-        getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
-        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(3, GUIButton.VERSION);
+            getInventory().setItem(i + 9, BOARD);
+        getInventory().setItem(0, COMPETITION_CONSOLE);
+        getInventory().setItem(1, CONTESTANTS_LIST);
+        getInventory().setItem(2, COMPETITION_SETTINGS);
+        getInventory().setItem(3, VERSION);
         getInventory().setItem(26, unregister());
         update();
     }
@@ -81,7 +80,7 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("unregister")
     public void unregister(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ConfirmGUI(this, player -> {
+        p.openInventory(new ConfirmationGUI(this, player -> {
             boolean b = Competitions.leave(data.getPlayer());
             player.sendMessage(b
                     ? Component.translatable("command.competition.unregister.success.other")

@@ -14,7 +14,6 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -34,8 +33,8 @@ public class ClothingTrimGUI extends PluginGUI {
         this.player = player;
         this.slot = slot;
         for (int i = 0; i < 9; i++)
-            getInventory().setItem(i, GUIButton.BOARD);
-        getInventory().setItem(8, GUIButton.BACK);
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         update();
     }
 

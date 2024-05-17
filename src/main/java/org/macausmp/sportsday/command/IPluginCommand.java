@@ -12,43 +12,41 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Represents a plugin command.
  */
-public abstract class IPluginCommand implements CommandExecutor, TabCompleter {
+public interface IPluginCommand extends CommandExecutor, TabCompleter {
     /**
      * Execute command.
      * @param sender command sender
      * @param args arguments
      */
-    abstract void onCommand(CommandSender sender, String[] args);
+    void onCommand(CommandSender sender, String[] args);
 
     /**
      * Command name.
      * @return name of command
      */
-    abstract String name();
+    String name();
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    default boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         onCommand(sender, args);
         return true;
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    @Nullable
+    default List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         return new ArrayList<>();
     }
 
-    protected void requirePlayer(@NotNull CommandSender sender, @NotNull Function function) {
+    default void requirePlayer(@NotNull CommandSender sender, @NotNull Consumer<Player> consumer) {
         if (sender instanceof Player p)
-            function.apply(p);
+            consumer.accept(p);
         else
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
-    }
-
-    protected interface Function {
-        void apply(Player p);
     }
 }

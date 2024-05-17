@@ -1,18 +1,27 @@
 package org.macausmp.sportsday.competition.sumo;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SumoMatch {
+    private final int number;
+    private final SumoStage stage;
     private final UUID[] contestants = new UUID[2];
     private MatchStatus status = MatchStatus.IDLE;
     private UUID winner;
     private UUID loser;
+
+    SumoMatch(int number, SumoStage stage) {
+        this.number = number;
+        this.stage = stage;
+    }
 
     public void setPlayer(UUID uuid) {
         if (isSet())
@@ -25,14 +34,14 @@ public class SumoMatch {
     }
 
     public void setResult(UUID defeated) {
-        if (status == MatchStatus.END)
+        if (status == MatchStatus.ENDED)
             return;
         int i = indexOf(defeated);
         if (i == -1)
             return;
         winner = contestants[i ^ 1];
         loser = contestants[i];
-        status = MatchStatus.END;
+        status = MatchStatus.ENDED;
     }
 
     public Player[] getPlayers() {
@@ -63,6 +72,14 @@ public class SumoMatch {
         consumer.accept(Bukkit.getPlayer(contestants[1]));
     }
 
+    public int getNumber() {
+        return number;
+    }
+
+    public SumoStage getStage() {
+        return stage;
+    }
+
     public MatchStatus getStatus() {
         return status;
     }
@@ -80,9 +97,19 @@ public class SumoMatch {
     }
 
     public enum MatchStatus {
-        IDLE,
-        COMING,
-        STARTED,
-        END
+        IDLE("competition.status.idle"),
+        COMING("competition.status.coming"),
+        STARTED("competition.status.started"),
+        ENDED("competition.status.ended");
+
+        private final Component name;
+
+        MatchStatus(String code) {
+            this.name = TextUtil.convert(Component.translatable(code));
+        }
+
+        public Component getName() {
+            return name;
+        }
     }
 }

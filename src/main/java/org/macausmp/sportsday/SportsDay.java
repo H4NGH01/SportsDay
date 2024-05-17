@@ -64,7 +64,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         if (configManager == null)
             configManager = new ConfigManager();
         configManager.setup();
-        configManager.saveConfig();
+        configManager.saveContestsConfig();
         Competitions.load();
         CONTESTANTS = registerTeam("contestants", Component.translatable("role.contestants"), NamedTextColor.GREEN);
         REFEREES = registerTeam("referees", Component.translatable("role.referees"), NamedTextColor.GOLD);
@@ -144,7 +144,6 @@ public final class SportsDay extends JavaPlugin implements Listener {
             });
         }
         Competitions.save();
-        getServer().getOnlinePlayers().forEach(CompetitionListener::cancelJudgementCut);
     }
 
     private void setTabList() {
@@ -226,7 +225,6 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
         AbstractEvent.leavePractice(p);
-        CompetitionListener.cancelJudgementCut(p);
         if (!Competitions.isContestant(p))
             return;
         new BukkitRunnable() {

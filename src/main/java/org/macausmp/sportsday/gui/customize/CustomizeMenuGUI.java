@@ -11,6 +11,7 @@ import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,6 +77,7 @@ public class CustomizeMenuGUI extends PluginGUI {
             Arrays.stream(slots).forEach(s -> lore.add(getTypeName(s)));
             stack.lore(lore);
         }
+        stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         return stack;
     }
 

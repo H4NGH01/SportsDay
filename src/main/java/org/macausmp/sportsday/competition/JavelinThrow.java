@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerHolder;
@@ -244,6 +245,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
             nextMatch();
         else
             end(false);
+        JavelinGUI.updateGUI();
     }
 
     @Override
@@ -257,29 +259,42 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                             .args(Component.text(i)).color(NamedTextColor.YELLOW));
                 if (i-- == 0) {
                     onMatchStart();
+                    JavelinGUI.updateGUI();
                     cancel();
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
-    private static final class ScoreResult implements PlayerHolder, Comparable<ScoreResult> {
+    public ContestantData getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public ScoreResult getScoreResult(UUID uuid) {
+        return resultMap.get(uuid);
+    }
+
+    public static final class ScoreResult implements PlayerHolder, Comparable<ScoreResult> {
         private final UUID uuid;
         private final Location loc;
         private double distance;
 
-        public ScoreResult(UUID uuid, Location loc) {
+        private ScoreResult(UUID uuid, Location loc) {
             this.uuid = uuid;
             this.loc = loc;
         }
 
-        public void setTridentLocation(@NotNull Trident trident) {
+        private void setTridentLocation(@NotNull Trident trident) {
             this.distance = loc.distance(trident.getLocation());
         }
 
         @Override
         public @NotNull UUID getUUID() {
             return uuid;
+        }
+
+        public double getDistance() {
+            return distance;
         }
 
         @Override

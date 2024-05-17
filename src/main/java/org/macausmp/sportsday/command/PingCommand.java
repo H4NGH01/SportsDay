@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PingCommand extends IPluginCommand {
+public class PingCommand implements IPluginCommand {
     @Override
     public void onCommand(CommandSender sender, String @NotNull [] args) {
         if (args.length >= 1) {

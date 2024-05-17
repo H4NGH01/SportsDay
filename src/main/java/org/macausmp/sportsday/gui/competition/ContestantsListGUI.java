@@ -13,42 +13,35 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.Pageable;
+import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.*;
 
-public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageable {
+public class ContestantsListGUI extends AbstractCompetitionGUI {
     private static final Set<ContestantsListGUI> HANDLER = new HashSet<>();
-    private int page = 0;
+    private final PageBox<ContestantData> pageBox = new PageBox<>(this, 18, 54,
+            () -> Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList());
 
     public ContestantsListGUI() {
         super(54, Component.translatable("gui.contestants_list.title"));
         for (int i = 0; i < 9; i++)
-            getInventory().setItem(i + 9, GUIButton.BOARD);
-        getInventory().setItem(0, GUIButton.COMPETITION_CONSOLE);
-        getInventory().setItem(1, ItemUtil.addWrapper(GUIButton.CONTESTANTS_LIST));
-        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(3, GUIButton.VERSION);
-        getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
+            getInventory().setItem(i + 9, BOARD);
+        getInventory().setItem(0, COMPETITION_CONSOLE);
+        getInventory().setItem(1, ItemUtil.addWrapper(CONTESTANTS_LIST));
+        getInventory().setItem(2, COMPETITION_SETTINGS);
+        getInventory().setItem(3, VERSION);
+        getInventory().setItem(9, PREVIOUS_PAGE);
         getInventory().setItem(13, pages());
-        getInventory().setItem(17, GUIButton.NEXT_PAGE);
+        getInventory().setItem(17, NEXT_PAGE);
         update();
     }
 
     @Override
     public void update() {
         getInventory().setItem(13, pages());
-        for (int i = getStartSlot(); i < getEndSlot(); i++)
-            getInventory().setItem(i, null);
-        List<ContestantData> list = Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList();
-        for (int i = 0; i < getSize(); i++) {
-            if (i >= Competitions.getContestants().size())
-                break;
-            getInventory().setItem(i + getStartSlot(), icon(list.get(i + getPage() * getSize()).getUUID()));
-        }
+        pageBox.updatePage(i -> icon(i.getUUID()));
         HANDLER.add(this);
     }
 
@@ -65,19 +58,19 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
     @ButtonHandler("next_page")
     public void next(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-        nextPage();
+        pageBox.nextPage();
     }
 
     @ButtonHandler("prev_page")
     public void prev(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-        previousPage();
+        pageBox.previousPage();
     }
 
     private @NotNull ItemStack pages() {
         ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
         stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator")
-                .args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
+                .args(Component.text(pageBox.getPage() + 1), Component.text(pageBox.getMaxPage())).decoration(TextDecoration.ITALIC, false)));
         return stack;
     }
 
@@ -100,40 +93,5 @@ public class ContestantsListGUI extends AbstractCompetitionGUI implements Pageab
     @Override
     public void onClose() {
         HANDLER.remove(this);
-    }
-
-    public void nextPage() {
-        if (getPage() < getMaxPage() - 1)
-            page++;
-        update();
-    }
-
-    public void previousPage() {
-        if (getPage() > 0)
-            page--;
-        update();
-    }
-
-    @Override
-    public int getPage() {
-        return page;
-    }
-
-    @Override
-    public int getMaxPage() throws ArithmeticException {
-        if (Competitions.getContestants().isEmpty())
-            return 1;
-        double i = (double) Competitions.getContestants().size() / getSize();
-        return (int) (i == (int) i ? i : i + 1);
-    }
-
-    @Override
-    public int getStartSlot() {
-        return 18;
-    }
-
-    @Override
-    public int getEndSlot() {
-        return 54;
     }
 }

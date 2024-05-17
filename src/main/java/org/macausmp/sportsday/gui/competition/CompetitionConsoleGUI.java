@@ -10,10 +10,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.ConfirmGUI;
-import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashSet;
@@ -23,22 +23,29 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
     private static final Set<CompetitionConsoleGUI> HANDLER = new HashSet<>();
 
     public CompetitionConsoleGUI() {
-        super(36, Component.translatable("gui.console.title"));
+        super(27, Component.translatable("gui.console.title"));
         for (int i = 0; i < 9; i++)
-            getInventory().setItem(i + 9, GUIButton.BOARD);
-        getInventory().setItem(0, ItemUtil.addWrapper(GUIButton.COMPETITION_CONSOLE));
-        getInventory().setItem(1, GUIButton.CONTESTANTS_LIST);
-        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(3, GUIButton.VERSION);
-        getInventory().setItem(18, GUIButton.START_COMPETITION);
-        getInventory().setItem(19, GUIButton.END_COMPETITION);
+            getInventory().setItem(i + 9, BOARD);
+        getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
+        getInventory().setItem(1, CONTESTANTS_LIST);
+        getInventory().setItem(2, COMPETITION_SETTINGS);
+        getInventory().setItem(3, VERSION);
+        if (hasEvent()) {
+            getInventory().setItem(18, status());
+            getInventory().setItem(19, player());
+            getInventory().setItem(26, END_COMPETITION);
+        } else {
+            getInventory().setItem(18, START_COMPETITION);
+        }
         update();
     }
 
     @Override
     public void update() {
-        getInventory().setItem(27, status());
-        getInventory().setItem(28, player());
+        if (hasEvent()) {
+            getInventory().setItem(18, status());
+            getInventory().setItem(19, player());
+        }
         HANDLER.add(this);
     }
 
@@ -64,9 +71,9 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        p.openInventory(new ConfirmGUI(this, player -> {
-            boolean b = Competitions.forceEnd(p);
-            p.playSound(Sound.sound(Key.key(b ?
+        p.openInventory(new ConfirmationGUI(this, player -> {
+            boolean b = Competitions.forceEnd(player);
+            player.playSound(Sound.sound(Key.key(b ?
                     "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return b;
         }).getInventory());
@@ -92,5 +99,10 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
     @Override
     public void onClose() {
         HANDLER.remove(this);
+    }
+
+    private static boolean hasEvent() {
+        IEvent event = Competitions.getCurrentEvent();
+        return event != null && event.getStatus() != Status.ENDED;
     }
 }

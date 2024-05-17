@@ -16,7 +16,7 @@ import java.util.function.Function;
 /**
  * Represents a confirmation gui.
  */
-public class ConfirmGUI extends PluginGUI {
+public class ConfirmationGUI extends PluginGUI {
     private static final ItemStack CONFIRM = ItemUtil.item(Material.GREEN_CONCRETE, "confirm", Component.translatable("gui.confirm.confirm").color(NamedTextColor.GREEN));
     private static final ItemStack CANCEL = ItemUtil.item(Material.RED_CONCRETE, "cancel", Component.translatable("gui.confirm.cancel").color(NamedTextColor.RED));
     private final PluginGUI prev;
@@ -28,7 +28,7 @@ public class ConfirmGUI extends PluginGUI {
      * @param prev previous gui
      * @param function function executed after confirmation
      */
-    public ConfirmGUI(PluginGUI prev, Function<Player, Boolean> function) {
+    public ConfirmationGUI(PluginGUI prev, Function<Player, Boolean> function) {
         super(27, Component.translatable("gui.confirm.title"));
         this.prev = prev;
         this.function = function;

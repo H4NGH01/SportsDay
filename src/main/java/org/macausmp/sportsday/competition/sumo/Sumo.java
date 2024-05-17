@@ -18,6 +18,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IFieldEvent;
 import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.competition.event.SumoGUI;
 import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -46,7 +47,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         stageIndex = 0;
         for (int i = 1; i <= stage; i++) {
             int j = SumoStage.Stage.values().length;
-            stages[stage - i] = new SumoStage(SumoStage.Stage.values()[i < j ? j - i : 0]);
+            stages[stage - i] = new SumoStage(stage - i + 1, SumoStage.Stage.values()[i < j ? j - i : 0]);
         }
         int size = switch (stages[1].getStage()) {
             case SEMI_FINAL -> queue.size() - 4;
@@ -54,13 +55,12 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             default -> queue.size() / 2;
         };
         for (int i = 0; i < size; i++) {
-            SumoMatch match = new SumoMatch();
+            SumoMatch match = stages[0].newMatch();
             match.setPlayer(getFromQueue());
             match.setPlayer(getFromQueue());
-            stages[0].getMatchList().add(match);
         }
-        stages[stages.length - 2].getMatchList().add(new SumoMatch()); // Third place
-        stages[stages.length - 1].getMatchList().add(new SumoMatch()); // Final
+        stages[stages.length - 2].newMatch(); // Third place
+        stages[stages.length - 1].newMatch(); // Final
         stageSetup();
     }
 
@@ -72,6 +72,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                     .args(Component.text(++i), m.getPlayers()[0].displayName(), m.getPlayers()[1].displayName()));
         }
         Bukkit.broadcast(c);
+        SumoGUI.updateGUI();
     }
 
     @Override
@@ -154,6 +155,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         getSumoStage().nextMatch();
         SumoMatch match = getSumoStage().getCurrentMatch();
         match.setStatus(SumoMatch.MatchStatus.COMING);
+        SumoGUI.updateGUI();
         Player[] pa = match.getPlayers();
         Player p1 = pa[0];
         Player p2 = pa[1];
@@ -173,6 +175,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                             match.setStatus(SumoMatch.MatchStatus.STARTED);
                             Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
                             giveWeapon();
+                            SumoGUI.updateGUI();
                             cancel();
                         }
                     }
@@ -194,7 +197,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 @Override
                 public void run() {
                     SumoMatch match = getSumoStage().getCurrentMatch();
-                    if (match == null || match.getStatus() == SumoMatch.MatchStatus.END) {
+                    if (match == null || match.getStatus() == SumoMatch.MatchStatus.ENDED) {
                         cancel();
                         return;
                     }
@@ -259,6 +262,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             else
                 end(false);
         }
+        SumoGUI.updateGUI();
     }
 
     @Override
@@ -293,10 +297,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 default -> 0; // Actually unreachable
             };
             for (int i = 0; i < size; i++) {
-                SumoMatch match = new SumoMatch();
+                SumoMatch match = getSumoStage().newMatch();
                 match.setPlayer(queue.removeFirst().getUUID());
                 match.setPlayer(queue.removeFirst().getUUID());
-                getSumoStage().getMatchList().add(match);
             }
         }
         stageSetup();
@@ -313,6 +316,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
+    }
+
+    public SumoStage[] getSumoStages() {
+        return stages;
     }
 
     public SumoStage getSumoStage() {

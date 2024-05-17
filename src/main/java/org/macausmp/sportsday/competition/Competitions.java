@@ -51,7 +51,7 @@ public final class Competitions {
             CONTESTANTS_CONFIG.set(uuid + ".number", data.getNumber());
             CONTESTANTS_CONFIG.set(uuid + ".score", data.getScore());
         });
-        PLUGIN.getConfigManager().saveConfig();
+        PLUGIN.getConfigManager().saveContestsConfig();
     }
 
     /**

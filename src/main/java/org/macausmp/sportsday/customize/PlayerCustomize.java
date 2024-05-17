@@ -72,9 +72,7 @@ public final class PlayerCustomize {
         ItemStack item = new ItemStack(cloth.material);
         item.editMeta(meta -> {
             meta.setUnbreakable(true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
         });
         if (cloth.colorable())
             item.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.color));
