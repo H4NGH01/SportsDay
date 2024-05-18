@@ -116,7 +116,7 @@ public class SumoGUI extends AbstractCompetitionGUI {
                 Component.translatable("gui.competition.sumo.match.players")
                         .args(match.getPlayers()[0].displayName(), match.getPlayers()[1].displayName()),
                 Component.translatable("gui.competition.sumo.match.result")
-                        .args(match.getStatus() != SumoMatch.MatchStatus.ENDED
+                        .args(!match.isEnd()
                                 ? Component.translatable("gui.competition.tbd")
                                 : Component.translatable("gui.competition.sumo.match.winner")
                                 .args(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
@@ -143,7 +143,7 @@ public class SumoGUI extends AbstractCompetitionGUI {
                         ? Component.translatable("gui.competition.sumo.match.players").args(match.getPlayers()[0].displayName(), match.getPlayers()[1].displayName())
                         : Component.translatable("gui.competition.sumo.match.players").args(Component.translatable("gui.competition.tbd"), Component.translatable("gui.competition.tbd")),
                 Component.translatable("gui.competition.sumo.match.result")
-                        .args(match.getStatus() != SumoMatch.MatchStatus.ENDED
+                        .args(!match.isEnd()
                                 ? Component.translatable("gui.competition.tbd")
                                 : Component.translatable("gui.competition.sumo.match.winner")
                                 .args(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));

@@ -23,7 +23,7 @@ public class SumoStage {
     }
 
     public SumoMatch newMatch() {
-        SumoMatch match = new SumoMatch(matchList.size() + 1, this);
+        SumoMatch match = new SumoMatch(matchList.size() + 1);
         matchList.add(match);
         return match;
     }

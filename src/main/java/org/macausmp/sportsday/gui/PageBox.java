@@ -84,18 +84,6 @@ public final class PageBox<T> {
     }
 
     /**
-     * Go to a specified page.
-     */
-    public void goPage(int i) {
-        if (i < 0)
-            i = 0;
-        else if (i >= getMaxPage())
-            i = getMaxPage() - 1;
-        page = i;
-        gui.update();
-    }
-
-    /**
      * Go to next page.
      */
     public void nextPage() {

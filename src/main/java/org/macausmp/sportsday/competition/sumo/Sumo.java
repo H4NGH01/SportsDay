@@ -197,7 +197,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 @Override
                 public void run() {
                     SumoMatch match = getSumoStage().getCurrentMatch();
-                    if (match == null || match.getStatus() == SumoMatch.MatchStatus.ENDED) {
+                    if (match == null || match.isEnd()) {
                         cancel();
                         return;
                     }

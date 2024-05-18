@@ -12,15 +12,13 @@ import java.util.function.Consumer;
 
 public class SumoMatch {
     private final int number;
-    private final SumoStage stage;
     private final UUID[] contestants = new UUID[2];
     private MatchStatus status = MatchStatus.IDLE;
     private UUID winner;
     private UUID loser;
 
-    SumoMatch(int number, SumoStage stage) {
+    SumoMatch(int number) {
         this.number = number;
-        this.stage = stage;
     }
 
     public void setPlayer(UUID uuid) {
@@ -33,8 +31,12 @@ public class SumoMatch {
         return contestants[0] != null && contestants[1] != null;
     }
 
+    public boolean isEnd() {
+        return status == MatchStatus.ENDED;
+    }
+
     public void setResult(UUID defeated) {
-        if (status == MatchStatus.ENDED)
+        if (isEnd())
             return;
         int i = indexOf(defeated);
         if (i == -1)
@@ -74,10 +76,6 @@ public class SumoMatch {
 
     public int getNumber() {
         return number;
-    }
-
-    public SumoStage getStage() {
-        return stage;
     }
 
     public MatchStatus getStatus() {
