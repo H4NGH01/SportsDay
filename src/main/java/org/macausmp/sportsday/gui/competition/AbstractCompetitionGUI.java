@@ -47,7 +47,7 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
             if (event instanceof ITrackEvent e) {
                 lore.add(TextUtil.text(Component.translatable("event.type.track").color(NamedTextColor.GRAY)));
                 lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
-            } else {
+            } else if (event instanceof IFieldEvent) {
                 lore.add(TextUtil.text(Component.translatable("event.type.field").color(NamedTextColor.GRAY)));
             }
             meta.lore(lore);

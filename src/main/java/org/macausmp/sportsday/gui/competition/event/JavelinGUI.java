@@ -8,11 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.competition.ContestantData;
 import org.macausmp.sportsday.competition.JavelinThrow;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashSet;

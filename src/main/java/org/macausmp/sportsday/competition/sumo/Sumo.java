@@ -4,27 +4,25 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractEvent;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IFieldEvent;
-import org.macausmp.sportsday.competition.Status;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.event.SumoGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.*;
 
-public class Sumo extends AbstractEvent implements IFieldEvent {
+public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
@@ -77,7 +75,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onStart() {
-        onMatchStart();
+        nextMatch();
     }
 
     @Override
@@ -116,6 +114,25 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @EventHandler
+    public void onHit(@NotNull EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
+            if (Competitions.getCurrentEvent() == this) {
+                SumoMatch match = getSumoStage().getCurrentMatch();
+                if (match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED
+                        && match.contain(player.getUniqueId()) && match.contain(damager.getUniqueId())) {
+                    e.setDamage(0);
+                    return;
+                }
+            }
+            if (AbstractEvent.inPractice(player, this) && AbstractEvent.inPractice(damager, this)) {
+                e.setDamage(0);
+                return;
+            }
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
         if (Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isContestant(p)) {
@@ -149,10 +166,6 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onMatchStart() {
-        SumoMatch prev = getSumoStage().getCurrentMatch();
-        if (prev != null)
-            prev.forEachPlayer(p -> p.teleport(getLocation()));
-        getSumoStage().nextMatch();
         SumoMatch match = getSumoStage().getCurrentMatch();
         match.setStatus(SumoMatch.MatchStatus.COMING);
         SumoGUI.updateGUI();
@@ -216,9 +229,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     private @NotNull ItemStack weapon(@NotNull Player p) {
         ItemStack weapon = ItemUtil.setBind(ItemUtil.item(Material.BLAZE_ROD, null, "item.sportsday.kb_stick"));
-        Material material = PlayerCustomize.getWeaponSkin(p);
-        if (material != null)
-            weapon.setType(material);
+        weapon.setType(PlayerCustomize.getWeaponSkin(p));
         weapon.editMeta(meta -> {
             meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
@@ -274,6 +285,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match_countdown")
                         .args(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
+                    SumoMatch prev = getSumoStage().getCurrentMatch();
+                    if (prev != null)
+                        prev.forEachPlayer(p -> p.teleport(getLocation()));
+                    getSumoStage().nextMatch();
                     onMatchStart();
                     cancel();
                 }
@@ -328,4 +343,59 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     protected void onPractice(@NotNull Player player) {}
+
+    @Override
+    public void load(@NotNull FileConfiguration config) {
+        alive.clear();
+        queue.clear();
+        int count = config.getInt("stages_count");
+        stageIndex = config.getInt("current_stage");
+        getSumoStage().matchIndex = config.getInt("current_match");
+        stages = new SumoStage[count];
+        for (int i = 0; i < count; i++) {
+            stages[i] = new SumoStage(i + 1, SumoStage.Stage.valueOf(config.getString("stages." + i + ".name")));
+            int size = config.getInt("stages." + i + ".size");
+            for (int j = 0; j < size; j++) {
+                SumoMatch match = stages[i].newMatch();
+                int num = match.getNumber() - 1;
+                if (config.getBoolean("stages." + i + ".match." + num + ".set")) {
+                    match.setPlayer(UUID.fromString(Objects.requireNonNull(config.getString("stages." + i + ".match." + num + ".p1"))));
+                    match.setPlayer(UUID.fromString(Objects.requireNonNull(config.getString("stages." + i + ".match." + num + ".p2"))));
+                }
+                if (config.getBoolean("stages." + i + ".match." + num + ".end")) {
+                    match.setResult(UUID.fromString(Objects.requireNonNull(config.getString("stages." + i + ".match." + num + ".loser"))));
+                    match.setStatus(SumoMatch.MatchStatus.ENDED);
+                }
+            }
+        }
+        start();
+    }
+
+    @Override
+    public void save(@NotNull FileConfiguration config) {
+        List<String> alive = this.alive.stream().map(data -> data.getUUID().toString()).toList();
+        config.set("alive", alive);
+        config.set("stages_count", getSumoStages().length);
+        config.set("current_stage", stageIndex);
+        config.set("current_match", getSumoStage().matchIndex);
+        for (int i = 0, length = getSumoStages().length; i < length; i++) {
+            SumoStage stage = getSumoStages()[i];
+            config.set("stages." + i + ".name", stage.getStage().name());
+            int size = stage.getMatchList().size();
+            config.set("stages." + i + ".size", size);
+            for (int j = 0; j < size; j++) {
+                SumoMatch match = stage.getMatchList().get(j);
+                config.set("stages." + i + ".match." + j + ".set", match.isSet());
+                if (match.isSet()) {
+                    config.set("stages." + i + ".match." + j + ".p1", match.getPlayers()[0].getUniqueId().toString());
+                    config.set("stages." + i + ".match." + j + ".p2", match.getPlayers()[1].getUniqueId().toString());
+                }
+                config.set("stages." + i + ".match." + j + ".end", match.isEnd());
+                if (match.isEnd()) {
+                    config.set("stages." + i + ".match." + j + ".winner", match.getWinner().toString());
+                    config.set("stages." + i + ".match." + j + ".loser", match.getLoser().toString());
+                }
+            }
+        }
+    }
 }

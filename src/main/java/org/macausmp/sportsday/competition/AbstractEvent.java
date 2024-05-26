@@ -13,12 +13,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.SportsDayListener;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -171,21 +170,29 @@ public abstract class AbstractEvent implements IEvent {
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
         if (!force) {
-            if (!getLeaderboard().isEmpty()) {
-                OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
-                CustomizeMusickit musickit = PlayerCustomize.getMusickit(contestantToMusickit.get(mvp.getUniqueId()));
-                if (musickit != null) {
-                    Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                    Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
-                            .args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
-                }
-            }
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
                     end();
                 }
             }.runTaskLater(PLUGIN, 100L));
+            PLUGIN.getConfigManager().clearCompetitionConfig();
+            if (!getLeaderboard().isEmpty()) {
+                OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
+                PersistentDataContainer pdc = contestantToMusickit.get(mvp.getUniqueId());
+                if (pdc == null) {
+                    if (mvp.isOnline())
+                        pdc = Objects.requireNonNull(mvp.getPlayer()).getPersistentDataContainer();
+                }
+                if (pdc != null) {
+                    CustomizeMusickit musickit = PlayerCustomize.getMusickit(pdc);
+                    if (musickit != null) {
+                        Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+                        Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
+                                .args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
+                    }
+                }
+            }
         } else {
             end();
         }
@@ -210,7 +217,7 @@ public abstract class AbstractEvent implements IEvent {
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             });
             getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
-                if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI))
+                if (e.getPersistentDataContainer().has(SportsDayListener.GRAFFITI))
                     e.remove();
             });
         }
@@ -308,17 +315,6 @@ public abstract class AbstractEvent implements IEvent {
      */
     public static <T extends IEvent> boolean inPractice(Player player, T event) {
         return PRACTICE.containsKey(player) && PRACTICE.get(player) == event;
-    }
-
-    /**
-     * Get the event the player is practice on.
-     * @param player who is practicing
-     * @return event the player is practice on
-     * @param <T> the event type
-     */
-    public static <T extends IEvent> T getPracticeEvent(Player player) {
-        //noinspection unchecked
-        return (T) PRACTICE.get(player);
     }
 
     /**

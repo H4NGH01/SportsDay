@@ -125,9 +125,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
      */
     private @NotNull Boat boat(@NotNull Player p) {
         Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
-        Boat.Type type = PlayerCustomize.getBoatType(p);
-        if (type != null)
-            boat.setBoatType(type);
+        boat.setBoatType(PlayerCustomize.getBoatType(p));
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;

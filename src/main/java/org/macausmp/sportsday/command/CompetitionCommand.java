@@ -6,16 +6,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.util.ContestantData;
+import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 
 public class CompetitionCommand implements IPluginCommand {
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
+
     @Override
     public void onCommand(CommandSender sender, String @NotNull [] args) {
         if (args.length > 0) {
@@ -39,7 +41,7 @@ public class CompetitionCommand implements IPluginCommand {
                             return;
                         }
                         if (Competitions.isContestant(p)) {
-                            sender.sendMessage(Component.translatable("command.competition.register.failed.other")
+                            sender.sendMessage(Component.translatable("command.competition.register.failed")
                                     .args(p.displayName()).color(NamedTextColor.RED));
                             return;
                         }
@@ -61,9 +63,9 @@ public class CompetitionCommand implements IPluginCommand {
                             number = Competitions.genNumber();
                         }
                         sender.sendMessage(Competitions.join(p, number)
-                                ? Component.translatable("command.competition.register.success.other")
+                                ? Component.translatable("command.competition.register.success")
                                         .args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN)
-                                : Component.translatable("command.competition.register_number_occupied")
+                                : Component.translatable("competition.register.failed.number_occupied")
                                         .args(Component.text(number)).color(NamedTextColor.RED));
                     } else {
                         sender.sendMessage(Component.text("/competition join <player>"));
@@ -78,14 +80,14 @@ public class CompetitionCommand implements IPluginCommand {
                             return;
                         }
                         sender.sendMessage(Competitions.leave(p)
-                                ? Component.translatable("command.competition.unregister.success.other")
+                                ? Component.translatable("command.competition.unregister.success")
                                         .args(Component.text(p.getName())).color(NamedTextColor.GREEN)
-                                : Component.translatable("command.competition.unregister.failed.other")
+                                : Component.translatable("command.competition.unregister.failed")
                                         .args(Component.text(p.getName())).color(NamedTextColor.RED));
                     } else {
                         if (sender instanceof Player p) {
                             if (!Competitions.leave(p))
-                                sender.sendMessage(Component.translatable("command.competition.unregister.failed.self")
+                                sender.sendMessage(Component.translatable("competition.unregister.failed")
                                         .color(NamedTextColor.RED));
                             return;
                         }
@@ -127,7 +129,7 @@ public class CompetitionCommand implements IPluginCommand {
                                     .color(NamedTextColor.GREEN));
                             return;
                         }
-                        sender.sendMessage(Component.translatable("command.competition.unregister.failed.other")
+                        sender.sendMessage(Component.translatable("command.competition.unregister.failed")
                                 .args(Component.text(p.getName())));
                     } else {
                         sender.sendMessage(Component.text("/competition score <player> <new_score>"));
@@ -159,6 +161,46 @@ public class CompetitionCommand implements IPluginCommand {
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN)
                             .args(Component.text(Arrays.toString(el.toArray())).color(NamedTextColor.YELLOW)));
                 }
+                case "load" -> {
+                    FileConfiguration config = PLUGIN.getConfigManager().getCompetitionConfig();
+                    String id = config.getString("event_id");
+                    if (id == null) {
+                        sender.sendMessage(Component.translatable("command.competition.load.failed")
+                                .color(NamedTextColor.RED));
+                        return;
+                    }
+                    if (!Competitions.EVENTS.containsKey(id)) {
+                        sender.sendMessage(Component.translatable("command.competition.load_unknown")
+                                .color(NamedTextColor.RED));
+                        return;
+                    }
+                    IEvent event = Competitions.EVENTS.get(id);
+                    if (event instanceof Savable savable) {
+                        Competitions.setCurrentEvent(event);
+                        savable.load(config);
+                        sender.sendMessage(Component.translatable("command.competition.load.success")
+                                .color(NamedTextColor.GREEN));
+                    }
+                }
+                case "save" -> {
+                    IEvent event = Competitions.getCurrentEvent();
+                    if (event == null || event.getStatus() != Status.STARTED) {
+                        sender.sendMessage(Component.translatable("command.competition.invalid_status")
+                                .color(NamedTextColor.RED));
+                        return;
+                    }
+                    if (!(event instanceof Savable savable)) {
+                        sender.sendMessage(Component.translatable("command.competition.not_savable")
+                                .color(NamedTextColor.RED));
+                        return;
+                    }
+                    FileConfiguration config = PLUGIN.getConfigManager().getCompetitionConfig();
+                    savable.save(config);
+                    config.set("event_id", event.getID());
+                    PLUGIN.getConfigManager().saveCompetitionConfig();
+                    sender.sendMessage(Component.translatable("command.competition.save.success")
+                            .color(NamedTextColor.GREEN));
+                }
                 default -> sender.sendMessage(Component.translatable("command.unknown.argument")
                         .color(NamedTextColor.RED));
             }
@@ -178,6 +220,8 @@ public class CompetitionCommand implements IPluginCommand {
         if (args.length == 1) {
             l.add("start");
             l.add("end");
+            l.add("load");
+            l.add("save");
             l.add("join");
             l.add("leave");
             l.add("score");

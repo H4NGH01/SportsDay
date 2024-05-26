@@ -17,11 +17,11 @@ public class SumoMatch {
     private UUID winner;
     private UUID loser;
 
-    SumoMatch(int number) {
+    protected SumoMatch(int number) {
         this.number = number;
     }
 
-    public void setPlayer(UUID uuid) {
+    protected void setPlayer(UUID uuid) {
         if (isSet())
             return;
         contestants[contestants[0] == null ? 0 : 1] = uuid;
@@ -35,7 +35,7 @@ public class SumoMatch {
         return status == MatchStatus.ENDED;
     }
 
-    public void setResult(UUID defeated) {
+    protected void setResult(UUID defeated) {
         if (isEnd())
             return;
         int i = indexOf(defeated);
@@ -57,7 +57,7 @@ public class SumoMatch {
     }
 
     @MagicConstant(intValues = {-1, 0, 1})
-    public int indexOf(UUID uuid) {
+    private int indexOf(UUID uuid) {
         if (!isSet())
             return -1;
         if (contestants[0].equals(uuid))
@@ -82,7 +82,7 @@ public class SumoMatch {
         return status;
     }
 
-    public void setStatus(MatchStatus status) {
+    protected void setStatus(MatchStatus status) {
         this.status = status;
     }
 

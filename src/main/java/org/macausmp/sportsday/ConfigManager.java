@@ -71,4 +71,12 @@ public final class ConfigManager {
             PLUGIN.getLogger().log(Level.SEVERE, "Could not save the competition.yml file", e);
         }
     }
+
+    public void clearCompetitionConfig() {
+        FileConfiguration config = PLUGIN.getConfigManager().getCompetitionConfig();
+        for (String key : config.getKeys(false)) {
+            config.set(key, null);
+        }
+        PLUGIN.getConfigManager().saveCompetitionConfig();
+    }
 }

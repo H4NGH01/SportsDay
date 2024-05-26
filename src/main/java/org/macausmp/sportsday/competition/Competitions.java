@@ -11,7 +11,6 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.*;
@@ -75,8 +74,8 @@ public final class Competitions {
      * @param id competition id
      * @return {@code True} if competition successfully started
      */
-    public static boolean start(CommandSender sender, String id) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.ENDED) {
+    public static boolean start(@NotNull CommandSender sender, String id) {
+        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.IDLE && getCurrentEvent().getStatus() != Status.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return false;
         }
@@ -144,7 +143,7 @@ public final class Competitions {
         CONTESTANTS.put(uuid, new ContestantData(uuid, number));
         CompetitionConsoleGUI.updateGUI();
         ContestantsListGUI.updateGUI();
-        player.sendMessage(Component.translatable("command.competition.register.success.self")
+        player.sendMessage(Component.translatable("competition.register.success")
                 .args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.CONTESTANTS.addPlayer(player);
         return true;
@@ -165,7 +164,7 @@ public final class Competitions {
             if (getCurrentEvent() != null)
                 getCurrentEvent().onDisqualification(data);
             Objects.requireNonNull(player.getPlayer())
-                    .sendMessage(Component.translatable("command.competition.unregister.success.self"));
+                    .sendMessage(Component.translatable("competition.unregister.success"));
         }
         CONTESTANTS_CONFIG.set(data.getUUID().toString(), null);
         REGISTERED_NUMBER_LIST.remove(data.getNumber());

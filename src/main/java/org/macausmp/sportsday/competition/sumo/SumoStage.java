@@ -11,9 +11,9 @@ public class SumoStage {
     private final Stage stage;
     private final List<SumoMatch> matchList = new ArrayList<>();
     private SumoMatch currentMatch;
-    private int matchIndex = 0;
+    protected int matchIndex = 0;
 
-    public SumoStage(int number, Stage stage) {
+    protected SumoStage(int number, Stage stage) {
         this.number = number;
         this.stage = stage;
     }
@@ -22,7 +22,7 @@ public class SumoStage {
         currentMatch = matchList.get(matchIndex++);
     }
 
-    public SumoMatch newMatch() {
+    protected SumoMatch newMatch() {
         SumoMatch match = new SumoMatch(matchList.size() + 1);
         matchList.add(match);
         return match;

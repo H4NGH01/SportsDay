@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
@@ -64,8 +63,8 @@ public class MenuGUI extends PluginGUI {
     private static @NotNull Book guidebook() {
         Book.Builder builder = Book.builder();
         builder.addPage(Component.translatable("book.guidebook.page_main"));
-        Component b1 = Component.translatable(CompetitionListener.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
-        Component b2 = Component.translatable(CompetitionListener.DEATH.translationKey()).color(NamedTextColor.RED);
+        Component b1 = Component.translatable(AbstractTrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
+        Component b2 = Component.translatable(AbstractTrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
         Component b3 = Component.translatable(AbstractTrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
         builder.addPage(Component.translatable("book.guidebook.page_block").args(b1, b2, b3));
         for (IEvent event : Competitions.EVENTS.values()) {

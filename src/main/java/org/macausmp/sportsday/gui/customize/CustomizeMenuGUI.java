@@ -32,7 +32,7 @@ import java.util.Objects;
 public class CustomizeMenuGUI extends PluginGUI {
     private final Player player;
 
-    public CustomizeMenuGUI(Player player) {
+    public CustomizeMenuGUI(@NotNull Player player) {
         super(45, Component.translatable("gui.customize.title"));
         this.player = player;
         update();
@@ -89,8 +89,6 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack boatType() {
         ItemStack stack = customize(Material.OAK_BOAT, "boat_type");
         Boat.Type type = PlayerCustomize.getBoatType(player);
-        if (type == null)
-            type = Boat.Type.OAK;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
@@ -101,8 +99,6 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack weaponSkin() {
         ItemStack stack = customize(Material.BONE, "weapon_skin");
         Material type = PlayerCustomize.getWeaponSkin(player);
-        if (type == null)
-            type = Material.BLAZE_ROD;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(type);
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));

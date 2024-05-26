@@ -28,10 +28,10 @@ public class RegisterCommand implements IPluginCommand {
                     number = Competitions.genNumber();
                 }
                 if (!Competitions.join(p, number))
-                    sender.sendMessage(Component.translatable("command.competition.register_number_occupied")
+                    sender.sendMessage(Component.translatable("competition.register.failed.number_occupied")
                             .args(Component.text(number)).color(NamedTextColor.RED));
             } else {
-                sender.sendMessage(Component.translatable("command.competition.register.failed.self")
+                sender.sendMessage(Component.translatable("competition.register.failed")
                         .args(p.displayName()).color(NamedTextColor.RED));
             }
         });

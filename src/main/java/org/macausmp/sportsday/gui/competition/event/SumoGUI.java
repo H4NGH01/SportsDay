@@ -127,7 +127,8 @@ public class SumoGUI extends AbstractCompetitionGUI {
                 Component.translatable("gui.competition.sumo.stage.title")
                         .args(stage.getStage() == SumoStage.Stage.ELIMINATE
                                 ? Component.translatable("{0} #" + stage.getNumber()).args(stage.getName())
-                                : stage.getName()));
+                                : stage.getName()),
+                "gui.competition.sumo.stage.lore");
         stack.editMeta(meta -> meta.getPersistentDataContainer().set(STAGE_NUMBER, PersistentDataType.INTEGER, stage.getNumber()));
         if (stage == selectedStage) {
             stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);

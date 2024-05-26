@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.competition.ContestantData;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.ConfirmationGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashSet;
@@ -55,7 +55,7 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
     @ButtonHandler("increase")
     public void increase(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (data.isRemoved()) {
-            p.sendMessage(Component.translatable("command.competition.unregister.failed.other")
+            p.sendMessage(Component.translatable("command.competition.unregister.failed")
                     .args(Component.text(data.getName())).color(NamedTextColor.RED));
             p.closeInventory();
             return;
@@ -68,7 +68,7 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
     @ButtonHandler("decrease")
     public void decrease(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (data.isRemoved()) {
-            p.sendMessage(Component.translatable("command.competition.unregister.failed.other")
+            p.sendMessage(Component.translatable("command.competition.unregister.failed")
                     .args(Component.text(data.getName())).color(NamedTextColor.RED));
             p.closeInventory();
             return;
@@ -83,9 +83,9 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         p.openInventory(new ConfirmationGUI(this, player -> {
             boolean b = Competitions.leave(data.getPlayer());
             player.sendMessage(b
-                    ? Component.translatable("command.competition.unregister.success.other")
+                    ? Component.translatable("command.competition.unregister.success")
                     .args(Component.text(data.getName())).color(NamedTextColor.GREEN)
-                    : Component.translatable("command.competition.unregister.failed.other")
+                    : Component.translatable("command.competition.unregister.failed")
                     .args(Component.text(data.getName())).color(NamedTextColor.RED));
             return b;
         }).getInventory());

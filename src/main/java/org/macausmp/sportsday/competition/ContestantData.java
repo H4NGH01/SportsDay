@@ -1,7 +1,8 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.competition;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.UUID;
 

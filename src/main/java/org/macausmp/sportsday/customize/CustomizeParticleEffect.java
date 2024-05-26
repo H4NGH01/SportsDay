@@ -38,8 +38,8 @@ public enum CustomizeParticleEffect {
         return particle;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getData() {
-        //noinspection unchecked
         return (T) data;
     }
 

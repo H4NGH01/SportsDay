@@ -21,14 +21,11 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.command.CommandManager;
-import org.macausmp.sportsday.competition.AbstractEvent;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.ContestantProfileGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -114,7 +111,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     private void registerListener() {
         getServer().getPluginManager().registerEvents(this, this);
-        getServer().getPluginManager().registerEvents(new CompetitionListener(), this);
+        getServer().getPluginManager().registerEvents(new SportsDayListener(), this);
         Competitions.EVENTS.values().forEach(e -> getServer().getPluginManager().registerEvents(e, this));
     }
 
@@ -132,7 +129,12 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (Competitions.getCurrentEvent() != null) {
+        IEvent event = Competitions.getCurrentEvent();
+        if (event != null) {
+            if (event instanceof Savable savable) {
+                savable.save(configManager.getCompetitionConfig());
+                configManager.saveCompetitionConfig();
+            }
             Competitions.forceEnd(getServer().getConsoleSender());
             getServer().getOnlinePlayers().forEach(p -> {
                 p.getInventory().clear();
@@ -194,8 +196,12 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BOSSBAR.addViewer(p);
-        if (!p.hasPlayedBefore())
+        if (!p.hasPlayedBefore()) {
             SportsDay.AUDIENCES.addPlayer(p);
+            p.getInventory().setItem(0, ItemUtil.MENU);
+            p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+            p.setGameMode(GameMode.ADVENTURE);
+        }
         if (p.getPersistentDataContainer().has(AbstractEvent.IN_GAME)) {
             IEvent curr = Competitions.getCurrentEvent();
             long last = Objects.requireNonNull(p.getPersistentDataContainer().get(AbstractEvent.IN_GAME, PersistentDataType.LONG));

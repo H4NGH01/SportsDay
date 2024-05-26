@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -23,13 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.*;
 
-public class JavelinThrow extends AbstractEvent implements IFieldEvent {
+public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable {
     private final List<ContestantData> queue = new ArrayList<>();
     private final Map<UUID, ScoreResult> resultMap = new HashMap<>();
     private ContestantData currentPlayer = null;
@@ -58,8 +58,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onStart() {
-        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().setItem(0, TRIDENT));
-        onMatchStart();
+        nextMatch();
     }
 
     private static @NotNull ItemStack trident() {
@@ -209,16 +208,11 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onMatchStart() {
-        Bukkit.getOnlinePlayers().forEach(p -> p.setGameMode(GameMode.SPECTATOR));
-        queue.removeIf(d -> !getContestants().contains(d));
-        for (ContestantData d : queue) {
-            currentPlayer = d;
-            if (currentPlayer.isOnline()) {
-                currentPlayer.getPlayer().teleport(getLocation());
-                currentPlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
-                queue.remove(d);
-                return;
-            }
+        if (currentPlayer.isOnline()) {
+            currentPlayer.getPlayer().teleport(getLocation());
+            currentPlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
+            currentPlayer.getPlayer().getInventory().setItem(0, TRIDENT);
+            return;
         }
         if (reconnectTask == null || reconnectTask.isCancelled()) {
             reconnectTask = addRunnable(new BukkitRunnable() {
@@ -258,6 +252,14 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                     Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.next_round_countdown")
                             .args(Component.text(i)).color(NamedTextColor.YELLOW));
                 if (i-- == 0) {
+                    Bukkit.getOnlinePlayers().forEach(p -> p.setGameMode(GameMode.SPECTATOR));
+                    for (ContestantData d : queue) {
+                        currentPlayer = d;
+                        if (currentPlayer.isOnline()) {
+                            queue.remove(d);
+                            break;
+                        }
+                    }
                     onMatchStart();
                     JavelinGUI.updateGUI();
                     cancel();
@@ -274,18 +276,62 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         return resultMap.get(uuid);
     }
 
+    @Override
+    public void load(@NotNull FileConfiguration config) {
+        queue.clear();
+        resultMap.clear();
+        currentPlayer = null;
+        String current = Objects.requireNonNull(config.getString("current_player"));
+        if (!current.equals("null")) {
+            queue.add(Competitions.getContestant(UUID.fromString(current)));
+        }
+        for (String uuid : config.getStringList("queue")) {
+            queue.add(Competitions.getContestant(UUID.fromString(uuid)));
+        }
+        int count = config.getInt("result_count");
+        for (int i = 0; i < count; i++) {
+            UUID uuid = UUID.fromString(Objects.requireNonNull(config.getString("result." + i + ".uuid")));
+            Location loc = Objects.requireNonNull(config.getLocation("result." + i + ".loc"));
+            ScoreResult result = new ScoreResult(uuid, loc);
+            result.arrived = true;
+            result.distance = config.getDouble("result." + i + ".distance");
+            resultMap.put(uuid, result);
+        }
+        start();
+    }
+
+    @Override
+    public void save(@NotNull FileConfiguration config) {
+        config.set("current_player", currentPlayer != null ? currentPlayer.getUUID().toString() : "null");
+        List<String> uuids = queue.stream().map(data -> data.getUUID().toString()).toList();
+        config.set("queue", uuids);
+        config.set("result_count", resultMap.size());
+        int i = 0;
+        for (UUID uuid : resultMap.keySet()) {
+            ScoreResult sr = resultMap.get(uuid);
+            if (!sr.arrived)
+                continue;
+            config.set("result." + i + ".uuid", uuid.toString());
+            config.set("result." + i + ".loc", sr.loc);
+            config.set("result." + i + ".distance", sr.distance);
+            ++i;
+        }
+    }
+
     public static final class ScoreResult implements PlayerHolder, Comparable<ScoreResult> {
         private final UUID uuid;
         private final Location loc;
         private double distance;
+        private boolean arrived = false;
 
-        private ScoreResult(UUID uuid, Location loc) {
+        private ScoreResult(@NotNull UUID uuid, @NotNull Location loc) {
             this.uuid = uuid;
             this.loc = loc;
         }
 
         private void setTridentLocation(@NotNull Trident trident) {
-            this.distance = loc.distance(trident.getLocation());
+            distance = loc.distance(trident.getLocation());
+            arrived = true;
         }
 
         @Override

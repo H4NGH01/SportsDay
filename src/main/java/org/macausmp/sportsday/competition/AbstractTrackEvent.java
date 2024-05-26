@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,12 +15,13 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.ContestantData;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
+    private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
+    public static final @NotNull Material CHECKPOINT = getMaterial("checkpoint_block");
+    public static final @NotNull Material DEATH = getMaterial("death_block");
     public static final @NotNull Material FINISH_LINE = getMaterial("finish_line_block");
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
@@ -88,8 +90,11 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             ContestantData data = Competitions.getContestant(p.getUniqueId());
             if (getLeaderboard().contains(data) || !lapMap.containsKey(data))
                 return;
-            Location loc = p.getLocation().clone();
+            Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
+            spawnpoint(p, loc);
+            if (loc.getBlock().getType() == DEATH)
+                p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 lapMap.put(data, lapMap.get(data) + 1);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
@@ -137,6 +142,9 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         } else if (inPractice(p, this)) {
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
+            spawnpoint(p, loc);
+            if (loc.getBlock().getType() == DEATH)
+                p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 p.teleport(getLocation());
                 p.setBedSpawnLocation(getLocation(), true);
@@ -145,6 +153,18 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             }
         }
+    }
+
+    private void spawnpoint(@NotNull Player player, @NotNull Location loc) {
+        UUID uuid = player.getUniqueId();
+        if (loc.getBlock().getType() == CHECKPOINT && !SPAWNPOINT_SET.contains(uuid)) {
+            SPAWNPOINT_SET.add(uuid);
+            player.setBedSpawnLocation(player.getLocation(), true);
+            player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+            player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
+        }
+        if (loc.getBlock().getType() != CHECKPOINT)
+            SPAWNPOINT_SET.remove(uuid);
     }
 
     @Override
@@ -167,6 +187,6 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     }
 
     public static @NotNull Material getMaterial(@NotNull String path) {
-        return Material.valueOf(PLUGIN.getConfig().getString(path));
+        return Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString(path))));
     }
 }
