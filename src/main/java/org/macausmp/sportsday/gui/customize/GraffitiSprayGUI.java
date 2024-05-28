@@ -63,7 +63,8 @@ public class GraffitiSprayGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack graffiti(@NotNull CustomizeGraffitiSpray graffiti) {
-        ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(), graffiti == selected ? "gui.selected" : "gui.select");
+        ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(),
+                graffiti == selected ? "gui.selected" : "gui.select");
         if (graffiti == selected) {
             stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);

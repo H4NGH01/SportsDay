@@ -1,12 +1,9 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
@@ -18,6 +15,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -47,13 +47,13 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
         queue.clear();
         queue.addAll(getContestants());
         currentPlayer = null;
-        Component c = Component.translatable("event.javelin.order");
+        TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
         for (int i = 0; i < queue.size();) {
             ContestantData data = queue.get(i);
-            c = c.appendNewline().append(Component.translatable("event.javelin.queue")
-                    .args(Component.text(++i), Component.text(data.getName())));
+            builder.appendNewline().append(Component.translatable("event.javelin.queue")
+                    .arguments(Component.text(++i), Component.text(data.getName())));
         }
-        Bukkit.broadcast(c);
+        Bukkit.broadcast(builder.build());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     private static @NotNull ItemStack trident() {
         String display = "item.sportsday.javelin";
         Component lore = Component.translatable("enchantment.sportsday.range")
-                .args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY);
+                .arguments(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY);
         ItemStack trident = ItemUtil.setBind(ItemUtil.item(Material.TRIDENT, null, display, lore));
         trident.editMeta(meta -> {
             meta.setUnbreakable(true);
@@ -82,17 +82,17 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             return;
         List<ScoreResult> results = resultMap.values().stream().sorted().toList();
         getLeaderboard().addAll(results.stream().map(r -> Competitions.getContestant(r.uuid)).toList());
-        Component c = Component.translatable("event.result");
+        TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
         for (int i = 0; i < getLeaderboard().size();) {
             ContestantData d = getLeaderboard().get(i);
             ScoreResult r = results.get(i);
-            c = c.appendNewline().append(Component.translatable("event.javelin.rank")
-                    .args(Component.text(++i), Component.text(d.getName()), Component.text(r.distance)));
+            builder.appendNewline().append(Component.translatable("event.javelin.rank")
+                    .arguments(Component.text(++i), Component.text(d.getName()), Component.text(r.distance)));
             if (i <= 3)
                 d.addScore(4 - i);
             d.addScore(1);
         }
-        Bukkit.broadcast(c);
+        Bukkit.broadcast(builder.build());
     }
 
     @EventHandler
@@ -102,7 +102,8 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 resultMap.put(p.getUniqueId(), new ScoreResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
-                trident.customName(Component.translatable("event.javelin.javelin_name").args(p.displayName(), Component.text()));
+                trident.customName(Component.translatable("event.javelin.javelin_name")
+                        .arguments(p.displayName(), Component.text()));
                 addRunnable(new BukkitRunnable() {
                     private final CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(p);
                     @Override
@@ -129,17 +130,17 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 result.setTridentLocation(trident);
                 if (check(p) && currentPlayer.getUUID().equals(uuid)) {
                     trident.customName(Component.translatable("event.javelin.javelin_name")
-                            .args(p.displayName(), Component.text(result.distance)));
+                            .arguments(p.displayName(), Component.text(result.distance)));
                     getWorld().strikeLightningEffect(trident.getLocation());
                     Bukkit.broadcast(Component.translatable("event.javelin.result")
-                            .args(p.displayName(), Component.text(result.distance)));
+                            .arguments(p.displayName(), Component.text(result.distance)));
                     onMatchEnd();
                 } else {
                     resultMap.remove(uuid);
                     trident.remove();
                     if (p.isOnline())
                         p.sendMessage(Component.translatable("event.javelin.practice_result")
-                                .args(Component.text(result.distance)));
+                                .arguments(Component.text(result.distance)));
                     if (inPractice(p, this))
                         p.getInventory().setItem(0, TRIDENT);
                 }
@@ -178,7 +179,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                     public void run() {
                         if (i > 0)
                             Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected")
-                                    .args(Component.text(i)).color(NamedTextColor.YELLOW));
+                                    .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                         if (i-- == 0) {
                             onMatchEnd();
                             cancel();
@@ -221,7 +222,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 public void run() {
                     if (i > 0)
                         Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected")
-                                .args(Component.text(i)).color(NamedTextColor.YELLOW));
+                                .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                     if (i-- == 0) {
                         queue.remove(currentPlayer);
                         onMatchEnd();
@@ -250,7 +251,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             public void run() {
                 if (i > 0)
                     Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.next_round_countdown")
-                            .args(Component.text(i)).color(NamedTextColor.YELLOW));
+                            .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                 if (i-- == 0) {
                     Bukkit.getOnlinePlayers().forEach(p -> p.setGameMode(GameMode.SPECTATOR));
                     for (ContestantData d : queue) {
@@ -277,52 +278,39 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     }
 
     @Override
-    public void load(@NotNull FileConfiguration config) {
+    public void load(@NotNull PersistentDataContainer data) {
+        init();
         queue.clear();
         resultMap.clear();
         currentPlayer = null;
-        String current = Objects.requireNonNull(config.getString("current_player"));
-        if (!current.equals("null")) {
+        String current = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING));
+        if (!current.equals("null"))
             queue.add(Competitions.getContestant(UUID.fromString(current)));
-        }
-        for (String uuid : config.getStringList("queue")) {
-            queue.add(Competitions.getContestant(UUID.fromString(uuid)));
-        }
-        int count = config.getInt("result_count");
-        for (int i = 0; i < count; i++) {
-            UUID uuid = UUID.fromString(Objects.requireNonNull(config.getString("result." + i + ".uuid")));
-            Location loc = Objects.requireNonNull(config.getLocation("result." + i + ".loc"));
-            ScoreResult result = new ScoreResult(uuid, loc);
-            result.arrived = true;
-            result.distance = config.getDouble("result." + i + ".distance");
-            resultMap.put(uuid, result);
-        }
+        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "queue"),
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
+                .forEach(uuid -> queue.add(Competitions.getContestant(UUID.fromString(uuid))));
+        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "result"),
+                PersistentDataType.LIST.listTypeFrom(new ScoreResultDataType())))
+                .forEach(sr -> resultMap.put(sr.uuid, sr));
         start();
     }
 
     @Override
-    public void save(@NotNull FileConfiguration config) {
-        config.set("current_player", currentPlayer != null ? currentPlayer.getUUID().toString() : "null");
-        List<String> uuids = queue.stream().map(data -> data.getUUID().toString()).toList();
-        config.set("queue", uuids);
-        config.set("result_count", resultMap.size());
-        int i = 0;
-        for (UUID uuid : resultMap.keySet()) {
-            ScoreResult sr = resultMap.get(uuid);
-            if (!sr.arrived)
-                continue;
-            config.set("result." + i + ".uuid", uuid.toString());
-            config.set("result." + i + ".loc", sr.loc);
-            config.set("result." + i + ".distance", sr.distance);
-            ++i;
-        }
+    public void save(@NotNull PersistentDataContainer data) {
+        data.set(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING,
+                currentPlayer != null ? currentPlayer.getUUID().toString() : "null");
+        data.set(new NamespacedKey(PLUGIN, "queue"),
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
+                queue.stream().map(d -> d.getUUID().toString()).toList());
+        data.set(new NamespacedKey(PLUGIN, "result"),
+                PersistentDataType.LIST.listTypeFrom(new ScoreResultDataType()),
+                resultMap.values().stream().filter(ScoreResult::isSet).toList());
     }
 
     public static final class ScoreResult implements PlayerHolder, Comparable<ScoreResult> {
         private final UUID uuid;
         private final Location loc;
-        private double distance;
-        private boolean arrived = false;
+        private double distance = -1;
 
         private ScoreResult(@NotNull UUID uuid, @NotNull Location loc) {
             this.uuid = uuid;
@@ -331,7 +319,6 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
 
         private void setTridentLocation(@NotNull Trident trident) {
             distance = loc.distance(trident.getLocation());
-            arrived = true;
         }
 
         @Override
@@ -343,9 +330,47 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             return distance;
         }
 
+        public boolean isSet() {
+            return distance != -1;
+        }
+
         @Override
         public int compareTo(@NotNull JavelinThrow.ScoreResult o) {
             return Double.compare(o.distance, this.distance);
+        }
+    }
+
+    private final class ScoreResultDataType implements PersistentDataType<PersistentDataContainer, ScoreResult> {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<ScoreResult> getComplexType() {
+            return ScoreResult.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull ScoreResult complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.uuid.toString());
+            pdc.set(new NamespacedKey(PLUGIN, "x"), DOUBLE, complex.loc.x());
+            pdc.set(new NamespacedKey(PLUGIN, "y"), DOUBLE, complex.loc.y());
+            pdc.set(new NamespacedKey(PLUGIN, "z"), DOUBLE, complex.loc.z());
+            pdc.set(new NamespacedKey(PLUGIN, "d"), DOUBLE, complex.distance);
+            return pdc;
+        }
+
+        @Override
+        public @NotNull ScoreResult fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
+            double x = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "x"), DOUBLE));
+            double y = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "y"), DOUBLE));
+            double z = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "z"), DOUBLE));
+            ScoreResult sr = new ScoreResult(uuid, new Location(getWorld(), x, y, z));
+            sr.distance = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "d"), DOUBLE));
+            return sr;
         }
     }
 }

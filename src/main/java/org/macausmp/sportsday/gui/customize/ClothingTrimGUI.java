@@ -16,7 +16,8 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Objects;
 
 public class ClothingTrimGUI extends PluginGUI {
     private final Player player;
@@ -111,6 +112,6 @@ public class ClothingTrimGUI extends PluginGUI {
 
     private @NotNull ItemStack reset() {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
-                .args(Component.translatable("gui.customize.clothing.reset_trim")));
+                .arguments(Component.translatable("gui.customize.clothing.reset_trim")));
     }
 }

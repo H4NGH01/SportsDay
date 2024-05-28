@@ -2,15 +2,24 @@ package org.macausmp.sportsday.competition.sumo;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.util.TextUtil;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SumoMatch {
+    protected static final SportsDay PLUGIN = SportsDay.getInstance();
+    protected static final SumoMatchDataType SUMO_MATCH = new SumoMatchDataType();
     private final int number;
     private final UUID[] contestants = new UUID[2];
     private MatchStatus status = MatchStatus.IDLE;
@@ -46,8 +55,20 @@ public class SumoMatch {
         status = MatchStatus.ENDED;
     }
 
-    public Player[] getPlayers() {
-        return new Player[]{Bukkit.getPlayer(contestants[0]), Bukkit.getPlayer(contestants[1])};
+    public OfflinePlayer getFirstPlayer() {
+        return Bukkit.getOfflinePlayer(contestants[0]);
+    }
+
+    public Component getFirstPlayerName() {
+        return Component.text(Objects.requireNonNull(getFirstPlayer().getName()));
+    }
+
+    public OfflinePlayer getSecondPlayer() {
+        return Bukkit.getOfflinePlayer(contestants[1]);
+    }
+
+    public Component getSecondPlayerName() {
+        return Component.text(Objects.requireNonNull(getSecondPlayer().getName()));
     }
 
     public boolean contain(@NotNull UUID uuid) {
@@ -108,6 +129,47 @@ public class SumoMatch {
 
         public Component getName() {
             return name;
+        }
+    }
+
+    protected static final class SumoMatchDataType implements PersistentDataType<PersistentDataContainer, SumoMatch> {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<SumoMatch> getComplexType() {
+            return SumoMatch.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoMatch complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            boolean set = complex.isSet();
+            pdc.set(new NamespacedKey(PLUGIN, "set"), BOOLEAN, set);
+            if (set) {
+                pdc.set(new NamespacedKey(PLUGIN, "p1"), STRING, complex.contestants[0].toString());
+                pdc.set(new NamespacedKey(PLUGIN, "p2"), STRING, complex.contestants[1].toString());
+            }
+            boolean end = complex.isEnd();
+            pdc.set(new NamespacedKey(PLUGIN, "end"), BOOLEAN, end);
+            if (end)
+                pdc.set(new NamespacedKey(PLUGIN, "loser"), STRING, complex.loser.toString());
+            return pdc;
+        }
+
+        @Override
+        public @NotNull SumoMatch fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            SumoMatch match = new SumoMatch(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER)));
+            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "set"), BOOLEAN))) {
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), STRING))));
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), STRING))));
+            }
+            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "end"), BOOLEAN)))
+                match.setResult(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "loser"), STRING))));
+            return match;
         }
     }
 }

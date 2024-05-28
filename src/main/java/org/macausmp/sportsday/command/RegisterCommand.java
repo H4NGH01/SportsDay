@@ -21,7 +21,7 @@ public class RegisterCommand implements IPluginCommand {
                         }
                     } catch (Exception e) {
                         sender.sendMessage(Component.translatable("parsing.int.invalid")
-                                .args(Component.text(args[0])).color(NamedTextColor.RED));
+                                .arguments(Component.text(args[0])).color(NamedTextColor.RED));
                         return;
                     }
                 } else {
@@ -29,10 +29,10 @@ public class RegisterCommand implements IPluginCommand {
                 }
                 if (!Competitions.join(p, number))
                     sender.sendMessage(Component.translatable("competition.register.failed.number_occupied")
-                            .args(Component.text(number)).color(NamedTextColor.RED));
+                            .arguments(Component.text(number)).color(NamedTextColor.RED));
             } else {
                 sender.sendMessage(Component.translatable("competition.register.failed")
-                        .args(p.displayName()).color(NamedTextColor.RED));
+                        .arguments(p.displayName()).color(NamedTextColor.RED));
             }
         });
     }

@@ -81,6 +81,6 @@ public class ClothingColorGUI extends PluginGUI {
 
     private @NotNull ItemStack reset() {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
-                .args(Component.translatable("gui.customize.clothing.reset_color")));
+                .arguments(Component.translatable("gui.customize.clothing.reset_color")));
     }
 }

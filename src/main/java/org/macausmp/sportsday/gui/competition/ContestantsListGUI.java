@@ -70,20 +70,21 @@ public class ContestantsListGUI extends AbstractCompetitionGUI {
     private @NotNull ItemStack pages() {
         ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
         stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator")
-                .args(Component.text(pageBox.getPage() + 1), Component.text(pageBox.getMaxPage())).decoration(TextDecoration.ITALIC, false)));
+                .arguments(Component.text(pageBox.getPage() + 1), Component.text(pageBox.getMaxPage()))
+                .decoration(TextDecoration.ITALIC, false)));
         return stack;
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
         ContestantData data = Competitions.getContestant(uuid);
         Component online = Component.translatable(data.isOnline() ? "contestant.online" : "contestant.offline");
-        Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").args(online);
-        Component number = Component.translatable("contestant.number")
-                .args(Component.text(data.getNumber())).color(NamedTextColor.YELLOW);
-        Component score = Component.translatable("contestant.score")
-                .args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").arguments(online);
+        Component number = Component.translatable("contestant.number").arguments(Component.text(data.getNumber()))
+                .color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("contestant.score").arguments(Component.text(data.getScore()))
+                .color(NamedTextColor.YELLOW);
         Component detail = Component.translatable("gui.contestant_profile.detail")
-                .args(Component.text(data.getName())).color(NamedTextColor.YELLOW);
+                .arguments(Component.text(data.getName())).color(NamedTextColor.YELLOW);
         ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display,
                 number, score, "", detail);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));

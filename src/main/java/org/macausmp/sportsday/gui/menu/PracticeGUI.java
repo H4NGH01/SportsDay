@@ -55,7 +55,7 @@ public class PracticeGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack practice(@NotNull IEvent event) {
-        ItemStack stack = ItemUtil.item(Material.OAK_DOOR, "practice", Component.translatable("gui.menu.practice").args(event.getName()));
+        ItemStack stack = ItemUtil.item(Material.OAK_DOOR, "practice", Component.translatable("gui.menu.practice").arguments(event.getName()));
         stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }

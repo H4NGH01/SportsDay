@@ -99,10 +99,7 @@ public final class SportsDayListener implements Listener {
         Player p = e.getPlayer();
         if (p.isOp() || p.getGameMode() == GameMode.CREATIVE)
             return;
-        ItemStack item = e.getOffHandItem();
-        if (item == null)
-            return;
-        if (ItemUtil.isBind(item))
+        if (ItemUtil.isBind(e.getOffHandItem()))
             e.setCancelled(true);
     }
 
@@ -131,7 +128,7 @@ public final class SportsDayListener implements Listener {
                 return;
             if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
                 p.sendActionBar(Component.translatable("item.spray.cooldown")
-                        .args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f))
+                        .arguments(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f))
                         .color(NamedTextColor.YELLOW));
                 return;
             }
@@ -145,7 +142,8 @@ public final class SportsDayListener implements Listener {
             Location loc = b.getLocation().add(f.getDirection());
             ItemStack map = new ItemStack(Material.FILLED_MAP);
             map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
-            loc.getWorld().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f), loc.x(), loc.y(), loc.z());
+            loc.getWorld().playSound(Sound.sound(Key.key("minecraft:use_spray"),
+                    Sound.Source.MASTER, 1f, 1f), loc.x(), loc.y(), loc.z());
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -177,7 +175,7 @@ public final class SportsDayListener implements Listener {
             Player p = e.getPlayer();
             if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
                 p.sendActionBar(Component.translatable("item.spray.cooldown")
-                        .args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f))
+                        .arguments(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f))
                         .color(NamedTextColor.YELLOW));
                 return;
             }
@@ -187,7 +185,8 @@ public final class SportsDayListener implements Listener {
             ItemStack map = new ItemStack(Material.FILLED_MAP);
             map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
             Location loc = frame.getLocation();
-            loc.getWorld().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f), loc.x(), loc.y(), loc.z());
+            loc.getWorld().playSound(Sound.sound(Key.key("minecraft:use_spray"),
+                    Sound.Source.MASTER, 1f, 1f), loc.x(), loc.y(), loc.z());
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -266,7 +265,7 @@ public final class SportsDayListener implements Listener {
                     }
                     if (i == 0) {
                         p.damage(5);
-                        p.sendMessage(Component.translatable("item.op_book_easter_egg1").args(e.getItem().displayName()));
+                        p.sendMessage(Component.translatable("item.op_book_easter_egg1").arguments(e.getItem().displayName()));
                     } else if (i == 6) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 2, false, false));
                     } else if (i == 8) {

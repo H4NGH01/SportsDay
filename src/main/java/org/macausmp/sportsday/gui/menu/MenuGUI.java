@@ -66,10 +66,10 @@ public class MenuGUI extends PluginGUI {
         Component b1 = Component.translatable(AbstractTrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
         Component b2 = Component.translatable(AbstractTrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
         Component b3 = Component.translatable(AbstractTrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
-        builder.addPage(Component.translatable("book.guidebook.page_block").args(b1, b2, b3));
+        builder.addPage(Component.translatable("book.guidebook.page_block").arguments(b1, b2, b3));
         for (IEvent event : Competitions.EVENTS.values()) {
             Component rule = Component.translatable("event.rule." + event.getID());
-            builder.addPage(Component.translatable("book.guidebook.page_event").args(event.getName().color(NamedTextColor.BLACK), rule));
+            builder.addPage(Component.translatable("book.guidebook.page_event").arguments(event.getName().color(NamedTextColor.BLACK), rule));
         }
         return builder.build();
     }

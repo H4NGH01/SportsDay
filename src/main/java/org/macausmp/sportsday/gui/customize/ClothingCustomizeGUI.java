@@ -137,6 +137,6 @@ public class ClothingCustomizeGUI extends PluginGUI {
 
     private @NotNull ItemStack reset(String slot) {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
-                .args(Component.translatable(slot)));
+                .arguments(Component.translatable(slot)));
     }
 }
