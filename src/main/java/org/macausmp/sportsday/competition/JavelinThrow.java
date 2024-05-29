@@ -112,7 +112,8 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                             cancel();
                             return;
                         }
-                        p.spawnParticle(effect.getParticle(), trident.getLocation(), 1, 0.3f, 0.3f, 0.3f, effect.getData());
+                        p.spawnParticle(effect.getParticle(), trident.getLocation(),
+                                1, 0.3f, 0.3f, 0.3f, effect.getData());
                     }
                 }.runTaskTimer(PLUGIN, 0, 1L));
             }
@@ -283,22 +284,31 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
         queue.clear();
         resultMap.clear();
         currentPlayer = null;
-        String current = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING));
-        if (!current.equals("null"))
+        if (data.has(new NamespacedKey(PLUGIN, "current_player"))) {
+            String current = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING));
             queue.add(Competitions.getContestant(UUID.fromString(current)));
+        }
         Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "queue"),
                 PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
                 .forEach(uuid -> queue.add(Competitions.getContestant(UUID.fromString(uuid))));
         Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "result"),
                 PersistentDataType.LIST.listTypeFrom(new ScoreResultDataType())))
                 .forEach(sr -> resultMap.put(sr.uuid, sr));
+        TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
+        for (int i = 0; i < queue.size();) {
+            ContestantData d = queue.get(i);
+            builder.appendNewline().append(Component.translatable("event.javelin.queue")
+                    .arguments(Component.text(++i), Component.text(d.getName())));
+        }
+        Bukkit.broadcast(builder.build());
         start();
     }
 
     @Override
     public void save(@NotNull PersistentDataContainer data) {
-        data.set(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING,
-                currentPlayer != null ? currentPlayer.getUUID().toString() : "null");
+        if (currentPlayer != null)
+            data.set(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING,
+                    currentPlayer.getUUID().toString());
         data.set(new NamespacedKey(PLUGIN, "queue"),
                 PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
                 queue.stream().map(d -> d.getUUID().toString()).toList());

@@ -267,7 +267,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
             getLeaderboard().addFirst(Competitions.getContestant(match.getWinner()));
         // If this stage is not over
         if (getSumoStage().hasNextMatch()) {
-            SumoMatch m = getSumoStage().getCurrentMatch();
+            SumoMatch m = getSumoStage().getNextMatch();
             Bukkit.broadcast(Component.translatable("event.sumo.next_queue")
                     .arguments(m.getFirstPlayerName(), m.getSecondPlayerName()));
             nextMatch();
@@ -359,6 +359,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
         stageIndex = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER));
         stages = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "stages"),
                 PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE))).toArray(SumoStage[]::new);
+        TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
+                .arguments(getSumoStage().getName()).toBuilder();
+        for (int i = getSumoStage().getCurrentMatchIndex() + 1, j = 0; i < getSumoStage().getMatchList().size(); i++) {
+            SumoMatch m = getSumoStage().getMatchList().get(i);
+            builder.appendNewline().append(Component.translatable("event.sumo.queue")
+                    .arguments(Component.text(++j), m.getFirstPlayerName(), m.getSecondPlayerName()));
+        }
+        Bukkit.broadcast(builder.build());
+        SumoGUI.updateGUI();
         start();
     }
 

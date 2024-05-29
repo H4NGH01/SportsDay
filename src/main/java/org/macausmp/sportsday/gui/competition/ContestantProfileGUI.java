@@ -47,9 +47,7 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateProfile(UUID uuid) {
-        for (ContestantProfileGUI gui : HANDLER)
-            if (gui.data.getUUID().equals(uuid))
-                gui.update();
+        HANDLER.stream().filter(gui -> gui.data.getUUID().equals(uuid)).forEach(ContestantProfileGUI::update);
     }
 
     @ButtonHandler("increase")

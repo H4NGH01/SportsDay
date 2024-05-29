@@ -14,29 +14,17 @@ import org.macausmp.sportsday.competition.ContestantData;
 import org.macausmp.sportsday.competition.ITrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
-import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class TrackEventGUI extends AbstractCompetitionGUI {
-    private static final Set<TrackEventGUI> HANDLER = new HashSet<>();
-    private final ITrackEvent event;
+public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
     private final PageBox<ContestantData> pageBox;
 
     public TrackEventGUI(@NotNull ITrackEvent event) {
-        super(54, Component.translatable("event.name." + event.getID()));
-        this.event = event;
+        super(54, Component.translatable("event.name." + event.getID()), event);
         this.pageBox = new PageBox<>(this, 18, 54,
                 () -> event.getContestants().stream()
                         .sorted((d1, d2) -> event.getRecord(d1) > 0 && event.getRecord(d2) > 0
                                 ? Float.compare(event.getRecord(d1), event.getRecord(d2)) : 0).toList());
-        for (int i = 0; i < 9; i++)
-            getInventory().setItem(i + 9, BOARD);getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
-        getInventory().setItem(1, CONTESTANTS_LIST);
-        getInventory().setItem(2, COMPETITION_SETTINGS);
-        getInventory().setItem(3, VERSION);
         getInventory().setItem(9, PREVIOUS_PAGE);
         getInventory().setItem(17, NEXT_PAGE);
         update();
@@ -48,10 +36,6 @@ public class TrackEventGUI extends AbstractCompetitionGUI {
             return;
         HANDLER.add(this);
         pageBox.updatePage(this::icon);
-    }
-
-    public static void updateGUI() {
-        HANDLER.forEach(TrackEventGUI::update);
     }
 
     @ButtonHandler("next_page")
@@ -76,10 +60,5 @@ public class TrackEventGUI extends AbstractCompetitionGUI {
                         : Component.translatable("gui.competition.track.second").arguments(Component.text(f))));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 }

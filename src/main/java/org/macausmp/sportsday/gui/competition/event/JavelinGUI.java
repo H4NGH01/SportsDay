@@ -14,29 +14,16 @@ import org.macausmp.sportsday.competition.ContestantData;
 import org.macausmp.sportsday.competition.JavelinThrow;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
-import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class JavelinGUI extends AbstractCompetitionGUI {
-    private static final Set<JavelinGUI> HANDLER = new HashSet<>();
-    private final JavelinThrow event;
+public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
     private final PageBox<ContestantData> pageBox;
 
     public JavelinGUI(@NotNull JavelinThrow event) {
-        super(54, Component.translatable("event.name.javelin_throw"));
-        this.event = event;
+        super(54, Component.translatable("event.name.javelin_throw"), event);
         this.pageBox = new PageBox<>(this, 36, 54, () -> event.getContestants().stream().toList());
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i + 9, BOARD);
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 27, BOARD);
-        }
-        getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
-        getInventory().setItem(1, CONTESTANTS_LIST);
-        getInventory().setItem(2, COMPETITION_SETTINGS);
-        getInventory().setItem(3, VERSION);
         getInventory().setItem(27, PREVIOUS_PAGE);
         getInventory().setItem(35, NEXT_PAGE);
         update();
@@ -50,10 +37,6 @@ public class JavelinGUI extends AbstractCompetitionGUI {
         if (event.getCurrentPlayer() != null)
             getInventory().setItem(18, current());
         pageBox.updatePage(this::icon);
-    }
-
-    public static void updateGUI() {
-        HANDLER.forEach(JavelinGUI::update);
     }
 
     @ButtonHandler("next_page")
@@ -86,10 +69,5 @@ public class JavelinGUI extends AbstractCompetitionGUI {
                         : Component.translatable("gui.competition.javelin.meters").arguments(Component.text(sr.getDistance()))));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 }

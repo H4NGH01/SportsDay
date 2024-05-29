@@ -27,6 +27,30 @@ public class SumoStage {
         this.stage = stage;
     }
 
+    public int getNumber() {
+        return number;
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public List<SumoMatch> getMatchList() {
+        return matchList;
+    }
+
+    public boolean hasNextStage() {
+        return stage != Stage.FINAL;
+    }
+
+    public SumoMatch getCurrentMatch() {
+        return currentMatch;
+    }
+
+    public int getCurrentMatchIndex() {
+        return matchIndex;
+    }
+
     public void nextMatch() {
         currentMatch = matchList.get(++matchIndex);
     }
@@ -37,20 +61,12 @@ public class SumoStage {
         return match;
     }
 
-    public List<SumoMatch> getMatchList() {
-        return matchList;
-    }
-
     public boolean hasNextMatch() {
         return matchIndex + 1 < matchList.size();
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    public Stage getStage() {
-        return stage;
+    public SumoMatch getNextMatch() {
+        return hasNextMatch() ? matchList.get(matchIndex + 1) : null;
     }
 
     public Component getName() {
@@ -59,14 +75,6 @@ public class SumoStage {
 
     public Material getIcon() {
         return stage.icon;
-    }
-
-    public boolean hasNextStage() {
-        return stage != Stage.FINAL;
-    }
-
-    public SumoMatch getCurrentMatch() {
-        return currentMatch;
     }
 
     public enum Stage {
@@ -101,7 +109,8 @@ public class SumoStage {
             PersistentDataContainer pdc = context.newPersistentDataContainer();
             pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
             pdc.set(new NamespacedKey(PLUGIN, "stage"), STRING, complex.stage.name());
-            pdc.set(new NamespacedKey(PLUGIN, "index"), INTEGER, complex.matchIndex);
+            pdc.set(new NamespacedKey(PLUGIN, "index"), INTEGER,
+                    complex.matchIndex - (complex.currentMatch == null || complex.currentMatch.isEnd() ? 0 : 1));
             pdc.set(new NamespacedKey(PLUGIN, "match_list"), LIST.listTypeFrom(SumoMatch.SUMO_MATCH), complex.matchList);
             return pdc;
         }
@@ -114,7 +123,8 @@ public class SumoStage {
             sumoStage.matchList.addAll(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "match_list"),
                     LIST.listTypeFrom(SumoMatch.SUMO_MATCH))));
             sumoStage.matchIndex = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "index"), INTEGER));
-            sumoStage.currentMatch = sumoStage.matchList.get(sumoStage.matchIndex);
+            if (sumoStage.matchIndex != -1)
+                sumoStage.currentMatch = sumoStage.matchList.get(sumoStage.matchIndex);
             return sumoStage;
         }
     }

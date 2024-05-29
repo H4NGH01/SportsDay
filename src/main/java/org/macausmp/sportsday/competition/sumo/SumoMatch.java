@@ -147,12 +147,10 @@ public class SumoMatch {
         public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoMatch complex, @NotNull PersistentDataAdapterContext context) {
             PersistentDataContainer pdc = context.newPersistentDataContainer();
             pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
-            boolean set = complex.isSet();
-            pdc.set(new NamespacedKey(PLUGIN, "set"), BOOLEAN, set);
-            if (set) {
+            if (complex.contestants[0] != null)
                 pdc.set(new NamespacedKey(PLUGIN, "p1"), STRING, complex.contestants[0].toString());
+            if (complex.contestants[1] != null)
                 pdc.set(new NamespacedKey(PLUGIN, "p2"), STRING, complex.contestants[1].toString());
-            }
             boolean end = complex.isEnd();
             pdc.set(new NamespacedKey(PLUGIN, "end"), BOOLEAN, end);
             if (end)
@@ -163,10 +161,10 @@ public class SumoMatch {
         @Override
         public @NotNull SumoMatch fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
             SumoMatch match = new SumoMatch(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER)));
-            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "set"), BOOLEAN))) {
+            if (primitive.has(new NamespacedKey(PLUGIN, "p1")))
                 match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), STRING))));
+            if (primitive.has(new NamespacedKey(PLUGIN, "p2")))
                 match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), STRING))));
-            }
             if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "end"), BOOLEAN)))
                 match.setResult(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "loser"), STRING))));
             return match;

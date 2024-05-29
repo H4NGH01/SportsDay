@@ -19,40 +19,28 @@ import org.macausmp.sportsday.competition.sumo.SumoMatch;
 import org.macausmp.sportsday.competition.sumo.SumoStage;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
-import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
-public class SumoGUI extends AbstractCompetitionGUI {
-    private static final Set<SumoGUI> HANDLER = new HashSet<>();
+public class SumoGUI extends AbstractEventGUI<Sumo> {
     private static final NamespacedKey STAGE_NUMBER = new NamespacedKey(PLUGIN, "stage_number");
     private static final ItemStack NEXT_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page1", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page1", "gui.page.prev");
     private static final ItemStack NEXT_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page2", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page2", "gui.page.prev");
-    private final Sumo event;
     private final PageBox<SumoStage> stagePageBox;
     private SumoStage selectedStage;
     private final PageBox<SumoMatch> matchPageBox;
 
     public SumoGUI(@NotNull Sumo event) {
-        super(54, Component.translatable("event.name.sumo"));
-        this.event = event;
+        super(54, Component.translatable("event.name.sumo"), event);
         this.stagePageBox = new PageBox<>(this, 28, 35, () -> List.of(event.getSumoStages()));
         this.selectedStage = event.getSumoStage();
         this.matchPageBox = new PageBox<>(this, 45, 54, () -> selectedStage.getMatchList());
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i + 9, BOARD);
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 36, BOARD);
-        }
-        getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
-        getInventory().setItem(1, CONTESTANTS_LIST);
-        getInventory().setItem(2, COMPETITION_SETTINGS);
-        getInventory().setItem(3, VERSION);
         getInventory().setItem(27, PREVIOUS_PAGE1);
         getInventory().setItem(35, NEXT_PAGE1);
         getInventory().setItem(36, PREVIOUS_PAGE2);
@@ -69,10 +57,6 @@ public class SumoGUI extends AbstractCompetitionGUI {
             getInventory().setItem(18, currentMatch(event.getSumoStage()));
         stagePageBox.updatePage(this::stage);
         matchPageBox.updatePage(this::match);
-    }
-
-    public static void updateGUI() {
-        HANDLER.forEach(SumoGUI::update);
     }
 
     @ButtonHandler("sumo_stage")
@@ -146,10 +130,5 @@ public class SumoGUI extends AbstractCompetitionGUI {
                         ? Component.translatable("gui.competition.tbd")
                         : Component.translatable("gui.competition.sumo.match.winner")
                         .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 }

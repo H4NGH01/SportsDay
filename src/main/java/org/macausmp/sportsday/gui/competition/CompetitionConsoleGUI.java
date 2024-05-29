@@ -36,6 +36,7 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
             getInventory().setItem(26, END_COMPETITION);
         } else {
             getInventory().setItem(18, START_COMPETITION);
+            getInventory().setItem(19, LOAD_COMPETITION);
         }
         update();
     }
@@ -62,6 +63,17 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
         }
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         p.openInventory(new CompetitionStartGUI().getInventory());
+    }
+
+    @ButtonHandler("load_competitions")
+    public void load(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStatus() != Status.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            return;
+        }
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+        Competitions.loadEventData(p);
     }
 
     @ButtonHandler("end_competition")

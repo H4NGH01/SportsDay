@@ -31,7 +31,7 @@ public class MenuGUI extends PluginGUI {
     }
 
     @ButtonHandler("guidebook")
-    public void openGuideBook(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+    public void guide(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.openBook(GUIDE_BOOK);
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }

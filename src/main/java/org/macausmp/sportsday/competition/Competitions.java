@@ -73,6 +73,10 @@ public final class Competitions {
      * Load event data from the event.dat file and start the event.
      */
     public static void loadEventData(CommandSender sender) {
+        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.IDLE && getCurrentEvent().getStatus() != Status.ENDED) {
+            sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
+            return;
+        }
         EVENT_DATA.read();
         PersistentDataContainer pdc = EVENT_DATA.getPersistentDataContainer();
         String id = pdc.get(new NamespacedKey(PLUGIN, "event_id"), PersistentDataType.STRING);
