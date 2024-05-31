@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.customize.CustomizeMusickit;
+import org.macausmp.sportsday.customize.Musickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
@@ -23,9 +23,9 @@ import java.util.List;
 
 public class MusickitGUI extends PluginGUI {
     private static final NamespacedKey MUSICKIT = new NamespacedKey(PLUGIN, "musickit");
-    private final PageBox<CustomizeMusickit> pageBox = new PageBox<>(this, 10, 54,
-            () -> List.of(CustomizeMusickit.values()));
-    private CustomizeMusickit selected;
+    private final PageBox<Musickit> pageBox = new PageBox<>(this, 10, 54,
+            () -> List.of(Musickit.values()));
+    private Musickit selected;
 
     public MusickitGUI(@NotNull Player player) {
         super(54, Component.translatable("gui.customize.musickit.title"));
@@ -50,7 +50,7 @@ public class MusickitGUI extends PluginGUI {
 
     @ButtonHandler("musickit")
     public void musickit(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        CustomizeMusickit musickit = selected = CustomizeMusickit.values()[e.getSlot() - 10];
+        Musickit musickit = selected = Musickit.values()[e.getSlot() - 10];
         if (e.isRightClick()) {
             p.stopAllSounds();
             p.playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
@@ -68,7 +68,7 @@ public class MusickitGUI extends PluginGUI {
         update();
     }
 
-    private @NotNull ItemStack musickit(@NotNull CustomizeMusickit musickit) {
+    private @NotNull ItemStack musickit(@NotNull Musickit musickit) {
         ItemStack stack = ItemUtil.item(Material.JUKEBOX, "musickit", musickit.getName(), "gui.customize.musickit.view",
                 musickit == selected ? "gui.selected" : "gui.select");
         if (musickit == selected) {

@@ -2,12 +2,14 @@ package org.macausmp.sportsday.customize;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.TextUtil;
 
-public enum CustomizeParticleEffect {
+public enum ParticleEffect {
     GLOW("customize.particle.glow", new ParticleBuilder(Particle.GLOW), Material.GLOWSTONE_DUST),
     ENCHANT("customize.particle.enchant", new ParticleBuilder(Particle.ENCHANTMENT_TABLE), Material.ENCHANTING_TABLE),
     LAVA("customize.particle.lava", new ParticleBuilder(Particle.LAVA), Material.LAVA_BUCKET),
@@ -16,14 +18,15 @@ public enum CustomizeParticleEffect {
     HEART("customize.particle.heart", new ParticleBuilder(Particle.HEART), Material.GOLDEN_APPLE),
     NOTE("customize.particle.note", new ParticleBuilder(Particle.NOTE), Material.NOTE_BLOCK),
     GREEN_STAR("customize.particle.green_star", new ParticleBuilder(Particle.VILLAGER_HAPPY), Material.EMERALD),
-    BLOOD("customize.particle.blood", new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()), Material.REDSTONE);
+    BLOOD("customize.particle.blood", new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()),
+            Material.REDSTONE);
 
     private final Component name;
     private final Particle particle;
     private final Object data;
     private final Material material;
 
-    CustomizeParticleEffect(String code, @NotNull ParticleBuilder builder, Material material) {
+    ParticleEffect(String code, @NotNull ParticleBuilder builder, Material material) {
         this.name = TextUtil.text(Component.translatable(code));
         this.particle = builder.particle();
         this.data = builder.data();
@@ -34,16 +37,11 @@ public enum CustomizeParticleEffect {
         return name;
     }
 
-    public Particle getParticle() {
-        return particle;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getData() {
-        return (T) data;
-    }
-
     public Material getMaterial() {
         return material;
+    }
+
+    public void play(@NotNull Player player, @NotNull Location location) {
+        player.spawnParticle(particle, location, 1, 0.3, 0.3, 0.3, data);
     }
 }

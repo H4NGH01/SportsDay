@@ -172,7 +172,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                                 : Component.translatable("tablist.current").arguments(event.getName(), event.getStatus().getName()));
                         Component count = Component.newline().append(Component.translatable("tablist.contestants_count")
                                 .arguments(Component.text(Competitions.getOnlineContestants().size()),
-                                        Component.text(getServer().getOnlinePlayers().size())));
+                                        Component.text(Competitions.getContestants().size())));
                         return Component.translatable("tablist.title").append(competition).append(count);
                     }
                 }.runTaskTimer(instance, 0L, 20L);
