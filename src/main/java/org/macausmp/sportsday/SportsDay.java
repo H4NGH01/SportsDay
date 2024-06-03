@@ -30,7 +30,8 @@ import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
@@ -137,7 +138,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     private void setTabList() {
-        long d = Math.round(20f - LocalDateTime.now().getNano() / 50000000f);
+        long d = Math.round(20f - Instant.now().getNano() / 50000000f);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -145,7 +147,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                     @Override
                     public void run() {
                         final Component head = getHeader();
-                        final Component time = Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+                        final Component time = Component.text(formatter.format(Instant.now()));
                         for (Player p : getServer().getOnlinePlayers()) {
                             Component header = head;
                             if (Competitions.isContestant(p)) {

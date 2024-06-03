@@ -10,23 +10,23 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.TextUtil;
 
 public enum ParticleEffect {
-    GLOW("customize.particle.glow", new ParticleBuilder(Particle.GLOW), Material.GLOWSTONE_DUST),
-    ENCHANT("customize.particle.enchant", new ParticleBuilder(Particle.ENCHANTMENT_TABLE), Material.ENCHANTING_TABLE),
-    LAVA("customize.particle.lava", new ParticleBuilder(Particle.LAVA), Material.LAVA_BUCKET),
-    WATER("customize.particle.water", new ParticleBuilder(Particle.FALLING_WATER), Material.WATER_BUCKET),
-    CHERRY("customize.particle.cherry", new ParticleBuilder(Particle.CHERRY_LEAVES), Material.CHERRY_LEAVES),
-    HEART("customize.particle.heart", new ParticleBuilder(Particle.HEART), Material.GOLDEN_APPLE),
-    NOTE("customize.particle.note", new ParticleBuilder(Particle.NOTE), Material.NOTE_BLOCK),
-    GREEN_STAR("customize.particle.green_star", new ParticleBuilder(Particle.VILLAGER_HAPPY), Material.EMERALD),
-    BLOOD("customize.particle.blood", new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()),
-            Material.REDSTONE);
+    GLOW("customize.particle.glow", Material.GLOWSTONE_DUST, new ParticleBuilder(Particle.GLOW)),
+    ENCHANT("customize.particle.enchant", Material.ENCHANTING_TABLE, new ParticleBuilder(Particle.ENCHANTMENT_TABLE)),
+    LAVA("customize.particle.lava", Material.LAVA_BUCKET, new ParticleBuilder(Particle.LAVA)),
+    WATER("customize.particle.water", Material.WATER_BUCKET, new ParticleBuilder(Particle.FALLING_WATER)),
+    CHERRY("customize.particle.cherry", Material.CHERRY_LEAVES, new ParticleBuilder(Particle.CHERRY_LEAVES)),
+    HEART("customize.particle.heart", Material.GOLDEN_APPLE, new ParticleBuilder(Particle.HEART)),
+    NOTE("customize.particle.note", Material.NOTE_BLOCK, new ParticleBuilder(Particle.NOTE)),
+    GREEN_STAR("customize.particle.green_star", Material.EMERALD, new ParticleBuilder(Particle.VILLAGER_HAPPY)),
+    BLOOD("customize.particle.blood", Material.REDSTONE,
+            new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()));
 
     private final Component name;
     private final Particle particle;
     private final Object data;
     private final Material material;
 
-    ParticleEffect(String code, @NotNull ParticleBuilder builder, Material material) {
+    ParticleEffect(String code, Material material, @NotNull ParticleBuilder builder) {
         this.name = TextUtil.text(Component.translatable(code));
         this.particle = builder.particle();
         this.data = builder.data();

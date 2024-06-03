@@ -8,7 +8,6 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.*;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -37,7 +36,8 @@ public abstract class AbstractEvent implements IEvent {
     private long time;
     private final Collection<ContestantData> contestants = new HashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
-    private final Map<UUID, PersistentDataContainer> contestantToMusickit = new HashMap<>();
+    private VictoryDance victoryDance;
+    private Musickit mvpAnthem;
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
     public AbstractEvent(String id) {
@@ -153,7 +153,6 @@ public abstract class AbstractEvent implements IEvent {
             p.getInventory().setItem(4, ItemUtil.SPRAY);
             p.setRespawnLocation(location, true);
             p.teleport(location);
-            contestantToMusickit.put(data.getUUID(), p.getPersistentDataContainer());
         });
     }
 
@@ -173,41 +172,39 @@ public abstract class AbstractEvent implements IEvent {
         EVENT_TASKS.forEach(BukkitTask::cancel);
         if (!force) {
             Competitions.clearEventData();
+            if (!leaderboard.isEmpty()) {
+                addRunnable(new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        OfflinePlayer mvp = leaderboard.getFirst().getOfflinePlayer();
+                        if (!mvp.isOnline())
+                            return;
+                        Player p = Objects.requireNonNull(mvp.getPlayer());
+                        victoryDance = PlayerCustomize.getVictoryDance(p);
+                        if (victoryDance != null)
+                            victoryDance.play(p);
+                        mvpAnthem = PlayerCustomize.getMusickit(mvp.getPlayer());
+                        if (mvpAnthem != null) {
+                            Bukkit.getServer().playSound(Sound.sound(mvpAnthem.getKey(), Sound.Source.MASTER, 1f, 1f));
+                            Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
+                                    .arguments(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW),
+                                            mvpAnthem.getName()));
+                        }
+                    }
+                }.runTaskLater(PLUGIN, 40L));
+            }
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
                     end();
                 }
             }.runTaskLater(PLUGIN, 200L));
-            if (!getLeaderboard().isEmpty()) {
-                OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
-                PersistentDataContainer pdc = contestantToMusickit.get(mvp.getUniqueId());
-                if (pdc == null) {
-                    if (mvp.isOnline())
-                        pdc = Objects.requireNonNull(mvp.getPlayer()).getPersistentDataContainer();
-                }
-                if (pdc != null) {
-                    Musickit musickit = PlayerCustomize.getMusickit(pdc);
-                    if (musickit != null) {
-                        Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                        Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
-                                .arguments(Component.text(Objects.requireNonNull(mvp.getName()))
-                                        .color(NamedTextColor.YELLOW), musickit.getName()));
-                    }
-                }
-                if (mvp.isOnline()) {
-                    Player p = Objects.requireNonNull(mvp.getPlayer());
-                    VictoryDance victoryDance = PlayerCustomize.getVictoryDance(p);
-                    if (victoryDance != null)
-                        victoryDance.play(p);
-                }
-            }
         } else {
             end();
         }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.end.broadcast"));
-        PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end")
-                .arguments(name));
+        PLUGIN.getComponentLogger()
+                .info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").arguments(name));
     }
 
     private void end() {
@@ -216,8 +213,11 @@ public abstract class AbstractEvent implements IEvent {
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
         contestants.clear();
+        if (!leaderboard.isEmpty() && victoryDance != null)
+            victoryDance.stop(leaderboard.getFirst().getOfflinePlayer().getUniqueId());
+        victoryDance = null;
+        mvpAnthem = null;
         leaderboard.clear();
-        contestantToMusickit.clear();
         Competitions.setCurrentEvent(null);
         setStatus(Status.IDLE);
         Bukkit.getOnlinePlayers().forEach(p -> {
@@ -257,7 +257,7 @@ public abstract class AbstractEvent implements IEvent {
     @Override
     public void onDisqualification(@NotNull ContestantData contestant) {
         contestants.remove(contestant);
-        getLeaderboard().remove(contestant);
+        leaderboard.remove(contestant);
         Player p = contestant.getPlayer();
         if (p.isInsideVehicle())
             Objects.requireNonNull(p.getVehicle()).remove();

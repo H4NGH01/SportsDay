@@ -196,8 +196,8 @@ public final class PlayerCustomize {
         set(player.getPersistentDataContainer(), GRAFFITI_SPRAY, graffiti != null ? graffiti.name() : null);
     }
 
-    public static @Nullable Musickit getMusickit(@NotNull PersistentDataContainer pdc) {
-        return get(pdc, MUSICKIT, Musickit::valueOf);
+    public static @Nullable Musickit getMusickit(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), MUSICKIT, Musickit::valueOf);
     }
 
     public static void setMusickit(@NotNull Player player, Musickit musickit) {

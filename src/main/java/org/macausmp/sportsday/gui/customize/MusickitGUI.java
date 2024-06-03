@@ -29,7 +29,7 @@ public class MusickitGUI extends PluginGUI {
 
     public MusickitGUI(@NotNull Player player) {
         super(54, Component.translatable("gui.customize.musickit.title"));
-        selected = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
+        selected = PlayerCustomize.getMusickit(player);
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(8, BACK);
