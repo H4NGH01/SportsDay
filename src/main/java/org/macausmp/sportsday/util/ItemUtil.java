@@ -31,6 +31,10 @@ public final class ItemUtil {
     public static final ItemStack SPRAY = setBind(item(Material.DRAGON_BREATH, "graffiti_spray", "item.spray", "item.spray_lore1", "item.spray_lore2", "item.spray_lore3"));
     public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";
     public static final String PAUSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc3YWFlMWEyNmI5NTI0OTNhNzM3MWMzMGFkOGM0OTFmMTJiNTc0Y2M5NGE0MWIyZjkxYTM3M2NhNjhmOTA5OCJ9fX0=";
+    public static final String PLUS = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkZDIwYmU5MzUyMDk0OWU2Y2U3ODlkYzRmNDNlZmFlYjI4YzcxN2VlNmJmY2JiZTAyNzgwMTQyZjcxNiJ9fX0=";
+    public static final String MINUS = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ4YTk5ZGIyYzM3ZWM3MWQ3MTk5Y2Q1MjYzOTk4MWE3NTEzY2U5Y2NhOTYyNmEzOTM2Zjk2NWIxMzExOTMifX19";
+    public static final String ONE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzFiYzJiY2ZiMmJkMzc1OWU2YjFlODZmYzdhNzk1ODVlMTEyN2RkMzU3ZmMyMDI4OTNmOWRlMjQxYmM5ZTUzMCJ9fX0=";
+    public static final String TWO = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNkOWVlZWU4ODM0Njg4ODFkODM4NDhhNDZiZjMwMTI0ODVjMjNmNzU3NTNiOGZiZTg0ODczNDE0MTk4NDcifX19";
 
     public static @NotNull ItemStack item(@NotNull ItemStack stack, String id, Object display, Object... lore) {
         ItemStack clone = stack.clone();
@@ -61,7 +65,7 @@ public final class ItemUtil {
         return clone;
     }
 
-    public static @NotNull ItemStack item(Material material, String id, Object display, Object... lore) {
+    public static @NotNull ItemStack item(@NotNull Material material, String id, Object display, Object... lore) {
         return item(new ItemStack(material), id, display, lore);
     }
 
@@ -80,6 +84,12 @@ public final class ItemUtil {
     public static @NotNull ItemStack setGlint(@NotNull ItemStack stack) {
         ItemStack s = stack.clone();
         s.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
+        return s;
+    }
+
+    public static @NotNull ItemStack hideTooltip(@NotNull ItemStack stack) {
+        ItemStack s = stack.clone();
+        s.editMeta(meta -> meta.setHideTooltip(true));
         return s;
     }
 

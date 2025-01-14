@@ -9,8 +9,9 @@ import java.util.Set;
 public final class CommandManager {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final Set<PluginCommand> COMMANDS = new HashSet<>();
-    private static final PluginCommand COMPETITION = new CompetitionCommand();
-    private static final PluginCommand COMPETITIONGUI = new CompetitionGUICommand();
+    private static final PluginCommand EVENT = new SportingEventCommand();
+    private static final PluginCommand ADMIN_MENU = new SGBCommand();
+    private static final PluginCommand CONTESTANT = new ContestantCommand();
     private static final PluginCommand REGISTER = new RegisterCommand();
     private static final PluginCommand UNREGISTER = new UnregisterCommand();
     private static final PluginCommand MENU = new MenuCommand();
@@ -18,8 +19,9 @@ public final class CommandManager {
     private static final PluginCommand PING = new PingCommand();
 
     public void register() {
-        COMMANDS.add(COMPETITION);
-        COMMANDS.add(COMPETITIONGUI);
+        COMMANDS.add(EVENT);
+        COMMANDS.add(ADMIN_MENU);
+        COMMANDS.add(CONTESTANT);
         COMMANDS.add(REGISTER);
         COMMANDS.add(UNREGISTER);
         COMMANDS.add(MENU);

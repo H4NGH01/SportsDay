@@ -15,17 +15,21 @@ Macau SMP SportsDay papermc plugin
 > Unpause the current event
 > * `terminate`
 > Terminate the current event
+> * `info`
+> Display current status information list
+* `/competitiongui`
+> Open competition GUI
+> * `book`
+* `/contestant`
+> Contestant management command
 > * `join <player> <number>`
 > Register new contestant
 > * `leave | leave <player>`
 > Unregister contestant
 > * `score <player> <new_score>`
 > Modify contestant's score
-> * `info`
-> Display current status information list
-* `/competitiongui`
-> Open competition GUI
-> * `book`
+> * `list`
+> Show a list of all registered contestants
 * `/register`
 > Register as a contestant
 > * `<number>`
