@@ -18,7 +18,38 @@ import java.util.UUID;
 
 public class Venue implements ComponentLike {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
-    public static final VenueDataType VENUE_DATA_TYPE = new VenueDataType();
+    public static final PersistentDataType<PersistentDataContainer, Venue> VENUE_DATA_TYPE = new PersistentDataType<>() {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<Venue> getComplexType() {
+            return Venue.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull Venue complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer container = context.newPersistentDataContainer();
+            container.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.getUUID().toString());
+            container.set(new NamespacedKey(PLUGIN, "name"), STRING, complex.name);
+            container.set(new NamespacedKey(PLUGIN, "item"), STRING, complex.item.name());
+            container.set(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE, complex.location);
+            return container;
+        }
+
+        @Override
+        public @NotNull Venue fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
+            String name = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "name"), STRING));
+            Material item = Material.getMaterial(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), STRING)));
+            Location location = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE));
+            Venue venue = new Venue(VenueType.VENUE, uuid, name, location);
+            venue.item = item;
+            return venue;
+        }
+    };
 
     private final VenueType<? extends Venue> type;
     private final UUID uuid;
@@ -69,40 +100,5 @@ public class Venue implements ComponentLike {
 
     public void setLocation(@NotNull Location location) {
         this.location = location;
-    }
-
-    public static class VenueDataType implements PersistentDataType<PersistentDataContainer, Venue> {
-        private VenueDataType() {}
-
-        @Override
-        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
-            return PersistentDataContainer.class;
-        }
-
-        @Override
-        public @NotNull Class<Venue> getComplexType() {
-            return Venue.class;
-        }
-
-        @Override
-        public @NotNull PersistentDataContainer toPrimitive(@NotNull Venue complex, @NotNull PersistentDataAdapterContext context) {
-            PersistentDataContainer container = context.newPersistentDataContainer();
-            container.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.getUUID().toString());
-            container.set(new NamespacedKey(PLUGIN, "name"), STRING, complex.name);
-            container.set(new NamespacedKey(PLUGIN, "item"), STRING, complex.item.name());
-            container.set(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE, complex.location);
-            return container;
-        }
-
-        @Override
-        public @NotNull Venue fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
-            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
-            String name = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "name"), STRING));
-            Material item = Material.getMaterial(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), STRING)));
-            Location location = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE));
-            Venue venue = new Venue(VenueType.VENUE, uuid, name, location);
-            venue.item = item;
-            return venue;
-        }
     }
 }

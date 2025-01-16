@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.gui.venue;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -8,6 +9,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PermissionRequired;
@@ -56,9 +58,9 @@ public class TrackPointSettingsGUI extends PluginGUI {
         BoundingBox bb = trackPoint.getBoundingBox();
         return ItemUtil.item(Material.SPAWNER, "bb",
                 Component.translatable("gui.venue_settings.track_point.bounding_box"),
-                Component.translatable("gui.venue_settings.track_point.bounding_box.lore1")
-                        .arguments(Component.text(bb.getMinX() + ", " + bb.getMinY() + ", " + bb.getMinZ()).appendNewline()
-                                .append(Component.text(bb.getMaxX() + ", " + bb.getMaxY() + ", " + bb.getMaxZ()))),
+                Component.translatable("gui.venue_settings.track_point.bounding_box.lore1"),
+                Component.text(bb.getMinX() + ", " + bb.getMinY() + ", " + bb.getMinZ()).color(NamedTextColor.GRAY),
+                Component.text(bb.getMaxX() + ", " + bb.getMaxY() + ", " + bb.getMaxZ()).color(NamedTextColor.GRAY),
                 Component.translatable("gui.venue_settings.track_point.bounding_box.lore2"),
                 Component.translatable("gui.venue_settings.track_point.bounding_box.lore3"));
     }
@@ -75,12 +77,11 @@ public class TrackPointSettingsGUI extends PluginGUI {
         ClickType type = e.getClick();
         if (!type.isLeftClick() && !type.isRightClick())
             return;
-        Location loc = p.getLocation();
-        BoundingBox bb = trackPoint.getBoundingBox();
+        Vector vec = p.getLocation().toVector();
         if (type.isLeftClick()) {
-            bb.resize(bb.getMinX(), bb.getMinY(), bb.getMinX(), loc.x(), loc.y(), loc.z());
+            trackPoint.setBoundingBoxCorner1(vec);
         } else {
-            bb.resize(loc.x(), loc.y(), loc.z(), bb.getMaxX(), bb.getMaxY(), bb.getMaxZ());
+            trackPoint.setBoundingBoxCorner2(vec);
         }
         updateTrackPoint(trackPoint);
         p.playSound(UI_BUTTON_CLICK_SOUND);

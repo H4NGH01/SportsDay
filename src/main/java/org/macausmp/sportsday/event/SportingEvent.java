@@ -63,7 +63,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         if (!SportsDay.isContestant(p))
             return false;
         ContestantData data = SportsDay.getContestant(p.getUniqueId());
-        return getContestants().contains(data) && !getLeaderboard().contains(data);
+        return getContestants().contains(data) && !getLeaderboard().contains(data) && status != EventStatus.ENDED;
     };
     private VictoryDance victoryDance = null;
     private Musickit mvpAnthem = null;
@@ -86,7 +86,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
      * @param data where the data will be written
      */
     public void save(@NotNull PersistentDataContainer data) {
-        data.set(new NamespacedKey(PLUGIN, "sports"), KeyDataType.KEY_DATA_TYPE, sport.getKey());
+        data.set(new NamespacedKey(PLUGIN, "sport"), KeyDataType.KEY_DATA_TYPE, sport.getKey());
         data.set(new NamespacedKey(PLUGIN, "venue"), PersistentDataType.STRING, getVenue().getUUID().toString());
         data.set(new NamespacedKey(PLUGIN, "contestants"),
                 PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
@@ -254,14 +254,17 @@ public abstract class SportingEvent implements ComponentLike, Listener {
      * End the event.
      */
     protected void end() {
-        if (status == EventStatus.CLOSED)
+        if (status == EventStatus.ENDED)
             return;
         onEnd();
-        status = EventStatus.CLOSED;
+        status = EventStatus.ENDED;
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.end"));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.end").arguments(this));
-        if (leaderboard.isEmpty())
+        onClose();
+        if (leaderboard.isEmpty()) {
+            close();
             return;
+        }
         OfflinePlayer mvp = leaderboard.getFirst().getOfflinePlayer();
         addTask(new BukkitRunnable() {
             @Override
@@ -285,7 +288,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
             public void run() {
                 if (victoryDance != null)
                     victoryDance.stop(mvp.getUniqueId());
-                cleanup();
+                close();
             }
         }.runTaskLater(PLUGIN, 200L));
     }
@@ -324,14 +327,18 @@ public abstract class SportingEvent implements ComponentLike, Listener {
     public void terminate(@NotNull CommandSender sender) {
         if (status == EventStatus.CLOSED)
             return;
-        status = EventStatus.CLOSED;
-        cleanup();
+        close();
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.terminate"));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.terminate").arguments(this));
         sender.sendMessage(Component.translatable("command.competition.terminate.success").color(NamedTextColor.YELLOW));
     }
 
-    protected void cleanup() {
+    protected void close() {
+        if (status == EventStatus.CLOSED)
+            return;
+        if (status != EventStatus.ENDED)
+            onClose();
+        status = EventStatus.CLOSED;
         getVenue().getLocation().getWorld().getEntitiesByClass(ItemFrame.class).stream()
                 .filter(e -> e.getPersistentDataContainer().has(GRAFFITI))
                 .forEach(ItemFrame::remove);
@@ -365,6 +372,13 @@ public abstract class SportingEvent implements ComponentLike, Listener {
      * @see #end()
      */
     protected abstract void onEnd();
+
+    /**
+     * Called when the event closed.
+     *
+     * @see #close()
+     */
+    protected void onClose() {}
 
     /**
      * <p>Add a {@link BukkitTask} to event.

@@ -37,6 +37,39 @@ import org.macausmp.sportsday.venue.Venue;
 import java.util.*;
 
 public class JavelinThrowEvent extends SportingEvent {
+    private static final PersistentDataType<PersistentDataContainer, ScoreResult> SCORE_RESULT_DATA_TYPE = new PersistentDataType<>() {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<ScoreResult> getComplexType() {
+            return ScoreResult.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull ScoreResult complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.uuid.toString());
+            pdc.set(new NamespacedKey(PLUGIN, "x"), DOUBLE, complex.loc.getX());
+            pdc.set(new NamespacedKey(PLUGIN, "y"), DOUBLE, complex.loc.getY());
+            pdc.set(new NamespacedKey(PLUGIN, "z"), DOUBLE, complex.loc.getZ());
+            pdc.set(new NamespacedKey(PLUGIN, "d"), DOUBLE, complex.distance);
+            return pdc;
+        }
+
+        @Override
+        public @NotNull ScoreResult fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
+            double x = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "x"), DOUBLE));
+            double y = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "y"), DOUBLE));
+            double z = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "z"), DOUBLE));
+            ScoreResult sr = new ScoreResult(uuid, new Vector(x, y, z));
+            sr.distance = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "d"), DOUBLE));
+            return sr;
+        }
+    };
     private static final ItemStack TRIDENT = trident();
 
     private static @NotNull ItemStack trident() {
@@ -55,7 +88,6 @@ public class JavelinThrowEvent extends SportingEvent {
     private final Map<UUID, ScoreResult> resultMap = new HashMap<>();
     private ContestantData currentContestant = null;
     private BukkitTask reconnectTask;
-    private static final ScoreResultDataType SCORE_RESULT_DATA_TYPE = new ScoreResultDataType();
 
     public JavelinThrowEvent(@NotNull Sport sport, @NotNull Venue venue, @Nullable PersistentDataContainer save) {
         super(sport, venue, save);
@@ -97,7 +129,7 @@ public class JavelinThrowEvent extends SportingEvent {
                         PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
                 .forEach(uuid -> queue.add(SportsDay.getContestant(UUID.fromString(uuid))));
         Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "result"),
-                        PersistentDataType.LIST.listTypeFrom(new ScoreResultDataType())))
+                        PersistentDataType.LIST.listTypeFrom(SCORE_RESULT_DATA_TYPE)))
                 .forEach(sr -> resultMap.put(sr.uuid, sr));
         TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
         for (int i = 0; i < queue.size();) {
@@ -122,13 +154,6 @@ public class JavelinThrowEvent extends SportingEvent {
     }
 
     @Override
-    protected void cleanup() {
-        SportsDay.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().remove(Material.TRIDENT));
-        getVenue().getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
-        super.cleanup();
-    }
-
-    @Override
     protected void onStart() {
         nextContestant();
     }
@@ -148,6 +173,12 @@ public class JavelinThrowEvent extends SportingEvent {
             d.addScore(1);
         }
         Bukkit.broadcast(builder.build());
+    }
+
+    @Override
+    protected void onClose() {
+        SportsDay.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().remove(Material.TRIDENT));
+        getVenue().getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
     }
 
     @Override
@@ -344,40 +375,6 @@ public class JavelinThrowEvent extends SportingEvent {
         @Override
         public int compareTo(@NotNull ScoreResult o) {
             return Double.compare(o.distance, this.distance);
-        }
-    }
-
-    private static final class ScoreResultDataType implements PersistentDataType<PersistentDataContainer, ScoreResult> {
-        @Override
-        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
-            return PersistentDataContainer.class;
-        }
-
-        @Override
-        public @NotNull Class<ScoreResult> getComplexType() {
-            return ScoreResult.class;
-        }
-
-        @Override
-        public @NotNull PersistentDataContainer toPrimitive(@NotNull ScoreResult complex, @NotNull PersistentDataAdapterContext context) {
-            PersistentDataContainer pdc = context.newPersistentDataContainer();
-            pdc.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.uuid.toString());
-            pdc.set(new NamespacedKey(PLUGIN, "x"), DOUBLE, complex.loc.getX());
-            pdc.set(new NamespacedKey(PLUGIN, "y"), DOUBLE, complex.loc.getY());
-            pdc.set(new NamespacedKey(PLUGIN, "z"), DOUBLE, complex.loc.getZ());
-            pdc.set(new NamespacedKey(PLUGIN, "d"), DOUBLE, complex.distance);
-            return pdc;
-        }
-
-        @Override
-        public @NotNull ScoreResult fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
-            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
-            double x = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "x"), DOUBLE));
-            double y = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "y"), DOUBLE));
-            double z = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "z"), DOUBLE));
-            ScoreResult sr = new ScoreResult(uuid, new Vector(x, y, z));
-            sr.distance = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "d"), DOUBLE));
-            return sr;
         }
     }
 }

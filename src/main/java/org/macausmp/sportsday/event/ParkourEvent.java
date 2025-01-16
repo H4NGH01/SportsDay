@@ -32,8 +32,7 @@ public class ParkourEvent extends TrackEvent {
     }
 
     @Override
-    protected void onEnd() {
-        super.onEnd();
+    protected void onClose() {
         getContestants().forEach(d -> d.getPlayer().clearActivePotionEffects());
     }
 

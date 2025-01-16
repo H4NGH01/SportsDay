@@ -7,9 +7,10 @@ import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.BoundingBoxDataType;
 import org.macausmp.sportsday.util.LocationDataType;
+import org.macausmp.sportsday.util.VectorDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,33 +18,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Track extends Venue {
-    public static final TrackDataType TRACK_DATA_TYPE = new TrackDataType();
-    private static final TrackPointDataType TRACK_POINT_DATA_TYPE = new TrackPointDataType();
-    private TrackPoint start;
-    private TrackPoint end;
-    private final List<TrackPoint> checkpoints = new ArrayList<>();
-
-    public Track(@NotNull VenueType<? extends Track> type, @NotNull UUID uuid, @NotNull String name, @NotNull Location location) {
-        super(type, uuid, name, location);
-        this.start = new TrackPoint(location, new BoundingBox());
-        this.end = new TrackPoint(location, new BoundingBox());
-    }
-
-    public TrackPoint getStartPoint() {
-        return start;
-    }
-
-    public TrackPoint getEndPoint() {
-        return end;
-    }
-
-    public List<TrackPoint> getCheckPoints() {
-        return checkpoints;
-    }
-
-    public static class TrackDataType implements PersistentDataType<PersistentDataContainer, Track> {
-        private TrackDataType() {}
-
+    public static final PersistentDataType<PersistentDataContainer, Track> TRACK_DATA_TYPE = new PersistentDataType<>() {
         @Override
         public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
             return PersistentDataContainer.class;
@@ -80,9 +55,9 @@ public class Track extends Venue {
             track.checkpoints.addAll(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "checkpoints"), LIST.listTypeFrom(TRACK_POINT_DATA_TYPE))));
             return track;
         }
-    }
+    };
 
-    private static class TrackPointDataType implements PersistentDataType<PersistentDataContainer, TrackPoint> {
+    private static final PersistentDataType<PersistentDataContainer, TrackPoint> TRACK_POINT_DATA_TYPE = new PersistentDataType<>() {
         @Override
         public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
             return PersistentDataContainer.class;
@@ -97,15 +72,39 @@ public class Track extends Venue {
         public @NotNull PersistentDataContainer toPrimitive(@NotNull TrackPoint complex, @NotNull PersistentDataAdapterContext context) {
             PersistentDataContainer container = context.newPersistentDataContainer();
             container.set(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE, complex.getLocation());
-            container.set(new NamespacedKey(PLUGIN, "boundingBox"), BoundingBoxDataType.BOUNDING_BOX_DATA_TYPE, complex.getBoundingBox());
+            container.set(new NamespacedKey(PLUGIN, "corner1"), VectorDataType.VECTOR_DATA_TYPE, complex.getBoundingBox().getMin());
+            container.set(new NamespacedKey(PLUGIN, "corner2"), VectorDataType.VECTOR_DATA_TYPE, complex.getBoundingBox().getMax());
             return container;
         }
 
         @Override
         public @NotNull TrackPoint fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
             Location location = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE));
-            BoundingBox boundingBox = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "boundingBox"), BoundingBoxDataType.BOUNDING_BOX_DATA_TYPE));
-            return new TrackPoint(location, boundingBox);
+            Vector corner1 = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "corner1"), VectorDataType.VECTOR_DATA_TYPE));
+            Vector corner2 = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "corner2"), VectorDataType.VECTOR_DATA_TYPE));
+            return new TrackPoint(location, BoundingBox.of(corner1, corner2));
         }
+    };
+
+    private TrackPoint start;
+    private TrackPoint end;
+    private final List<TrackPoint> checkpoints = new ArrayList<>();
+
+    public Track(@NotNull VenueType<? extends Track> type, @NotNull UUID uuid, @NotNull String name, @NotNull Location location) {
+        super(type, uuid, name, location);
+        this.start = new TrackPoint(location, new BoundingBox());
+        this.end = new TrackPoint(location, new BoundingBox());
+    }
+
+    public TrackPoint getStartPoint() {
+        return start;
+    }
+
+    public TrackPoint getEndPoint() {
+        return end;
+    }
+
+    public List<TrackPoint> getCheckPoints() {
+        return checkpoints;
     }
 }

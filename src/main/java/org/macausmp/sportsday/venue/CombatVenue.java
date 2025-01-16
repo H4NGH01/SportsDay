@@ -13,35 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class CombatVenue extends Venue {
-    public static final CombatVenueDataType COMBAT_VENUE_DATA_TYPE = new CombatVenueDataType();
-    private Location p1;
-    private Location p2;
-
-    public CombatVenue(@NotNull VenueType<? extends CombatVenue> type, @NotNull UUID uuid, @NotNull String name, @NotNull Location location) {
-        super(type, uuid, name, location);
-        this.p1 = location;
-        this.p2 = location;
-    }
-
-    public Location getP1Location() {
-        return p1;
-    }
-
-    public void setP1Location(@NotNull Location p1) {
-        this.p1 = p1;
-    }
-
-    public Location getP2Location() {
-        return p2;
-    }
-
-    public void setP2Location(@NotNull Location p2) {
-        this.p2 = p2;
-    }
-
-    public static class CombatVenueDataType implements PersistentDataType<PersistentDataContainer, CombatVenue> {
-        private CombatVenueDataType() {}
-
+    public static final PersistentDataType<PersistentDataContainer, CombatVenue> COMBAT_VENUE_DATA_TYPE = new PersistentDataType<>() {
         @Override
         public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
             return PersistentDataContainer.class;
@@ -76,5 +48,30 @@ public class CombatVenue extends Venue {
             combatVenue.p2 = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), LocationDataType.LOCATION_DATA_TYPE));
             return combatVenue;
         }
+    };
+
+    private Location p1;
+    private Location p2;
+
+    public CombatVenue(@NotNull VenueType<? extends CombatVenue> type, @NotNull UUID uuid, @NotNull String name, @NotNull Location location) {
+        super(type, uuid, name, location);
+        this.p1 = location;
+        this.p2 = location;
+    }
+
+    public Location getP1Location() {
+        return p1;
+    }
+
+    public void setP1Location(@NotNull Location p1) {
+        this.p1 = p1;
+    }
+
+    public Location getP2Location() {
+        return p2;
+    }
+
+    public void setP2Location(@NotNull Location p2) {
+        this.p2 = p2;
     }
 }

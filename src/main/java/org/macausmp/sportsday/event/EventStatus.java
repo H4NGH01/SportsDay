@@ -12,6 +12,7 @@ public enum EventStatus implements ComponentLike {
     UPCOMING("event.status.upcoming"),
     PROCESSING("event.status.processing"),
     PAUSED("event.status.paused"),
+    ENDED("event.status.ended"),
     CLOSED("event.status.closed");
 
     private final Component name;

@@ -16,7 +16,10 @@ import org.macausmp.sportsday.sport.Sport;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.venue.Venue;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public abstract class SportsTrainingHandler implements Listener {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();

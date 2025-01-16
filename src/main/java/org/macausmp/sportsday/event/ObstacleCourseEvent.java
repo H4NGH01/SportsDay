@@ -23,8 +23,7 @@ public class ObstacleCourseEvent extends TrackEvent {
     }
 
     @Override
-    protected void onEnd() {
-        super.onEnd();
+    protected void onClose() {
         SportsDay.CONTESTANTS.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
     }
 

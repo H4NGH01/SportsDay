@@ -26,28 +26,21 @@ import java.util.Objects;
 @PermissionRequired
 public class PlayersListGUI extends PluginGUI {
     private final Scoreboard scoreboard = PLUGIN.getServer().getScoreboardManager().getMainScoreboard();
-    private final Filter<OfflinePlayer> roleFilter = new Filter<>(new String[]{
-            "gui.players_list.filter.all",
-            "gui.players_list.filter.contestants",
-            "gui.players_list.filter.referees",
-            "gui.players_list.filter.audiences"
-    }, (player, count) -> {
-        switch (count) {
-            case 0 -> {
-                return true;
+    private final Filter<OfflinePlayer> roleFilter = new Filter<>(
+            new String[]{
+                    "gui.players_list.filter.all",
+                    "gui.players_list.filter.contestants",
+                    "gui.players_list.filter.referees",
+                    "gui.players_list.filter.audiences"
+            },
+            (player, count) -> switch (count) {
+                case 0 -> true;
+                case 1 -> SportsDay.CONTESTANTS.hasPlayer(player);
+                case 2 -> SportsDay.REFEREES.hasPlayer(player);
+                case 3 -> SportsDay.AUDIENCES.hasPlayer(player);
+                default -> false;
             }
-            case 1 -> {
-                return SportsDay.CONTESTANTS.hasPlayer(player);
-            }
-            case 2 -> {
-                return SportsDay.REFEREES.hasPlayer(player);
-            }
-            case 3 -> {
-                return SportsDay.AUDIENCES.hasPlayer(player);
-            }
-        }
-        return false;
-    });
+    );
     private final PageBox<OfflinePlayer> pageBox = new PageBox<>(this, 0, 45,
             () -> Arrays.stream(PLUGIN.getServer().getOfflinePlayers()).toList(), roleFilter);
 

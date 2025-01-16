@@ -106,6 +106,16 @@ public abstract class TrackEvent extends SportingEvent {
     }
 
     @Override
+    public boolean pause(@NotNull CommandSender sender) {
+        if (getStatus() == EventStatus.UPCOMING) {
+            return super.pause(sender);
+        } else {
+            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+    }
+
+    @Override
     protected void onStart() {
         PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSports().getSetting(Sport.TrackSettings.START_COMMAND));
         addTask(new BukkitRunnable() {
@@ -129,16 +139,6 @@ public abstract class TrackEvent extends SportingEvent {
             data.addScore(1);
         }
         Bukkit.broadcast(builder.build());
-    }
-
-    @Override
-    public boolean pause(@NotNull CommandSender sender) {
-        if (getStatus() == EventStatus.UPCOMING) {
-            return super.pause(sender);
-        } else {
-            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
-            return false;
-        }
     }
 
     @Override

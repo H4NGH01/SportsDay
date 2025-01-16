@@ -31,14 +31,7 @@ public class IceBoatRacingEvent extends TrackEvent {
     }
 
     @Override
-    protected void cleanup() {
-        boatMap.values().forEach(Boat::remove);
-        super.cleanup();
-    }
-
-    @Override
-    protected void onEnd() {
-        super.onEnd();
+    protected void onClose() {
         boatMap.values().forEach(Boat::remove);
     }
 

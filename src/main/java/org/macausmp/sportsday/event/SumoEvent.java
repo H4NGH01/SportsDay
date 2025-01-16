@@ -36,14 +36,87 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class SumoEvent extends SportingEvent {
+    private static final PersistentDataType<PersistentDataContainer, SumoMatch> SUMO_MATCH_DATA_TYPE = new PersistentDataType<>() {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<SumoMatch> getComplexType() {
+            return SumoMatch.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoMatch complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            if (complex.contestants[0] != null)
+                pdc.set(new NamespacedKey(PLUGIN, "p1"), STRING, complex.contestants[0].toString());
+            if (complex.contestants[1] != null)
+                pdc.set(new NamespacedKey(PLUGIN, "p2"), STRING, complex.contestants[1].toString());
+            boolean end = complex.isEnd();
+            pdc.set(new NamespacedKey(PLUGIN, "end"), BOOLEAN, end);
+            if (end)
+                pdc.set(new NamespacedKey(PLUGIN, "loser"), STRING, complex.loser.toString());
+            return pdc;
+        }
+
+        @Override
+        public @NotNull SumoMatch fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            SumoMatch match = new SumoMatch(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER)));
+            if (primitive.has(new NamespacedKey(PLUGIN, "p1")))
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), STRING))));
+            if (primitive.has(new NamespacedKey(PLUGIN, "p2")))
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), STRING))));
+            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "end"), BOOLEAN)))
+                match.setResult(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "loser"), STRING))));
+            return match;
+        }
+    };
+
+    private static final PersistentDataType<PersistentDataContainer, SumoStage> SUMO_STAGE_DATA_TYPE = new PersistentDataType<>() {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<SumoStage> getComplexType() {
+            return SumoStage.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoStage complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            pdc.set(new NamespacedKey(PLUGIN, "stage"), STRING, complex.stage.name());
+            pdc.set(new NamespacedKey(PLUGIN, "index"), INTEGER,
+                    complex.matchIndex - (complex.currentMatch == null || complex.currentMatch.isEnd() ? 0 : 1));
+            pdc.set(new NamespacedKey(PLUGIN, "match_list"), LIST.listTypeFrom(SUMO_MATCH_DATA_TYPE), complex.matchList);
+            return pdc;
+        }
+
+        @Override
+        public @NotNull SumoStage fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            int number = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER));
+            SumoStage.Stage stage = SumoStage.Stage.valueOf(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "stage"), STRING)));
+            SumoStage sumoStage = new SumoStage(number, stage);
+            sumoStage.matchList.addAll(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "match_list"),
+                    LIST.listTypeFrom(SUMO_MATCH_DATA_TYPE))));
+            sumoStage.matchIndex = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "index"), INTEGER));
+            if (sumoStage.matchIndex != -1)
+                sumoStage.currentMatch = sumoStage.matchList.get(sumoStage.matchIndex);
+            return sumoStage;
+        }
+    };
+
     private final boolean weapon;
     private final int weaponTime;
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
     private int stageIndex = 0;
-    private static final SumoMatchDataType SUMO_MATCH_DATA_TYPE = new SumoMatchDataType();
-    private static final SumoStageDataType SUMO_STAGE_DATA_TYPE = new SumoStageDataType();
 
     public SumoEvent(@NotNull Sport sport, @NotNull CombatVenue venue, @Nullable PersistentDataContainer save) {
         super(sport, venue, save);
@@ -75,6 +148,19 @@ public class SumoEvent extends SportingEvent {
             this.weapon = Boolean.TRUE.equals(save.get(new NamespacedKey(PLUGIN, "weapon"), PersistentDataType.BOOLEAN));
             this.weaponTime = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "weapon_time"), PersistentDataType.INTEGER));
         }
+    }
+
+    @Override
+    public void save(@NotNull PersistentDataContainer data) {
+        super.save(data);
+        data.set(new NamespacedKey(PLUGIN, "weapon"), PersistentDataType.BOOLEAN, weapon);
+        data.set(new NamespacedKey(PLUGIN, "weapon_time"), PersistentDataType.INTEGER, weaponTime);
+        data.set(new NamespacedKey(PLUGIN, "alive"),
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
+                alive.stream().map(d -> d.getUUID().toString()).toList());
+        data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
+        data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SUMO_STAGE_DATA_TYPE),
+                Arrays.stream(stages).toList());
     }
 
     @Override
@@ -401,19 +487,6 @@ public class SumoEvent extends SportingEvent {
         }
     }
 
-    @Override
-    public void save(@NotNull PersistentDataContainer data) {
-        super.save(data);
-        data.set(new NamespacedKey(PLUGIN, "weapon"), PersistentDataType.BOOLEAN, weapon);
-        data.set(new NamespacedKey(PLUGIN, "weapon_time"), PersistentDataType.INTEGER, weaponTime);
-        data.set(new NamespacedKey(PLUGIN, "alive"),
-                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
-                alive.stream().map(d -> d.getUUID().toString()).toList());
-        data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
-        data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SUMO_STAGE_DATA_TYPE),
-                Arrays.stream(stages).toList());
-    }
-
     public static class SumoMatch {
         private final int number;
         private final UUID[] contestants = new UUID[2];
@@ -606,81 +679,6 @@ public class SumoEvent extends SportingEvent {
                 this.name = name;
                 this.icon = icon;
             }
-        }
-    }
-
-    private static final class SumoMatchDataType implements PersistentDataType<PersistentDataContainer, SumoMatch> {
-        @Override
-        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
-            return PersistentDataContainer.class;
-        }
-
-        @Override
-        public @NotNull Class<SumoMatch> getComplexType() {
-            return SumoMatch.class;
-        }
-
-        @Override
-        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoMatch complex, @NotNull PersistentDataAdapterContext context) {
-            PersistentDataContainer pdc = context.newPersistentDataContainer();
-            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
-            if (complex.contestants[0] != null)
-                pdc.set(new NamespacedKey(PLUGIN, "p1"), STRING, complex.contestants[0].toString());
-            if (complex.contestants[1] != null)
-                pdc.set(new NamespacedKey(PLUGIN, "p2"), STRING, complex.contestants[1].toString());
-            boolean end = complex.isEnd();
-            pdc.set(new NamespacedKey(PLUGIN, "end"), BOOLEAN, end);
-            if (end)
-                pdc.set(new NamespacedKey(PLUGIN, "loser"), STRING, complex.loser.toString());
-            return pdc;
-        }
-
-        @Override
-        public @NotNull SumoMatch fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
-            SumoMatch match = new SumoMatch(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER)));
-            if (primitive.has(new NamespacedKey(PLUGIN, "p1")))
-                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), STRING))));
-            if (primitive.has(new NamespacedKey(PLUGIN, "p2")))
-                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), STRING))));
-            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "end"), BOOLEAN)))
-                match.setResult(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "loser"), STRING))));
-            return match;
-        }
-    }
-
-    private static final class SumoStageDataType implements PersistentDataType<PersistentDataContainer, SumoStage> {
-        @Override
-        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
-            return PersistentDataContainer.class;
-        }
-
-        @Override
-        public @NotNull Class<SumoStage> getComplexType() {
-            return SumoStage.class;
-        }
-
-        @Override
-        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoStage complex, @NotNull PersistentDataAdapterContext context) {
-            PersistentDataContainer pdc = context.newPersistentDataContainer();
-            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
-            pdc.set(new NamespacedKey(PLUGIN, "stage"), STRING, complex.stage.name());
-            pdc.set(new NamespacedKey(PLUGIN, "index"), INTEGER,
-                    complex.matchIndex - (complex.currentMatch == null || complex.currentMatch.isEnd() ? 0 : 1));
-            pdc.set(new NamespacedKey(PLUGIN, "match_list"), LIST.listTypeFrom(SUMO_MATCH_DATA_TYPE), complex.matchList);
-            return pdc;
-        }
-
-        @Override
-        public @NotNull SumoStage fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
-            int number = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER));
-            SumoStage.Stage stage = SumoStage.Stage.valueOf(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "stage"), STRING)));
-            SumoStage sumoStage = new SumoStage(number, stage);
-            sumoStage.matchList.addAll(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "match_list"),
-                    LIST.listTypeFrom(SUMO_MATCH_DATA_TYPE))));
-            sumoStage.matchIndex = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "index"), INTEGER));
-            if (sumoStage.matchIndex != -1)
-                sumoStage.currentMatch = sumoStage.matchList.get(sumoStage.matchIndex);
-            return sumoStage;
         }
     }
 }

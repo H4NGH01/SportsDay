@@ -52,6 +52,75 @@ public final class PlayerCustomize {
         registry.forEach(pattern -> TRIM_PATTERN.put(Objects.requireNonNull(registry.getKey(pattern)).getKey().toUpperCase(), pattern));
     }
 
+    public static class Cloth {
+        public static final String NONE = "none";
+        private Material material;
+        private String trimMaterial = NONE;
+        private String trimPattern = NONE;
+        private Color color = Bukkit.getItemFactory().getDefaultLeatherColor();
+
+        private Cloth() {}
+
+        public Material getMaterial() {
+            return material;
+        }
+
+        public String getTrimMaterial() {
+            return trimMaterial;
+        }
+
+        public String getTrimPattern() {
+            return trimPattern;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+
+        public boolean colorable() {
+            return material != null && Bukkit.getItemFactory().getItemMeta(material) instanceof ColorableArmorMeta;
+        }
+    }
+
+    public static final PersistentDataType<PersistentDataContainer, Cloth> CLOTH_DATA_TYPE = new PersistentDataType<>() {
+        private static final NamespacedKey MATERIAL = new NamespacedKey(PLUGIN, "material");
+        private static final NamespacedKey TRIM_MATERIAL = new NamespacedKey(PLUGIN, "trim-material");
+        private static final NamespacedKey TRIM_PATTERN = new NamespacedKey(PLUGIN, "trim-pattern");
+        private static final NamespacedKey COLOR = new NamespacedKey(PLUGIN, "color");
+
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<Cloth> getComplexType() {
+            return Cloth.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull Cloth complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer container = context.newPersistentDataContainer();
+            container.set(MATERIAL, PersistentDataType.STRING, complex.material.name());
+            container.set(TRIM_MATERIAL, PersistentDataType.STRING, complex.trimMaterial);
+            container.set(TRIM_PATTERN, PersistentDataType.STRING, complex.trimPattern);
+            container.set(COLOR, PersistentDataType.INTEGER, complex.color.asARGB());
+            return container;
+        }
+
+        @Override
+        public @NotNull Cloth fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            Cloth cloth = new Cloth();
+            cloth.material = Material.getMaterial(Objects.requireNonNull(primitive.get(MATERIAL, PersistentDataType.STRING)));
+            cloth.trimMaterial = primitive.get(TRIM_MATERIAL, PersistentDataType.STRING);
+            cloth.trimPattern = primitive.get(TRIM_PATTERN, PersistentDataType.STRING);
+            Integer color = primitive.get(COLOR, PersistentDataType.INTEGER);
+            if (color != null)
+                cloth.color = Color.fromARGB(color);
+            return cloth;
+        }
+    };
+
     public static @Unmodifiable @NotNull List<Material> getTrimMaterial() {
         return List.copyOf(TRIM_MATERIAL.keySet());
     }
@@ -78,7 +147,7 @@ public final class PlayerCustomize {
         if (!player.getPersistentDataContainer().has(CLOTHING, PersistentDataType.TAG_CONTAINER))
             return null;
         PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(CLOTHING, PersistentDataType.TAG_CONTAINER));
-        return container.get(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE);
+        return container.get(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), CLOTH_DATA_TYPE);
     }
 
     public static @NotNull ItemStack getClothItemStack(@NotNull Cloth cloth) {
@@ -108,7 +177,7 @@ public final class PlayerCustomize {
         if (original == null)
             original = new Cloth();
         original.material = type;
-        container.set(new NamespacedKey(PLUGIN, type.getEquipmentSlot().name().toLowerCase()), ClothDataType.INSTANCE, original);
+        container.set(new NamespacedKey(PLUGIN, type.getEquipmentSlot().name().toLowerCase()), CLOTH_DATA_TYPE, original);
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
@@ -122,7 +191,7 @@ public final class PlayerCustomize {
         PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(CLOTHING, PersistentDataType.TAG_CONTAINER));
         Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
         cloth.color = color != null ? color : Bukkit.getItemFactory().getDefaultLeatherColor();
-        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), CLOTH_DATA_TYPE, cloth);
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
@@ -130,7 +199,7 @@ public final class PlayerCustomize {
         PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(CLOTHING, PersistentDataType.TAG_CONTAINER));
         Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
         cloth.trimMaterial = type.name();
-        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), CLOTH_DATA_TYPE, cloth);
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
@@ -138,7 +207,7 @@ public final class PlayerCustomize {
         PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(CLOTHING, PersistentDataType.TAG_CONTAINER));
         Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
         cloth.trimPattern = type.name().substring(0, type.name().length() - 29);
-        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), CLOTH_DATA_TYPE, cloth);
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
@@ -147,7 +216,7 @@ public final class PlayerCustomize {
         Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
         cloth.trimMaterial = PlayerCustomize.Cloth.NONE;
         cloth.trimPattern = PlayerCustomize.Cloth.NONE;
-        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), CLOTH_DATA_TYPE, cloth);
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
@@ -224,75 +293,5 @@ public final class PlayerCustomize {
             pdc.set(key, PersistentDataType.STRING, value);
         else
             pdc.remove(key);
-    }
-
-    public static class Cloth {
-        public static final String NONE = "none";
-        private Material material;
-        private String trimMaterial = NONE;
-        private String trimPattern = NONE;
-        private Color color = Bukkit.getItemFactory().getDefaultLeatherColor();
-
-        private Cloth() {}
-
-        public Material getMaterial() {
-            return material;
-        }
-
-        public String getTrimMaterial() {
-            return trimMaterial;
-        }
-
-        public String getTrimPattern() {
-            return trimPattern;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-
-        public boolean colorable() {
-            return material != null && Bukkit.getItemFactory().getItemMeta(material) instanceof ColorableArmorMeta;
-        }
-    }
-
-    private static class ClothDataType implements PersistentDataType<PersistentDataContainer, Cloth> {
-        private static final ClothDataType INSTANCE = new ClothDataType();
-        private static final NamespacedKey MATERIAL = new NamespacedKey(PLUGIN, "material");
-        private static final NamespacedKey TRIM_MATERIAL = new NamespacedKey(PLUGIN, "trim-material");
-        private static final NamespacedKey TRIM_PATTERN = new NamespacedKey(PLUGIN, "trim-pattern");
-        private static final NamespacedKey COLOR = new NamespacedKey(PLUGIN, "color");
-
-        @Override
-        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
-            return PersistentDataContainer.class;
-        }
-
-        @Override
-        public @NotNull Class<Cloth> getComplexType() {
-            return Cloth.class;
-        }
-
-        @Override
-        public @NotNull PersistentDataContainer toPrimitive(@NotNull Cloth complex, @NotNull PersistentDataAdapterContext context) {
-            PersistentDataContainer container = context.newPersistentDataContainer();
-            container.set(MATERIAL, PersistentDataType.STRING, complex.material.name());
-            container.set(TRIM_MATERIAL, PersistentDataType.STRING, complex.trimMaterial);
-            container.set(TRIM_PATTERN, PersistentDataType.STRING, complex.trimPattern);
-            container.set(COLOR, PersistentDataType.INTEGER, complex.color.asARGB());
-            return container;
-        }
-
-        @Override
-        public @NotNull Cloth fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
-            Cloth cloth = new Cloth();
-            cloth.material = Material.getMaterial(Objects.requireNonNull(primitive.get(MATERIAL, PersistentDataType.STRING)));
-            cloth.trimMaterial = primitive.get(TRIM_MATERIAL, PersistentDataType.STRING);
-            cloth.trimPattern = primitive.get(TRIM_PATTERN, PersistentDataType.STRING);
-            Integer color = primitive.get(COLOR, PersistentDataType.INTEGER);
-            if (color != null)
-                cloth.color = Color.fromARGB(color);
-            return cloth;
-        }
     }
 }
