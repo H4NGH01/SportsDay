@@ -62,9 +62,7 @@ public class EventLoadGUI extends PluginGUI {
     public void save(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         PersistentDataContainer data = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer()
                 .get(new NamespacedKey(PLUGIN, "data"), PersistentDataType.TAG_CONTAINER));
-        Sport sport = SportsRegistry.SPORT.get(Objects.requireNonNull(data
-                .get(new NamespacedKey(PLUGIN, "sport"), KeyDataType.KEY_DATA_TYPE)));
-        Objects.requireNonNull(sport).loadEvent(data);
+        SportsDay.loadEvent(p, data);
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 

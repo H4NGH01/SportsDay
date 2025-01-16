@@ -20,6 +20,7 @@ import org.macausmp.sportsday.gui.setting.TrackSportSettingsGUI;
 import org.macausmp.sportsday.training.*;
 import org.macausmp.sportsday.util.TextUtil;
 import org.macausmp.sportsday.venue.Venue;
+import org.macausmp.sportsday.venue.VenueType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -29,17 +30,17 @@ import java.util.function.Function;
  */
 public class Sport implements Keyed, ComponentLike {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    public static final Sport ELYTRA_RACING = register("elytra_racing", SportType.AIR_SPORT,
+    public static final Sport ELYTRA_RACING = register("elytra_racing", SportType.AIR_SPORT, VenueType.TRACK,
             ElytraRacingEvent::new, TrackSportSettingsGUI::new, ElytraRacingHandler::new);
-    public static final Sport ICE_BOAT_RACING = register("ice_boat_racing", SportType.MOTO_SPORT,
+    public static final Sport ICE_BOAT_RACING = register("ice_boat_racing", SportType.MOTO_SPORT, VenueType.TRACK,
             IceBoatRacingEvent::new, TrackSportSettingsGUI::new, IceBoatRacingHandler::new);
-    public static final Sport JAVELIN_THROW = register("javelin_throw", SportType.ATHLETICS,
+    public static final Sport JAVELIN_THROW = register("javelin_throw", SportType.ATHLETICS, VenueType.VENUE,
             JavelinThrowEvent::new, SportSettingsGUI::new, JavelinThrowHandler::new);
-    public static final Sport OBSTACLE_COURSE = register("obstacle_course", SportType.PARKOUR,
+    public static final Sport OBSTACLE_COURSE = register("obstacle_course", SportType.PARKOUR, VenueType.TRACK,
             ObstacleCourseEvent::new, TrackSportSettingsGUI::new, ObstacleCourseHandler::new);
-    public static final Sport PARKOUR = register("parkour", SportType.PARKOUR,
+    public static final Sport PARKOUR = register("parkour", SportType.PARKOUR, VenueType.TRACK,
             ParkourEvent::new, TrackSportSettingsGUI::new, ParkourHandler::new);
-    public static final Sport SUMO = register("sumo", SportType.COMBAT,
+    public static final Sport SUMO = register("sumo", SportType.COMBAT, VenueType.COMBAT_VENUE,
             SumoEvent::new, CombatSettingsGUI::new, SumoHandler::new);
 
     /**
@@ -55,10 +56,11 @@ public class Sport implements Keyed, ComponentLike {
     private static <V extends Venue> @NotNull Sport register(
             @NotNull String id,
             @NotNull SportType sportType,
+            @NotNull VenueType<?> venueType,
             @NotNull EventFactory<V, ?> eventFactory,
             @NotNull Function<Sport, SportSettingsGUI> settingsGUIFunction,
             @NotNull Function<Sport, SportsTrainingHandler> trainingHandler) {
-        Sport sport = new Sport(id, sportType, eventFactory, settingsGUIFunction, trainingHandler);
+        Sport sport = new Sport(id, sportType, venueType, eventFactory, settingsGUIFunction, trainingHandler);
         SportsRegistry.SPORT.add(new NamespacedKey(PLUGIN, id), sport);
         return sport;
     }
@@ -81,6 +83,7 @@ public class Sport implements Keyed, ComponentLike {
     }
 
     private final SportType sportType;
+    private final VenueType<?> venueType;
     private final EventFactory<?, ?> eventFactory;
     private final Component name;
     private final Material displayItem;
@@ -91,10 +94,12 @@ public class Sport implements Keyed, ComponentLike {
 
     <V extends Venue> Sport(@NotNull String id,
                             @NotNull SportType sportType,
+                            @NotNull VenueType<?> venueType,
                             @NotNull EventFactory<V, ?> eventFactory,
                             @NotNull Function<Sport, SportSettingsGUI> settingsGUIFunction,
                             @NotNull Function<Sport, SportsTrainingHandler> trainingHandler) {
         this.sportType = sportType;
+        this.venueType = venueType;
         this.name = TextUtil.convert(Component.translatable("sport.name." + id));
         String item = PLUGIN.getConfig().getString(id + ".item");
         this.displayItem = item != null ? Material.getMaterial(item) : Material.YELLOW_STAINED_GLASS_PANE;
@@ -185,7 +190,7 @@ public class Sport implements Keyed, ComponentLike {
         if (name != null && venues.values().stream().anyMatch(v -> v.getName().equals(name))) {
             return null;
         }
-        Venue venue = sportType.getVenueType().create(name, location);
+        Venue venue = venueType.create(name, location);
         venues.put(venue.getUUID(), venue);
         return venue;
     }
@@ -198,13 +203,13 @@ public class Sport implements Keyed, ComponentLike {
     public <V extends Venue> void saveVenues(@NotNull PersistentDataContainer container) {
         ListPersistentDataType<PersistentDataContainer, V> dataType =
                 (ListPersistentDataType<PersistentDataContainer, V>)
-                        PersistentDataType.LIST.listTypeFrom(sportType.getVenueType().getVenueDataType());
+                        PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType());
         container.set(getKey(), dataType, (List<V>) getVenues());
     }
 
     public void loadVenues(@NotNull PersistentDataContainer container) {
         List<? extends Venue> list = container.get(getKey(),
-                PersistentDataType.LIST.listTypeFrom(sportType.getVenueType().getVenueDataType()));
+                PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType()));
         if (list == null)
             return;
         list.forEach(v -> venues.put(v.getUUID(), v));
@@ -240,8 +245,8 @@ public class Sport implements Keyed, ComponentLike {
      */
     @SuppressWarnings("unchecked")
     public <V extends Venue, T extends SportingEvent> T loadEvent(@NotNull PersistentDataContainer save) {
-        Venue venue = save.get(new NamespacedKey(PLUGIN, "venue"), sportType.getVenueType().getVenueDataType());
-        return ((EventFactory<V, T>) eventFactory).create(this, (V) Objects.requireNonNull(venue), save);
+        UUID uuid = UUID.fromString(Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "venue"), PersistentDataType.STRING)));
+        return ((EventFactory<V, T>) eventFactory).create(this, (V) Objects.requireNonNull(venues.get(uuid)), save);
     }
 
     @FunctionalInterface

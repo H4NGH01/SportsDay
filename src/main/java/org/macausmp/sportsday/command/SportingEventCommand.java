@@ -50,7 +50,7 @@ public class SportingEventCommand extends PluginCommand {
                 }
             }
             case "save" -> SportsDay.saveEvent(sender);
-            case "load" -> SportsDay.loadEvent(sender);
+            case "load" -> SportsDay.loadEvent(sender, null);
             case "pause" -> SportsDay.pause(sender);
             case "unpause" -> SportsDay.unpause(sender);
             case "terminate" -> SportsDay.terminate(sender);

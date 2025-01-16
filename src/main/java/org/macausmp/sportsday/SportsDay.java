@@ -262,21 +262,23 @@ public final class SportsDay extends JavaPlugin implements Listener {
     /**
      * Load last event data from the events.dat file and start the event.
      */
-    public static void loadEvent(@NotNull CommandSender sender) {
+    public static void loadEvent(@NotNull CommandSender sender, @Nullable PersistentDataContainer save) {
         if (CURRENT_EVENT != null) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return;
         }
-        EVENTS_DATA.read();
-        PersistentDataContainer pdc = EVENTS_DATA.getPersistentDataContainer();
-        Optional<NamespacedKey> first = pdc.getKeys().stream().findFirst();
-        if (first.isEmpty()) {
-            sender.sendMessage(Component.translatable("command.competition.load.failed").color(NamedTextColor.RED));
-            return;
+        if (save == null) {
+            EVENTS_DATA.read();
+            PersistentDataContainer pdc = EVENTS_DATA.getPersistentDataContainer();
+            Optional<NamespacedKey> first = pdc.getKeys().stream().findFirst();
+            if (first.isEmpty()) {
+                sender.sendMessage(Component.translatable("command.competition.load.failed").color(NamedTextColor.RED));
+                return;
+            }
+            save = Objects.requireNonNull(pdc.get(first.get(), PersistentDataType.TAG_CONTAINER));
         }
-        PersistentDataContainer save = Objects.requireNonNull(pdc.get(first.get(), PersistentDataType.TAG_CONTAINER));
         Sport sport = SportsRegistry.SPORT.get(Objects.requireNonNull(save
-                .get(new NamespacedKey(SportsDay.getInstance(), "sports"), KeyDataType.KEY_DATA_TYPE)));
+                .get(new NamespacedKey(SportsDay.getInstance(), "sport"), KeyDataType.KEY_DATA_TYPE)));
         if (sport == null) {
             sender.sendMessage(Component.translatable("command.competition.load_unknown").color(NamedTextColor.RED));
             return;
@@ -288,6 +290,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     public static @NotNull List<PersistentDataContainer> getSavedEvents() {
+        EVENTS_DATA.read();
         List<PersistentDataContainer> list = new ArrayList<>();
         PersistentDataContainer pdc = EVENTS_DATA.getPersistentDataContainer();
         for (NamespacedKey key : pdc.getKeys()) {
