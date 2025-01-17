@@ -69,7 +69,13 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
+        if (event.getStatus() == EventStatus.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.invalid_status").color(NamedTextColor.RED));
+            p.playSound(EXECUTION_FAIL_SOUND);
+            return;
+        }
         p.playSound(event.pause(p) ? UI_BUTTON_CLICK_SOUND : EXECUTION_FAIL_SOUND);
+        updateGUI();
     }
 
     @ButtonHandler("unpause")
@@ -79,7 +85,13 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
+        if (event.getStatus() == EventStatus.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.invalid_status").color(NamedTextColor.RED));
+            p.playSound(EXECUTION_FAIL_SOUND);
+            return;
+        }
         p.playSound(event.unpause(p) ? UI_BUTTON_CLICK_SOUND : EXECUTION_FAIL_SOUND);
+        updateGUI();
     }
 
     @ButtonHandler("save")
@@ -97,6 +109,11 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
     public void terminate(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (event.getStatus() == EventStatus.CLOSED) {
             p.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            p.playSound(EXECUTION_FAIL_SOUND);
+            return;
+        }
+        if (event.getStatus() == EventStatus.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.invalid_status").color(NamedTextColor.RED));
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }

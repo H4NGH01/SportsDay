@@ -5,10 +5,10 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -94,37 +94,41 @@ public abstract class TrackEvent extends SportingEvent {
     }
 
     @Override
-    public void start() {
-        if (getStatus() == EventStatus.PROCESSING)
-            return;
-        super.start();
-        onEventStart();
+    protected void onStart() {
         PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSports().getSetting(Sport.TrackSettings.READY_COMMAND));
         getContestants().forEach(data -> lapMap.put(data, 0));
         getContestants().forEach(data -> checkpointMap.put(data, 0));
         Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
-    }
-
-    @Override
-    public boolean pause(@NotNull CommandSender sender) {
-        if (getStatus() == EventStatus.UPCOMING) {
-            return super.pause(sender);
-        } else {
-            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
-            return false;
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSports().getSetting(Sport.TrackSettings.START_COMMAND));
+        onEventStart();
         addTask(new BukkitRunnable() {
+            int i = PLUGIN.getConfig().getInt("ready_time");
+
             @Override
             public void run() {
-                ++time;
+                if (i > 0 && i <= 3) {
+                    Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.text(i).color(NamedTextColor.YELLOW));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                            Sound.Source.MASTER, 1f, 0.5f));
+                }
+                Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start_countdown")
+                        .arguments(Component.text(i)).color(NamedTextColor.GREEN));
+                if (i-- == 0) {
+                    onRacingStart();
+                    addTask(new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            ++time;
+                        }
+                    }.runTaskTimer(PLUGIN, 0L, 1L));
+                    PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSports().getSetting(Sport.TrackSettings.START_COMMAND));
+                    Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.text("GO").color(NamedTextColor.YELLOW));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start"));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                            Sound.Source.MASTER, 1f, 1f));
+                    cancel();
+                }
             }
-        }.runTaskTimer(PLUGIN, 0L, 1L));
-        onRacingStart();
+        }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
     @Override

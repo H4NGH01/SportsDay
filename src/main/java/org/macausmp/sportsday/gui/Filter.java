@@ -5,41 +5,63 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 /**
  * Represents a filter for page box.
  *
- * @param <T> type of entries
+ * @param <E> the type of entries
+ * @param <T> the type of the input to the predicate
  */
-public class Filter<T> {
-    private final String[] contents;
+public final class Filter<E, T> {
+    private final BiPredicate<T, E> predicate;
+    private final Entry<T>[] entries;
     private int counter = 0;
-    private final BiFunction<T, Integer, Boolean> function;
 
-    public Filter(String[] contents, BiFunction<T, Integer, Boolean> function) {
-        this.contents = contents;
-        this.function = function;
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    public Filter(@NotNull String defaultEntry, @NotNull BiPredicate<T, E> predicate, Entry<T> @NotNull ... entries) {
+        this.predicate = predicate;
+        this.entries = (Entry<T>[]) new Entry[entries.length + 1];
+        this.entries[0] = new Entry<>(defaultEntry, null);
+        System.arraycopy(entries, 0, this.entries, 1, entries.length);
     }
 
     public void next() {
-        if (++counter >= contents.length)
+        if (++counter >= entries.length)
             counter = 0;
     }
 
-    public boolean filter(T entry) {
-        return function.apply(entry, counter);
+    public void prev() {
+        if (--counter < 0)
+            counter = entries.length - 1;
     }
 
-    public @NotNull ItemStack filterItem(Material material, String id) {
-        Component[] lore = Arrays.stream(contents)
-                .map(s -> Component.translatable("- %s")
-                        .arguments(Component.translatable(s)).color(NamedTextColor.DARK_GRAY))
+    public boolean filter(@NotNull E entry) {
+        T t = entries[counter].t;
+        return t == null || predicate.test(t, entry);
+    }
+
+    public @NotNull ItemStack filterItem(@NotNull Material material, @NotNull String id) {
+        Component[] lore = Arrays.stream(entries)
+                .map(e -> Component.translatable("- %s")
+                        .arguments(Component.translatable(e.content)).color(NamedTextColor.DARK_GRAY))
                 .toArray(Component[]::new);
         lore[counter] = lore[counter].color(NamedTextColor.YELLOW);
         return ItemUtil.item(material, id, "gui.page_box.filter", (Object[]) lore);
+    }
+
+    public static class Entry<T> {
+        private final String content;
+        private final T t;
+
+        public Entry(@NotNull String content, @Nullable T t) {
+            this.content = content;
+            this.t = t;
+        }
     }
 }

@@ -115,7 +115,7 @@ public class SumoEvent extends SportingEvent {
     private final int weaponTime;
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
-    private SumoStage[] stages;
+    private final SumoStage[] stages;
     private int stageIndex = 0;
 
     public SumoEvent(@NotNull Sport sport, @NotNull CombatVenue venue, @Nullable PersistentDataContainer save) {
@@ -143,11 +143,16 @@ public class SumoEvent extends SportingEvent {
             }
             this.stages[this.stages.length - 2].newMatch(); // Third place
             this.stages[this.stages.length - 1].newMatch(); // Final
-            stageSetup();
         } else {
             this.weapon = Boolean.TRUE.equals(save.get(new NamespacedKey(PLUGIN, "weapon"), PersistentDataType.BOOLEAN));
             this.weaponTime = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "weapon_time"), PersistentDataType.INTEGER));
+            Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "alive"), PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
+                    .forEach(uuid -> this.alive.add(SportsDay.getContestant(UUID.fromString(uuid))));
+            this.stageIndex = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER));
+            this.stages = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "stages"),
+                    PersistentDataType.LIST.listTypeFrom(SUMO_STAGE_DATA_TYPE))).toArray(SumoStage[]::new);
         }
+        stageSetup();
     }
 
     @Override
@@ -161,26 +166,6 @@ public class SumoEvent extends SportingEvent {
         data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
         data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SUMO_STAGE_DATA_TYPE),
                 Arrays.stream(stages).toList());
-    }
-
-    @Override
-    public void load(@NotNull PersistentDataContainer data) {
-        super.load(data);
-        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "alive"),
-                        PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
-                .forEach(uuid -> alive.add(SportsDay.getContestant(UUID.fromString(uuid))));
-        stageIndex = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER));
-        stages = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "stages"),
-                PersistentDataType.LIST.listTypeFrom(SUMO_STAGE_DATA_TYPE))).toArray(SumoStage[]::new);
-        TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
-                .arguments(getSumoStage()).toBuilder();
-        for (int i = getSumoStage().getCurrentMatchIndex() + 1, j = 0; i < getSumoStage().getMatchList().size(); i++) {
-            SumoMatch m = getSumoStage().getMatchList().get(i);
-            builder.appendNewline().append(Component.translatable("event.sumo.queue")
-                    .arguments(Component.text(++j), m.getFirstPlayerName(), m.getSecondPlayerName()));
-        }
-        Bukkit.broadcast(builder.build());
-        SumoEventGUI.updateGUI();
     }
 
     @Override
@@ -208,7 +193,7 @@ public class SumoEvent extends SportingEvent {
     private void stageSetup() {
         TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
                 .arguments(getSumoStage()).toBuilder();
-        for (int i = 0; i < getSumoStage().getMatchList().size();) {
+        for (int i = getSumoStage().getCurrentMatchIndex() + 1; i < getSumoStage().getMatchList().size();) {
             SumoMatch m = getSumoStage().getMatchList().get(i);
             builder.appendNewline().append(Component.translatable("event.sumo.queue")
                     .arguments(Component.text(++i), m.getFirstPlayerName(), m.getSecondPlayerName()));
@@ -244,6 +229,10 @@ public class SumoEvent extends SportingEvent {
 
             @Override
             public void run() {
+                if (isPaused()) {
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
+                    return;
+                }
                 if (i <= 5 && i > 0)
                     Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_stage_countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.GREEN));

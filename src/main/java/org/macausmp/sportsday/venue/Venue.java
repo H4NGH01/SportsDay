@@ -11,7 +11,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.util.LocationDataType;
-import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -75,7 +74,7 @@ public class Venue implements ComponentLike {
 
     @Override
     public @NotNull Component asComponent() {
-        return TextUtil.convert(Component.text(name));
+        return Component.text(name);
     }
 
     public String getName() {

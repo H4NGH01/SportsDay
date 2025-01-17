@@ -246,7 +246,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
      */
     public static void saveEvent(@NotNull CommandSender sender) {
         SportingEvent event = getCurrentEvent();
-        if (event == null || event.getStatus() == EventStatus.CLOSED) {
+        if (event == null || event.getStatus() == EventStatus.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.invalid_status")
                     .color(NamedTextColor.RED));
             return;
@@ -254,7 +254,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         PersistentDataContainer pdc = EVENTS_DATA.getPersistentDataContainer();
         PersistentDataContainer saves = pdc.getAdapterContext().newPersistentDataContainer();
         event.save(saves);
-        pdc.set(new NamespacedKey(SportsDay.getInstance(), String.valueOf(event.getStartTime())), PersistentDataType.TAG_CONTAINER, saves);
+        pdc.set(new NamespacedKey(getInstance(), String.valueOf(event.getStartTime())), PersistentDataType.TAG_CONTAINER, saves);
         EVENTS_DATA.write();
         sender.sendMessage(Component.translatable("command.competition.save.success").color(NamedTextColor.GREEN));
     }
@@ -278,7 +278,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
             save = Objects.requireNonNull(pdc.get(first.get(), PersistentDataType.TAG_CONTAINER));
         }
         Sport sport = SportsRegistry.SPORT.get(Objects.requireNonNull(save
-                .get(new NamespacedKey(SportsDay.getInstance(), "sport"), KeyDataType.KEY_DATA_TYPE)));
+                .get(new NamespacedKey(getInstance(), "sport"), KeyDataType.KEY_DATA_TYPE)));
         if (sport == null) {
             sender.sendMessage(Component.translatable("command.competition.load_unknown").color(NamedTextColor.RED));
             return;
@@ -294,9 +294,16 @@ public final class SportsDay extends JavaPlugin implements Listener {
         List<PersistentDataContainer> list = new ArrayList<>();
         PersistentDataContainer pdc = EVENTS_DATA.getPersistentDataContainer();
         for (NamespacedKey key : pdc.getKeys()) {
-            list.add(pdc.get(key, PersistentDataType.TAG_CONTAINER));
+            PersistentDataContainer save = Objects.requireNonNull(pdc.get(key, PersistentDataType.TAG_CONTAINER));
+            save.set(new NamespacedKey(getInstance(), "time"), KeyDataType.KEY_DATA_TYPE, key);
+            list.add(save);
         }
         return list;
+    }
+
+    public static void clearSavedEvents() {
+        EVENTS_DATA.clear();
+        EVENTS_DATA.write();
     }
 
     /**
@@ -322,6 +329,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
             sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
             return;
         }
+        if (getCurrentEvent().getStatus() == EventStatus.ENDED) {
+            sender.sendMessage(Component.translatable("command.competition.invalid_status").color(NamedTextColor.RED));
+            return;
+        }
         getCurrentEvent().pause(sender);
     }
 
@@ -333,6 +344,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public static void unpause(@NotNull CommandSender sender) {
         if (getCurrentEvent() == null || getCurrentEvent().getStatus() == EventStatus.CLOSED) {
             sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            return;
+        }
+        if (getCurrentEvent().getStatus() == EventStatus.ENDED) {
+            sender.sendMessage(Component.translatable("command.competition.invalid_status").color(NamedTextColor.RED));
             return;
         }
         getCurrentEvent().unpause(sender);

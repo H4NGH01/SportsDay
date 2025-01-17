@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.gui.PermissionRequired;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.sport.Sport;
@@ -95,9 +96,12 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("delete")
     public void delete(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        sport.removeVenue(venue.getUUID());
-        p.openInventory(new VenueListGUI<>(sport).getInventory());
-        p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
+        p.openInventory(new ConfirmationGUI(this, player -> {
+            sport.removeVenue(venue.getUUID());
+            p.openInventory(new VenueListGUI<>(sport).getInventory());
+            p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
+            return true;
+        }).getInventory());
     }
 
     @ButtonHandler("back")

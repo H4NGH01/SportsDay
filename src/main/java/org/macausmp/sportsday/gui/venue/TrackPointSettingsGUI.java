@@ -5,7 +5,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
@@ -74,11 +73,10 @@ public class TrackPointSettingsGUI extends PluginGUI {
 
     @ButtonHandler("bb")
     public void bb(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        ClickType type = e.getClick();
-        if (!type.isLeftClick() && !type.isRightClick())
+        if (!e.isLeftClick() && !e.isRightClick())
             return;
         Vector vec = p.getLocation().toVector();
-        if (type.isLeftClick()) {
+        if (e.isLeftClick()) {
             trackPoint.setBoundingBoxCorner1(vec);
         } else {
             trackPoint.setBoundingBoxCorner2(vec);

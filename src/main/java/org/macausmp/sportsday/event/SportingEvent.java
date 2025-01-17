@@ -75,7 +75,9 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         if (save == null) {
             contestants.addAll(SportsDay.getContestants());
         } else {
-            load(save);
+            List<String> list = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "contestants"),
+                    PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)));
+            contestants.addAll(list.stream().map(uuid -> SportsDay.getContestant(UUID.fromString(uuid))).toList());
         }
         PLUGIN.getServer().getPluginManager().registerEvents(this, PLUGIN);
     }
@@ -91,17 +93,6 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         data.set(new NamespacedKey(PLUGIN, "contestants"),
                 PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
                 contestants.stream().map(d -> d.getUUID().toString()).toList());
-    }
-
-    /**
-     * Load the event from {@link PersistentDataContainer}
-     *
-     * @param data where the data stored
-     */
-    public void load(@NotNull PersistentDataContainer data) {
-        List<String> list = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "contestants"),
-                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)));
-        contestants.addAll(list.stream().map(uuid -> SportsDay.getContestant(UUID.fromString(uuid))).toList());
     }
 
     /**
@@ -140,15 +131,6 @@ public abstract class SportingEvent implements ComponentLike, Listener {
      */
     public final EventStatus getStatus() {
         return pause ? EventStatus.PAUSED : status;
-    }
-
-    /**
-     * Set the event's current status
-     *
-     * @param status new status
-     */
-    protected final void setStatus(EventStatus status) {
-        this.status = status;
     }
 
     /**
@@ -196,24 +178,23 @@ public abstract class SportingEvent implements ComponentLike, Listener {
     public void start() {
         if (status == EventStatus.PROCESSING)
             return;
-        status = EventStatus.PROCESSING;
         SportsTrainingHandler.leaveAllSportsTraining();
-        Bukkit.getOnlinePlayers().forEach(p -> p.getPersistentDataContainer()
-                .set(LAST_EVENT_TIME, PersistentDataType.LONG, startTime));
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            p.getPersistentDataContainer().set(LAST_EVENT_TIME, PersistentDataType.LONG, startTime);
+            p.setRespawnLocation(getVenue().getLocation(), true);
+            p.teleportAsync(getVenue().getLocation());
+        });
         contestants.forEach(data -> {
             Player p = data.getPlayer();
             if (!SportsDay.REFEREES.hasPlayer(p))
                 p.getInventory().clear();
             p.clearActivePotionEffects();
-            p.getInventory().clear();
             p.setFireTicks(0);
             p.setFreezeTicks(0);
             p.setHealth(Objects.requireNonNull(p.getAttribute(Attribute.MAX_HEALTH)).getValue());
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
-            p.setRespawnLocation(getVenue().getLocation(), true);
-            p.teleportAsync(getVenue().getLocation());
         });
         Bukkit.broadcast(Component.translatable("event.broadcast.ready")
                 .arguments(this, Component.text(PLUGIN.getConfig().getInt("ready_time")))
@@ -221,25 +202,19 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         Bukkit.broadcast(Component.translatable("sport.desc." + sport.getKey().getKey()));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").arguments(this));
         addTask(new BukkitRunnable() {
-            int i = PLUGIN.getConfig().getInt("ready_time");
+            int i = 3;
 
             @Override
             public void run() {
-                if (isPaused()) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
-                    return;
-                }
                 if (i > 0 && i <= 3) {
-                    Bukkit.getServer().sendTitlePart(TitlePart.TITLE,
-                            Component.translatable("event.broadcast.start_countdown")
-                                    .arguments(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.text(i).color(NamedTextColor.YELLOW));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                             Sound.Source.MASTER, 1f, 0.5f));
-                } else {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start_countdown")
-                            .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 }
+                Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start_countdown")
+                        .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
+                    status = EventStatus.PROCESSING;
                     onStart();
                     Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start"));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
@@ -248,6 +223,50 @@ public abstract class SportingEvent implements ComponentLike, Listener {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
+    }
+
+    /**
+     * Pause the event.
+     */
+    public boolean pause(@NotNull CommandSender sender) {
+        if (this instanceof TrackEvent) {
+            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+        if (pause) {
+            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+        pause = true;
+        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
+        sender.sendMessage(Component.translatable("command.competition.pause.success").color(NamedTextColor.YELLOW));
+        return true;
+    }
+
+    /**
+     * Unpause the event.
+     */
+    public boolean unpause(@NotNull CommandSender sender) {
+        if (!pause) {
+            sender.sendMessage(Component.translatable("command.competition.unpause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+        pause = false;
+        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.unpause"));
+        sender.sendMessage(Component.translatable("command.competition.unpause.success").color(NamedTextColor.YELLOW));
+        return true;
+    }
+
+    /**
+     * Terminate the event.
+     */
+    public void terminate(@NotNull CommandSender sender) {
+        if (status == EventStatus.ENDED)
+            return;
+        close();
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.terminate"));
+        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.terminate").arguments(this));
+        sender.sendMessage(Component.translatable("command.competition.terminate.success").color(NamedTextColor.YELLOW));
     }
 
     /**
@@ -260,6 +279,10 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         status = EventStatus.ENDED;
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.end"));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.end").arguments(this));
+        contestants.forEach(data -> {
+            Player p = data.getPlayer();
+            p.getInventory().clear();
+        });
         onClose();
         if (leaderboard.isEmpty()) {
             close();
@@ -293,56 +316,16 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         }.runTaskLater(PLUGIN, 200L));
     }
 
-    /**
-     * Pause the event.
-     */
-    public boolean pause(@NotNull CommandSender sender) {
-        if (pause) {
-            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
-            return false;
-        }
-        pause = true;
-        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
-        sender.sendMessage(Component.translatable("command.competition.pause.success").color(NamedTextColor.YELLOW));
-        return true;
-    }
-
-    /**
-     * Unpause the event.
-     */
-    public boolean unpause(@NotNull CommandSender sender) {
-        if (!pause) {
-            sender.sendMessage(Component.translatable("command.competition.unpause.failed").color(NamedTextColor.RED));
-            return false;
-        }
-        pause = false;
-        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.unpause"));
-        sender.sendMessage(Component.translatable("command.competition.unpause.success").color(NamedTextColor.YELLOW));
-        return true;
-    }
-
-    /**
-     * Terminate the event.
-     */
-    public void terminate(@NotNull CommandSender sender) {
-        if (status == EventStatus.CLOSED)
-            return;
-        close();
-        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.terminate"));
-        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.terminate").arguments(this));
-        sender.sendMessage(Component.translatable("command.competition.terminate.success").color(NamedTextColor.YELLOW));
-    }
-
     protected void close() {
         if (status == EventStatus.CLOSED)
             return;
         if (status != EventStatus.ENDED)
             onClose();
         status = EventStatus.CLOSED;
+        tasks.forEach(BukkitTask::cancel);
         getVenue().getLocation().getWorld().getEntitiesByClass(ItemFrame.class).stream()
                 .filter(e -> e.getPersistentDataContainer().has(GRAFFITI))
                 .forEach(ItemFrame::remove);
-        tasks.forEach(BukkitTask::cancel);
         Bukkit.getOnlinePlayers().forEach(p -> {
             p.getPersistentDataContainer().remove(LAST_EVENT_TIME);
             p.teleportAsync(getVenue().getLocation());
@@ -381,18 +364,6 @@ public abstract class SportingEvent implements ComponentLike, Listener {
     protected void onClose() {}
 
     /**
-     * <p>Add a {@link BukkitTask} to event.
-     *
-     * <p>When the event ends, all tasks added through this method will be automatically canceled.
-     *
-     * @param task {@link BukkitTask} to add
-     */
-    protected final BukkitTask addTask(BukkitTask task) {
-        tasks.add(task);
-        return task;
-    }
-
-    /**
      * Called when a contestant unregistered during the event
      *
      * @param contestant who leaved the event
@@ -412,6 +383,18 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         p.setRespawnLocation(getVenue().getLocation(), true);
         p.teleportAsync(getVenue().getLocation());
+    }
+
+    /**
+     * <p>Add a {@link BukkitTask} to event.
+     *
+     * <p>When the event ends, all tasks added through this method will be automatically canceled.
+     *
+     * @param task {@link BukkitTask} to add
+     */
+    protected final BukkitTask addTask(BukkitTask task) {
+        tasks.add(task);
+        return task;
     }
 
     @EventHandler

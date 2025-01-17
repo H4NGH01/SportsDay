@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.macausmp'
-version = '2.11-BETA SNAPSHOT 2'
+version = '2.11-BETA SNAPSHOT 3'
 
 repositories {
     mavenCentral()

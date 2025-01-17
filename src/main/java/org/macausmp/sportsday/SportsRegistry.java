@@ -1,7 +1,6 @@
 package org.macausmp.sportsday;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -12,13 +11,14 @@ import org.macausmp.sportsday.sport.SportType;
 import org.macausmp.sportsday.venue.VenueType;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class SportsRegistry<T extends Keyed> implements Registry<T> {
     private static final Set<Supplier<?>> DEFAULT_ENTRIES = new HashSet<>();
-    public static final SportsRegistry<VenueType<?>> VENUE_TYPE = create(() -> VenueType.VENUE);
     public static final SportsRegistry<SportType> SPORT_TYPE = create(() -> SportType.ATHLETICS);
+    public static final SportsRegistry<VenueType<?>> VENUE_TYPE = create(() -> VenueType.VENUE);
     public static final SportsRegistry<Sport> SPORT = create(() -> Sport.ELYTRA_RACING);
 
     private static <T extends Keyed> @NotNull SportsRegistry<T> create(@NotNull Supplier<T> supplier) {

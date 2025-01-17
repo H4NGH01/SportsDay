@@ -92,16 +92,27 @@ public class JavelinThrowEvent extends SportingEvent {
     public JavelinThrowEvent(@NotNull Sport sport, @NotNull Venue venue, @Nullable PersistentDataContainer save) {
         super(sport, venue, save);
         getVenue().getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
+        TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
         if (save == null) {
             this.queue.addAll(getContestants());
-            TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
-            for (int i = 0; i < this.queue.size();) {
-                ContestantData data = this.queue.get(i);
-                builder.appendNewline().append(Component.translatable("event.javelin.queue")
-                        .arguments(Component.text(++i), Component.text(data.getName())));
+        } else {
+            if (save.has(new NamespacedKey(PLUGIN, "current_player"))) {
+                String current = Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING));
+                queue.add(SportsDay.getContestant(UUID.fromString(current)));
             }
-            Bukkit.broadcast(builder.build());
+            Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "queue"),
+                            PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
+                    .forEach(uuid -> queue.add(SportsDay.getContestant(UUID.fromString(uuid))));
+            Objects.requireNonNull(save.get(new NamespacedKey(PLUGIN, "result"),
+                            PersistentDataType.LIST.listTypeFrom(SCORE_RESULT_DATA_TYPE)))
+                    .forEach(sr -> resultMap.put(sr.uuid, sr));
         }
+        for (int i = 0; i < this.queue.size();) {
+            ContestantData data = this.queue.get(i);
+            builder.appendNewline().append(Component.translatable("event.javelin.queue")
+                    .arguments(Component.text(++i), Component.text(data.getName())));
+        }
+        Bukkit.broadcast(builder.build());
     }
 
     @Override
@@ -116,28 +127,6 @@ public class JavelinThrowEvent extends SportingEvent {
         data.set(new NamespacedKey(PLUGIN, "result"),
                 PersistentDataType.LIST.listTypeFrom(SCORE_RESULT_DATA_TYPE),
                 resultMap.values().stream().filter(ScoreResult::isSet).toList());
-    }
-
-    @Override
-    public void load(@NotNull PersistentDataContainer data) {
-        super.load(data);
-        if (data.has(new NamespacedKey(PLUGIN, "current_player"))) {
-            String current = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_player"), PersistentDataType.STRING));
-            queue.add(SportsDay.getContestant(UUID.fromString(current)));
-        }
-        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "queue"),
-                        PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
-                .forEach(uuid -> queue.add(SportsDay.getContestant(UUID.fromString(uuid))));
-        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "result"),
-                        PersistentDataType.LIST.listTypeFrom(SCORE_RESULT_DATA_TYPE)))
-                .forEach(sr -> resultMap.put(sr.uuid, sr));
-        TranslatableComponent.Builder builder = Component.translatable("event.javelin.order").toBuilder();
-        for (int i = 0; i < queue.size();) {
-            ContestantData d = queue.get(i);
-            builder.appendNewline().append(Component.translatable("event.javelin.queue")
-                    .arguments(Component.text(++i), Component.text(d.getName())));
-        }
-        Bukkit.broadcast(builder.build());
     }
 
     @Override

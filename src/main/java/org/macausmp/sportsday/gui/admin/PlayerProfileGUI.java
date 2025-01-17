@@ -131,7 +131,10 @@ public class PlayerProfileGUI extends PluginGUI {
 
     @ButtonHandler("unregister")
     public void unregister(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ConfirmationGUI(this, player -> SportsDay.leave(this.player)).getInventory());
+        p.openInventory(new ConfirmationGUI(this, player -> {
+            SportsDay.leave(this.player);
+            return false;
+        }).getInventory());
         updateProfile(player.getUniqueId());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }

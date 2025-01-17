@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.sport.Sport;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -85,9 +86,12 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
     public void checkpoint(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         int i = e.getSlot() - 36 + pageBox.getSize() * pageBox.getPage();
         if (e.getClick().isRightClick()) {
-            venue.getCheckPoints().remove(i);
-            updateGUI();
-            p.playSound(UI_BUTTON_CLICK_SOUND);
+            p.openInventory(new ConfirmationGUI(this, player -> {
+                venue.getCheckPoints().remove(i);
+                updateGUI();
+                p.playSound(UI_BUTTON_CLICK_SOUND);
+                return false;
+            }).getInventory());
             return;
         }
         p.openInventory(new TrackPointSettingsGUI(this, venue.getCheckPoints().get(i), "gui.venue_settings.checkpoint.title").getInventory());

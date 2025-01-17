@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.gui.customize;
 
+import com.google.common.collect.ImmutableMultimap;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -84,6 +85,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
             if (stack.getItemMeta() instanceof ColorableArmorMeta)
                 lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
+            meta.setAttributeModifiers(ImmutableMultimap.of());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
@@ -113,6 +115,8 @@ public class ClothingCustomizeGUI extends PluginGUI {
             update();
             PlayerCustomize.suitUp(p);
         } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
+            if (PlayerCustomize.getCloth(p, item.getType().getEquipmentSlot()) == null)
+                PlayerCustomize.setClothMaterial(p, item.getType());
             p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
         }
         p.playSound(UI_BUTTON_CLICK_SOUND);

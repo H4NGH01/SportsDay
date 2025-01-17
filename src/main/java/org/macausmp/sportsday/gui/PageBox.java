@@ -2,7 +2,9 @@ package org.macausmp.sportsday.gui;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,6 +20,7 @@ public final class PageBox<T> {
     private final int start;
     private final int end;
     private final Supplier<List<T>> entries;
+    private final Sorter<T> sorter;
     private final Predicate<T> filter;
     private int page;
 
@@ -30,7 +33,7 @@ public final class PageBox<T> {
      * @param entries entries
      */
     public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries) {
-        this(gui, start, end, entries, t -> true);
+        this(gui, start, end, entries, null, t -> true);
     }
 
     /**
@@ -42,8 +45,9 @@ public final class PageBox<T> {
      * @param entries entries
      * @param filter filter of entries
      */
-    public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries, @NotNull Filter<T> filter) {
-        this(gui, start, end, entries, filter::filter);
+    public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries,
+                   @Nullable Sorter<T> sorter, @NotNull Filter<T, ?> filter) {
+        this(gui, start, end, entries, sorter, filter::filter);
     }
 
     /**
@@ -55,11 +59,13 @@ public final class PageBox<T> {
      * @param entries entries
      * @param filter filter of entries
      */
-    public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries, @NotNull Predicate<T> filter) {
+    public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries,
+                   @Nullable Sorter<T> sorter, @NotNull Predicate<T> filter) {
         this.gui = gui;
         this.start = start;
         this.end = end;
         this.entries = entries;
+        this.sorter = sorter;
         this.filter = filter;
     }
 
@@ -124,7 +130,7 @@ public final class PageBox<T> {
      * Go to next page.
      */
     public void nextPage() {
-        if (getPage() < getMaxPage() - 1)
+        if (getPage() + 1 < getMaxPage())
             ++page;
         gui.update();
     }
@@ -146,7 +152,9 @@ public final class PageBox<T> {
     public void updatePage(@NotNull Function<T, ItemStack> function) {
         for (int i = getStartSlot(); i < getEndSlot(); i++)
             gui.getInventory().setItem(i, null);
-        List<T> entries = getEntries().stream().filter(filter).toList();
+        List<T> entries = new ArrayList<>(getEntries().stream().filter(filter).toList());
+        if (sorter != null)
+            entries.sort(sorter.comparator());
         for (int i = 0; i < getSize(); i++) {
             if (i >= entries.size())
                 break;

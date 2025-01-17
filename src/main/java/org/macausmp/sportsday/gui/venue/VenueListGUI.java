@@ -85,6 +85,7 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
     @ButtonHandler("add")
     public void add(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         V venue = (V) sport.addVenue(null, p.getLocation());
+        updateGUI();
         p.openInventory(venue.getType().getSettingsGUIFunction(sport, venue).getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }

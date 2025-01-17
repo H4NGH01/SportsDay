@@ -1,12 +1,6 @@
 #file: noinspection SpellCheckingInspection
 # 想要顯示出來的伺服器IP
 server_ip: §esample.server.ip
-# 判斷玩家到達終點或完成圈數的方塊
-finish_line_block: GOLD_BLOCK
-# 判斷玩家到達檢查點的方塊
-checkpoint_block: EMERALD_BLOCK
-# 判斷玩家離開賽道的方塊
-death_block: RED_TERRACOTTA
 # 讓玩家準備到開始比賽的時間
 ready_time: 15
 # 前三名玩家完成比賽後比賽結束倒計時
@@ -16,7 +10,7 @@ reconnect_time: 50
 # item - 代表物品
 # enable - 是否啟用該比賽
 # least_players_required - 開始該比賽最少需要的選手人數
-# lap - 徑類項目完成比賽的所需圈數
+# laps - 徑類項目完成比賽的所需圈數
 # all_checkpoints_required - 徑類項目是否需要經過所有檢查點
 # ready_command - 徑類項目準備所運行的指令，可以使用函數指令運行多條指令
 # start_command - 徑類項目開始所運行的指令，可以使用函數指令運行多條指令

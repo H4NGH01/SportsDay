@@ -9,9 +9,4 @@ public class GeneralVenueSettingsGUI<V extends Venue> extends VenueSettingsGUI<V
         super(36, sport, venue);
         update();
     }
-
-    @Override
-    public void update() {
-        super.update();
-    }
 }

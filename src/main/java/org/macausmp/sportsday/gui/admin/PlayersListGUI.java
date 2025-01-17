@@ -18,31 +18,23 @@ import org.macausmp.sportsday.gui.*;
 import org.macausmp.sportsday.training.SportsTrainingHandler;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @PermissionRequired
 public class PlayersListGUI extends PluginGUI {
     private final Scoreboard scoreboard = PLUGIN.getServer().getScoreboardManager().getMainScoreboard();
-    private final Filter<OfflinePlayer> roleFilter = new Filter<>(
-            new String[]{
-                    "gui.players_list.filter.all",
-                    "gui.players_list.filter.contestants",
-                    "gui.players_list.filter.referees",
-                    "gui.players_list.filter.audiences"
-            },
-            (player, count) -> switch (count) {
-                case 0 -> true;
-                case 1 -> SportsDay.CONTESTANTS.hasPlayer(player);
-                case 2 -> SportsDay.REFEREES.hasPlayer(player);
-                case 3 -> SportsDay.AUDIENCES.hasPlayer(player);
-                default -> false;
-            }
+    private final Sorter<OfflinePlayer> sorter = new Sorter<>(
+            new Sorter.Entry<>("gui.players_list.sort.first_play_time", Comparator.comparingLong(OfflinePlayer::getFirstPlayed)),
+            new Sorter.Entry<>("gui.players_list.sort.name", Comparator.comparing(o -> Objects.requireNonNull(o.getName())))
+    );
+    private final Filter<OfflinePlayer, Team> filter = new Filter<>("gui.players_list.filter.all",
+            Team::hasPlayer,
+            new Filter.Entry<>("gui.players_list.filter.contestants", SportsDay.CONTESTANTS),
+            new Filter.Entry<>("gui.players_list.filter.referees", SportsDay.REFEREES),
+            new Filter.Entry<>("gui.players_list.filter.audiences", SportsDay.AUDIENCES)
     );
     private final PageBox<OfflinePlayer> pageBox = new PageBox<>(this, 0, 45,
-            () -> Arrays.stream(PLUGIN.getServer().getOfflinePlayers()).toList(), roleFilter);
+            () -> Arrays.stream(PLUGIN.getServer().getOfflinePlayers()).toList(), sorter, filter);
 
     public PlayersListGUI() {
         super(54, Component.translatable("gui.players_list.title"));
@@ -58,7 +50,8 @@ public class PlayersListGUI extends PluginGUI {
     public void update() {
         getInventory().setItem(49, pages());
         pageBox.updatePage(this::icon);
-        getInventory().setItem(45, roleFilter.filterItem(Material.HOPPER, "role_filter"));
+        getInventory().setItem(45, sorter.sorterItem(Material.ANVIL, "sort"));
+        getInventory().setItem(46, filter.filterItem(Material.HOPPER, "role_filter"));
     }
 
     public static void updateGUI() {
@@ -133,9 +126,28 @@ public class PlayersListGUI extends PluginGUI {
 
     @ButtonHandler("role_filter")
     public void roleFilter(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.playSound(UI_BUTTON_CLICK_SOUND);
-        roleFilter.next();
+        if (!e.isLeftClick() && !e.isRightClick())
+            return;
+        if (e.isLeftClick()) {
+            filter.next();
+        } else {
+            filter.prev();
+        }
         update();
+        p.playSound(UI_BUTTON_CLICK_SOUND);
+    }
+
+    @ButtonHandler("sort")
+    public void sort(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (!e.isLeftClick() && !e.isRightClick())
+            return;
+        if (e.isLeftClick()) {
+            sorter.next();
+        } else {
+            sorter.prev();
+        }
+        update();
+        p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
     @ButtonHandler("back")

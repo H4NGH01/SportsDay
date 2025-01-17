@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.customize;
 
+import com.google.common.collect.ImmutableMultimap;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.*;
@@ -154,7 +155,8 @@ public final class PlayerCustomize {
         ItemStack item = new ItemStack(cloth.material);
         item.editMeta(meta -> {
             meta.setUnbreakable(true);
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+            meta.setAttributeModifiers(ImmutableMultimap.of());
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         });
         if (cloth.colorable())
             item.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.color));

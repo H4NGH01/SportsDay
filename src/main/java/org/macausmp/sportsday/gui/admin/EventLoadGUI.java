@@ -1,5 +1,7 @@
 package org.macausmp.sportsday.gui.admin;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -11,10 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.SportsRegistry;
-import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.PageBox;
-import org.macausmp.sportsday.gui.PermissionRequired;
-import org.macausmp.sportsday.gui.PluginGUI;
+import org.macausmp.sportsday.gui.*;
 import org.macausmp.sportsday.sport.Sport;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.KeyDataType;
@@ -31,6 +30,7 @@ public class EventLoadGUI extends PluginGUI {
         for (int i = 45; i < 54; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(53, BACK);
+        getInventory().setItem(45, clear());
         update();
     }
 
@@ -58,11 +58,26 @@ public class EventLoadGUI extends PluginGUI {
         return stack;
     }
 
+    private @NotNull ItemStack clear() {
+        return ItemUtil.item(Material.CAULDRON, "clear", "gui.load.clear.title", "gui.load.clear.lore");
+    }
+
     @ButtonHandler("save")
     public void save(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         PersistentDataContainer data = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer()
                 .get(new NamespacedKey(PLUGIN, "data"), PersistentDataType.TAG_CONTAINER));
         SportsDay.loadEvent(p, data);
+        p.playSound(UI_BUTTON_CLICK_SOUND);
+    }
+
+    @ButtonHandler("clear")
+    public void clear(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new ConfirmationGUI(this, player -> {
+            SportsDay.clearSavedEvents();
+            p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
+            updateGUI();
+            return false;
+        }).getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
