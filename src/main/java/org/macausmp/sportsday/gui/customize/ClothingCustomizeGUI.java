@@ -42,7 +42,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         for (int i = 0; i < 4; i++) {
             PlayerCustomize.Cloth selected = PlayerCustomize.getCloth(player, EquipmentSlot.values()[5 - i]);
             for (int j = 0; j < 6; j++) {

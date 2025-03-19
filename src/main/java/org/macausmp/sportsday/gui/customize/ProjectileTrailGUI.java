@@ -31,7 +31,7 @@ public class ProjectileTrailGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         pageBox.updatePage(this::effect);
     }
 

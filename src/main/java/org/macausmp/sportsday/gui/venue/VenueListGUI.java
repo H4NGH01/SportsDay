@@ -40,18 +40,11 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void update() {
+    protected void update() {
         map.clear();
         sport.getVenues().forEach(v -> map.put(v.getUUID(), (V) v));
         getInventory().setItem(49, pages());
         pageBox.updatePage(this::venue);
-    }
-
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof VenueListGUI)
-                .map(inv -> (VenueListGUI<? extends Venue>) inv.getHolder())
-                .forEach(VenueListGUI::update);
     }
 
     private @NotNull ItemStack pages() {
@@ -77,7 +70,7 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
     public void venue(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         V venue = map.get(UUID.fromString(Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer()
                 .get(VENUE_ID, PersistentDataType.STRING))));
-        p.openInventory(venue.getType().getSettingsGUIFunction(sport, venue).getInventory());
+        p.openInventory(venue.getType().getSettingsGUI(sport, venue).getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
@@ -85,8 +78,8 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
     @ButtonHandler("add")
     public void add(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         V venue = (V) sport.addVenue(null, p.getLocation());
-        updateGUI();
-        p.openInventory(venue.getType().getSettingsGUIFunction(sport, venue).getInventory());
+        updateAll();
+        p.openInventory(venue.getType().getSettingsGUI(sport, venue).getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 

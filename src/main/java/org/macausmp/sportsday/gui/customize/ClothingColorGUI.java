@@ -37,7 +37,7 @@ public class ClothingColorGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         pageBox.updatePage(this::dye);
     }
 

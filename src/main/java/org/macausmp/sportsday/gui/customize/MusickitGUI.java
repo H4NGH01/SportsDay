@@ -32,7 +32,7 @@ public class MusickitGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         pageBox.updatePage(this::musickit);
     }
 

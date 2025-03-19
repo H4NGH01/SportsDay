@@ -8,10 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.ConfirmationGUI;
-import org.macausmp.sportsday.gui.PermissionRequired;
-import org.macausmp.sportsday.gui.PluginGUI;
+import org.macausmp.sportsday.gui.*;
 import org.macausmp.sportsday.sport.Sport;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.venue.Venue;
@@ -31,18 +28,11 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(10, name());
         getInventory().setItem(12, item());
         getInventory().setItem(14, location());
         getInventory().setItem(16, delete());
-    }
-
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof VenueSettingsGUI)
-                .map(inv -> (VenueSettingsGUI<? extends Venue>) inv.getHolder())
-                .forEach(VenueSettingsGUI::update);
     }
 
     protected @NotNull ItemStack name() {
@@ -71,7 +61,9 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("name")
     public void name(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        updateGUI();
+        AnvilGUI gui = new AnvilGUI(() -> venue.getType().getSettingsGUI(sport, venue), p, venue.getName(), venue::setName);
+        PLUGIN.getServer().getPluginManager().registerEvents(gui, PLUGIN);
+        updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
@@ -83,14 +75,14 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
             return;
         }
         venue.setItem(material);
-        updateGUI();
+        updateAll();
         p.playSound(EXECUTION_SUCCESS_SOUND);
     }
 
     @ButtonHandler("location")
     public void location(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         venue.setLocation(p.getLocation());
-        updateGUI();
+        updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 

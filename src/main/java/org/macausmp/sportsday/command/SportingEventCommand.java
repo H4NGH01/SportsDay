@@ -55,25 +55,27 @@ public class SportingEventCommand extends PluginCommand {
             case "unpause" -> SportsDay.unpause(sender);
             case "terminate" -> SportsDay.terminate(sender);
             case "info" -> {
-                sender.sendMessage(Component.translatable("competition.info"));
+                sender.sendMessage(Component.translatable("event.info"));
                 SportingEvent event = SportsDay.getCurrentEvent();
                 boolean hasEvent = event != null;
-                sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN)
+                sender.sendMessage(Component.translatable("event.current").color(NamedTextColor.GREEN)
                         .arguments(hasEvent ? event : TextUtil.convert(Component.translatable("gui.text.none"))));
                 if (hasEvent)
-                    sender.sendMessage(Component.translatable("competition.status").color(NamedTextColor.GREEN)
+                    sender.sendMessage(Component.translatable("event.status").color(NamedTextColor.GREEN)
                             .arguments(event.getStatus()));
-                sender.sendMessage(Component.translatable("competition.contestants.total").color(NamedTextColor.GREEN)
+                sender.sendMessage(Component.translatable("event.contestants.total").color(NamedTextColor.GREEN)
                         .arguments(Component.text(SportsDay.getContestants().size()).color(NamedTextColor.YELLOW)));
+                sender.sendMessage(Component.translatable("event.contestants.online").color(NamedTextColor.GREEN)
+                        .arguments(Component.text(SportsDay.getOnlineContestants().size()).color(NamedTextColor.YELLOW)));
                 List<String> pl = new ArrayList<>();
                 SportsDay.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber))
                         .forEach(d -> pl.add(d.getName()));
-                sender.sendMessage(Component.translatable("competition.contestants.list").color(NamedTextColor.GREEN)
+                sender.sendMessage(Component.translatable("event.contestants.list").color(NamedTextColor.GREEN)
                         .arguments(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                 List<String> el = new ArrayList<>();
                 SportsRegistry.SPORT.stream().filter(s -> s.getSetting(Sport.Settings.ENABLE))
                         .forEach(e -> el.add(e.getKey().getKey().toUpperCase()));
-                sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN)
+                sender.sendMessage(Component.translatable("event.enabled").color(NamedTextColor.GREEN)
                         .arguments(Component.text(Arrays.toString(el.toArray())).color(NamedTextColor.YELLOW)));
             }
             default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));

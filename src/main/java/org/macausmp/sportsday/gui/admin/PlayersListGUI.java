@@ -47,18 +47,11 @@ public class PlayersListGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(49, pages());
         pageBox.updatePage(this::icon);
         getInventory().setItem(45, sorter.sorterItem(Material.ANVIL, "sort"));
         getInventory().setItem(46, filter.filterItem(Material.HOPPER, "role_filter"));
-    }
-
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof PlayersListGUI)
-                .map(inv -> (PlayersListGUI) inv.getHolder())
-                .forEach(PlayersListGUI::update);
     }
 
     private @NotNull ItemStack pages() {

@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -32,17 +33,13 @@ public class TrackPointSettingsGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(12, location());
         getInventory().setItem(14, bb());
     }
 
     public static void updateTrackPoint(TrackPoint point) {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof TrackPointSettingsGUI)
-                .map(inv -> (TrackPointSettingsGUI) inv.getHolder())
-                .filter(gui -> gui.trackPoint == point)
-                .forEach(TrackPointSettingsGUI::update);
+        updateAll(TrackPointSettingsGUI.class, gui -> gui.trackPoint == point);
     }
 
     private @NotNull ItemStack location() {
@@ -55,13 +52,15 @@ public class TrackPointSettingsGUI extends PluginGUI {
 
     private @NotNull ItemStack bb() {
         BoundingBox bb = trackPoint.getBoundingBox();
-        return ItemUtil.item(Material.SPAWNER, "bb",
+        ItemStack item = ItemUtil.item(Material.SPAWNER, "bb",
                 Component.translatable("gui.venue_settings.track_point.bounding_box"),
                 Component.translatable("gui.venue_settings.track_point.bounding_box.lore1"),
                 Component.text(bb.getMinX() + ", " + bb.getMinY() + ", " + bb.getMinZ()).color(NamedTextColor.GRAY),
                 Component.text(bb.getMaxX() + ", " + bb.getMaxY() + ", " + bb.getMaxZ()).color(NamedTextColor.GRAY),
                 Component.translatable("gui.venue_settings.track_point.bounding_box.lore2"),
                 Component.translatable("gui.venue_settings.track_point.bounding_box.lore3"));
+        item.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        return item;
     }
 
     @ButtonHandler("location")

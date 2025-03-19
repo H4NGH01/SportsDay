@@ -17,6 +17,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -383,9 +384,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
         if (CONTESTANTS_MAP.containsKey(uuid))
             return false;
         CONTESTANTS_MAP.put(uuid, new ContestantData(uuid, number));
-        EventGUI.updateGUI();
-        PlayersListGUI.updateGUI();
-        PlayerProfileGUI.updateProfile(player.getUniqueId());
+        EventGUI.updateAll(EventGUI.class);
+        PlayersListGUI.updateAll(PlayersListGUI.class);
+        PlayerProfileGUI.updateAll(player.getUniqueId());
         player.sendMessage(Component.translatable("contestant.register.success")
                 .arguments(Component.text(number)).color(NamedTextColor.GREEN));
         CONTESTANTS.addPlayer(player);
@@ -412,9 +413,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
         }
         REGISTERED_NUMBER_LIST.remove(data.getNumber());
         CONTESTANTS_MAP.remove(uuid);
-        EventGUI.updateGUI();
-        PlayersListGUI.updateGUI();
-        PlayerProfileGUI.updateProfile(player.getUniqueId());
+        EventGUI.updateAll(EventGUI.class);
+        PlayersListGUI.updateAll(PlayersListGUI.class);
+        PlayerProfileGUI.updateAll(player.getUniqueId());
         AUDIENCES.addPlayer(player);
         return true;
     }
@@ -510,9 +511,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
         }
         if (!isContestant(p))
             return;
-        EventGUI.updateGUI();
-        PlayersListGUI.updateGUI();
-        PlayerProfileGUI.updateProfile(p.getUniqueId());
+        EventGUI.updateAll(EventGUI.class);
+        PlayersListGUI.updateAll(PlayersListGUI.class);
+        PlayerProfileGUI.updateAll(p.getUniqueId());
     }
 
     @EventHandler
@@ -524,9 +525,9 @@ public final class SportsDay extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                EventGUI.updateGUI();
-                PlayersListGUI.updateGUI();
-                PlayerProfileGUI.updateProfile(p.getUniqueId());
+                EventGUI.updateAll(EventGUI.class);
+                PlayersListGUI.updateAll(PlayersListGUI.class);
+                PlayerProfileGUI.updateAll(p.getUniqueId());
             }
         }.runTaskLater(this, 1L);
     }

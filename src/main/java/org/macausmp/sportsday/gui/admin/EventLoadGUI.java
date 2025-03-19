@@ -35,15 +35,8 @@ public class EventLoadGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         pageBox.updatePage(this::save);
-    }
-
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof EventLoadGUI)
-                .map(inv -> (EventLoadGUI) inv.getHolder())
-                .forEach(EventLoadGUI::update);
     }
 
     private @NotNull ItemStack save(@NotNull PersistentDataContainer save) {
@@ -52,6 +45,7 @@ public class EventLoadGUI extends PluginGUI {
         if (sport == null) {
             return ItemUtil.item(Material.BARRIER, null, "gui.load.failed");
         }
+
         ItemStack stack = ItemUtil.item(sport.getDisplayItem(), "save", sport, "gui.load.lore");
         stack.editMeta(meta -> meta.getPersistentDataContainer()
                 .set(new NamespacedKey(PLUGIN, "data"), PersistentDataType.TAG_CONTAINER, save));
@@ -75,7 +69,7 @@ public class EventLoadGUI extends PluginGUI {
         p.openInventory(new ConfirmationGUI(this, player -> {
             SportsDay.clearSavedEvents();
             p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
-            updateGUI();
+            updateAll();
             return false;
         }).getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);

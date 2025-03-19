@@ -41,7 +41,7 @@ public class PlayerProfileGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(22, icon());
         boolean b = SportsDay.isContestant(player);
         getInventory().setItem(15, b ? stats() : null);
@@ -50,12 +50,8 @@ public class PlayerProfileGUI extends PluginGUI {
         getInventory().setItem(24, player.isOnline() ? tp() : null);
     }
 
-    public static void updateProfile(@NotNull UUID uuid) {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof PlayerProfileGUI)
-                .map(inv -> (PlayerProfileGUI) inv.getHolder())
-                .filter(gui -> gui.player.getUniqueId().equals(uuid))
-                .forEach(PlayerProfileGUI::update);
+    public static void updateAll(@NotNull UUID uuid) {
+        updateAll(PlayerProfileGUI.class, gui -> gui.player.getUniqueId().equals(uuid));
     }
 
     private @NotNull ItemStack icon() {
@@ -135,7 +131,7 @@ public class PlayerProfileGUI extends PluginGUI {
             SportsDay.leave(this.player);
             return false;
         }).getInventory());
-        updateProfile(player.getUniqueId());
+        updateAll(player.getUniqueId());
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 

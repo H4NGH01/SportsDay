@@ -17,7 +17,7 @@ public class CombatVenueSettingsGUI extends VenueSettingsGUI<CombatVenue> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(30, p1());
         getInventory().setItem(32, p2());
@@ -38,14 +38,14 @@ public class CombatVenueSettingsGUI extends VenueSettingsGUI<CombatVenue> {
     @ButtonHandler("p1")
     public void p1(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         venue.setP1Location(p.getLocation());
-        updateGUI();
+        updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
     @ButtonHandler("p2")
     public void p2(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         venue.setP2Location(p.getLocation());
-        updateGUI();
+        updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 }

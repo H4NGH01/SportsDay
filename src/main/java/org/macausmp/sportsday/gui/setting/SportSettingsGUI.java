@@ -20,7 +20,7 @@ public class SportSettingsGUI extends PluginGUI {
     protected final Sport sport;
 
     public SportSettingsGUI(@NotNull Sport sport) {
-        super(27, Component.translatable("gui.event_settings.title").arguments(sport.asComponent().color(NamedTextColor.BLACK)));
+        super(27, Component.translatable("gui.sport_settings.title").arguments(sport.asComponent().color(NamedTextColor.BLACK)));
         this.sport = sport;
         for (int i = 18; i < 27; i++)
             getInventory().setItem(i, BOARD);
@@ -29,23 +29,16 @@ public class SportSettingsGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(0, enable());
         getInventory().setItem(1, amount());
-    }
-
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof SportSettingsGUI)
-                .map(inv -> (SportSettingsGUI) inv.getHolder())
-                .forEach(SportSettingsGUI::update);
     }
 
     private @NotNull ItemStack enable() {
         return ItemUtil.item(
                 sport.getSetting(Sport.Settings.ENABLE) ? Material.LIME_DYE : Material.BARRIER,
                 "enable",
-                Component.translatable("gui.event_settings.enable").color(NamedTextColor.YELLOW)
+                Component.translatable("gui.sport_settings.enable").color(NamedTextColor.YELLOW)
                         .arguments(Component.translatable(sport.getSetting(Sport.Settings.ENABLE) ? "gui.enabled" : "gui.disabled")),
                 "gui.toggle");
     }
@@ -55,7 +48,7 @@ public class SportSettingsGUI extends PluginGUI {
         ItemStack stack = ItemUtil.item(
                 Material.PLAYER_HEAD,
                 "amount",
-                Component.translatable("gui.event_settings.amount").arguments(Component.text(amount)).color(NamedTextColor.YELLOW),
+                Component.translatable("gui.sport_settings.amount").arguments(Component.text(amount)).color(NamedTextColor.YELLOW),
                 "gui.increase", "gui.decrease");
         stack.setAmount(amount);
         return stack;

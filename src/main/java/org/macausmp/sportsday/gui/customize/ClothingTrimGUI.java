@@ -35,7 +35,7 @@ public class ClothingTrimGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         Iterator<Material> materials = PlayerCustomize.getTrimMaterial().iterator();
         for (int i = 0; i < 45; i++) {
             int j = i % 9;

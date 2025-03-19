@@ -211,7 +211,7 @@ public class JavelinThrowEvent extends SportingEvent {
             nextContestant();
         else
             end();
-        JavelinThrowEventGUI.updateGUI();
+        JavelinThrowEventGUI.updateAll(JavelinThrowEventGUI.class);
     }
 
     protected void nextContestant() {
@@ -237,7 +237,7 @@ public class JavelinThrowEvent extends SportingEvent {
                         }
                     }
                     onThrowingStart();
-                    JavelinThrowEventGUI.updateGUI();
+                    JavelinThrowEventGUI.updateAll(JavelinThrowEventGUI.class);
                     cancel();
                 }
             }

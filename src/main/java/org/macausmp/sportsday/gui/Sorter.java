@@ -21,8 +21,8 @@ public final class Sorter<E> {
 
     @SafeVarargs
     public Sorter(@NotNull Entry<E> @NotNull ... entries) {
-        if (entries.length < 2) {
-            throw new IllegalArgumentException("Requiring at least two element");
+        if (entries.length < 1) {
+            throw new IllegalArgumentException("Requiring at least one element");
         }
         this.entries = entries;
     }
@@ -47,7 +47,7 @@ public final class Sorter<E> {
                         .arguments(Component.translatable(e.content)).color(NamedTextColor.DARK_GRAY))
                 .toArray(Component[]::new);
         lore[counter] = lore[counter].color(NamedTextColor.YELLOW);
-        return ItemUtil.item(material, id, "gui.page_box.sorter", (Object[]) lore);
+        return ItemUtil.item(material, id, "gui.sorter", (Object[]) lore);
     }
 
     public static class Entry<T> {

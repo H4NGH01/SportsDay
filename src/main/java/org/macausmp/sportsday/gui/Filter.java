@@ -52,7 +52,7 @@ public final class Filter<E, T> {
                         .arguments(Component.translatable(e.content)).color(NamedTextColor.DARK_GRAY))
                 .toArray(Component[]::new);
         lore[counter] = lore[counter].color(NamedTextColor.YELLOW);
-        return ItemUtil.item(material, id, "gui.page_box.filter", (Object[]) lore);
+        return ItemUtil.item(material, id, "gui.filter", (Object[]) lore);
     }
 
     public static class Entry<T> {

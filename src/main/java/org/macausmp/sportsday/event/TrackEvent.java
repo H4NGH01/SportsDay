@@ -100,6 +100,9 @@ public abstract class TrackEvent extends SportingEvent {
         getContestants().forEach(data -> checkpointMap.put(data, 0));
         Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
         onEventStart();
+        Bukkit.broadcast(Component.translatable("event.broadcast.ready")
+                .arguments(this, Component.text(PLUGIN.getConfig().getInt("ready_time")))
+                .color(NamedTextColor.GREEN));
         addTask(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
 
@@ -117,6 +120,9 @@ public abstract class TrackEvent extends SportingEvent {
                     addTask(new BukkitRunnable() {
                         @Override
                         public void run() {
+                            if (task == null)
+                                getContestants().forEach(data -> data.getPlayer()
+                                        .sendActionBar(Component.text("%.2f".formatted(time / 20f)).color(NamedTextColor.GREEN)));
                             ++time;
                         }
                     }.runTaskTimer(PLUGIN, 0L, 1L));
@@ -185,7 +191,7 @@ public abstract class TrackEvent extends SportingEvent {
                                 .getLocation());
                         p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"),
                                 Sound.Source.MASTER, 1f, 1f));
-                        p.sendActionBar(Component.translatable("event.track.checkpoint_missed")
+                        p.sendMessage(Component.translatable("event.track.checkpoint_missed")
                                 .color(NamedTextColor.RED));
                         break;
                     }
@@ -196,7 +202,7 @@ public abstract class TrackEvent extends SportingEvent {
                 checkpointMap.put(data, ++next);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                         Sound.Source.MASTER, 1f, 1f));
-                p.sendActionBar(Component.translatable("event.track.checkpoint")
+                p.sendMessage(Component.translatable("event.track.checkpoint")
                         .arguments(Component.text(next)).color(NamedTextColor.GREEN));
             }
         }
@@ -204,11 +210,13 @@ public abstract class TrackEvent extends SportingEvent {
             int lap = lapMap.get(data) + 1;
             lapMap.put(data, lap);
             checkpointMap.put(data, 0);
+            p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                    Sound.Source.MASTER, 1f, 1f));
             if (lap < getLaps()) {
                 onCompletedLap(p);
                 Bukkit.broadcast(Component.translatable("event.track.contestant.completed_lap")
                         .arguments(p.displayName(), Component.text(lap)).color(NamedTextColor.YELLOW));
-                TrackEventGUI.updateGUI();
+                TrackEventGUI.updateAll(TrackEventGUI.class);
             } else {
                 onRaceFinish(p);
                 record.put(data, time / 20f);
@@ -216,12 +224,12 @@ public abstract class TrackEvent extends SportingEvent {
                 p.setGameMode(GameMode.SPECTATOR);
                 Bukkit.broadcast(Component.translatable("event.track.contestant.completed_all")
                         .arguments(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
-                TrackEventGUI.updateGUI();
+                TrackEventGUI.updateAll(TrackEventGUI.class);
 
                 if (getLeaderboard().size() == getContestants().size()) {
                     if (task != null && !task.isCancelled())
                         task.cancel();
-                    PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.all_completed"));
+                    PLUGIN.getServer().sendMessage(Component.translatable("event.track.end.all_completed"));
                     end();
                     return;
                 }

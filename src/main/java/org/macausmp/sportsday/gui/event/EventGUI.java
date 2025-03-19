@@ -24,7 +24,7 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
     protected final T event;
 
     public EventGUI(@NotNull T event) {
-        super(54, Component.translatable("gui.event_console.title").arguments(event.asComponent().color(NamedTextColor.BLACK)));
+        super(54, Component.translatable("gui.event.title").arguments(event.asComponent().color(NamedTextColor.BLACK)));
         this.event = event;
         for (int i = 45; i < 54; i++)
             getInventory().setItem(i, BOARD);
@@ -37,27 +37,20 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(0, status());
         getInventory().setItem(1, player());
         getInventory().setItem(6, event.isPaused() ? UNPAUSE_EVENT : PAUSE_EVENT);
     }
 
-    public static void updateGUI() {
-        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
-                .filter(inv -> inv.getHolder() instanceof EventGUI)
-                .map(inv -> (EventGUI<? extends SportingEvent>) inv.getHolder())
-                .forEach(EventGUI::update);
-    }
-
     private @NotNull ItemStack status() {
-        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).arguments(event);
-        Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN).arguments(event.getStatus());
+        Component display = Component.translatable("event.current").color(NamedTextColor.GREEN).arguments(event);
+        Component lore = Component.translatable("event.status").color(NamedTextColor.GREEN).arguments(event.getStatus());
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 
     private @NotNull ItemStack player() {
-        Component display = Component.translatable("competition.contestants.total").color(NamedTextColor.GREEN)
+        Component display = Component.translatable("event.contestants.total").color(NamedTextColor.GREEN)
                 .arguments(Component.text(event.getContestants().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display);
     }
@@ -75,7 +68,7 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
             return;
         }
         p.playSound(event.pause(p) ? UI_BUTTON_CLICK_SOUND : EXECUTION_FAIL_SOUND);
-        updateGUI();
+        updateAll();
     }
 
     @ButtonHandler("unpause")
@@ -91,7 +84,7 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
             return;
         }
         p.playSound(event.unpause(p) ? UI_BUTTON_CLICK_SOUND : EXECUTION_FAIL_SOUND);
-        updateGUI();
+        updateAll();
     }
 
     @ButtonHandler("save")

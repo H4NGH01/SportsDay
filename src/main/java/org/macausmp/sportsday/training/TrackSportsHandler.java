@@ -46,20 +46,23 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
         if (track.getStartPoint().overlaps(p) && !runningMap.containsKey(uuid)) {
             checkpointMap.put(uuid, 0);
             runningMap.put(uuid, new BukkitRunnable() {
-                int timer = 0;
+                int time = 0;
 
                 @Override
                 public void run() {
-                    p.sendActionBar(Component.text("%.2f".formatted(timer / 20f)));
+                    p.sendActionBar(Component.text("%.2f".formatted(time / 20f)));
                     if (track.getEndPoint().overlaps(p) && checkpointMap.get(uuid) == track.getCheckPoints().size()) {
-                        p.sendMessage(Component.translatable("training.finished").arguments(Component.text(timer / 20f), sport));
+                        p.sendMessage(Component.translatable("training.finished")
+                                .arguments(Component.text(time / 20f), sport));
+                        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                                Sound.Source.MASTER, 1f, 1f));
                         checkpointMap.remove(uuid);
                         runningMap.get(uuid).cancel();
                         runningMap.remove(uuid);
                         cancel();
                         return;
                     }
-                    ++timer;
+                    ++time;
                 }
             }.runTaskTimer(PLUGIN, 0L, 1L));
         }
@@ -70,10 +73,10 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
             for (int i = next + 1; i < track.getCheckPoints().size(); i++) {
                 if (track.getCheckPoints().get(i).overlaps(p)) {
                     p.teleportAsync((next > 1 ? track.getCheckPoints().get(next - 1) : track.getStartPoint()).getLocation());
-                    p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"),
-                            Sound.Source.MASTER, 1f, 1f));
                     p.sendActionBar(Component.translatable("event.track.checkpoint_missed")
                             .color(NamedTextColor.RED));
+                    p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"),
+                            Sound.Source.MASTER, 1f, 1f));
                     break;
                 }
             }
@@ -81,10 +84,10 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
             if (point.overlaps(p)) {
                 p.setRespawnLocation(p.getLocation(), true);
                 checkpointMap.put(uuid, ++next);
-                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
-                        Sound.Source.MASTER, 1f, 1f));
                 p.sendMessage(Component.translatable("event.track.checkpoint")
                         .arguments(Component.text(next)).color(NamedTextColor.GREEN));
+                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                        Sound.Source.MASTER, 1f, 1f));
             }
         }
     }

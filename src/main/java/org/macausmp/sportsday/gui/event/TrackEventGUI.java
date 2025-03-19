@@ -33,7 +33,7 @@ public class TrackEventGUI<T extends TrackEvent> extends EventGUI<T> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(49, pages());
         pageBox.updatePage(this::icon);
@@ -56,11 +56,11 @@ public class TrackEventGUI<T extends TrackEvent> extends EventGUI<T> {
     private @NotNull ItemStack icon(@NotNull ContestantData data) {
         float f = event.getRecord(data);
         ItemStack stack = ItemUtil.item(Material.PLAYER_HEAD, "icon",
-                Component.translatable("gui.competition.track.player")
+                Component.translatable("gui.event.track.player")
                         .arguments(Component.text(data.getName())),
-                Component.translatable("gui.competition.track.result").arguments(f == -1
-                        ? Component.translatable("gui.competition.tbd")
-                        : Component.translatable("gui.competition.track.second").arguments(Component.text(f))));
+                Component.translatable("gui.event.track.result").arguments(f == -1
+                        ? Component.translatable("gui.event.tbd")
+                        : Component.translatable("gui.event.track.second").arguments(Component.text(f))));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
     }

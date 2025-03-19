@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.gui.venue;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,7 +31,7 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(27, start());
         getInventory().setItem(28, end());
@@ -58,11 +59,16 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
         return stack;
     }
 
-    private @NotNull ItemStack checkpoint(TrackPoint trackPoint) {
+    private @NotNull ItemStack checkpoint(@NotNull TrackPoint trackPoint) {
+        BoundingBox bb = trackPoint.getBoundingBox();
         return ItemUtil.item(Material.BEACON, "checkpoint",
-                Component.translatable("gui.venue_settings.checkpoint.title"),
+                Component.translatable("gui.venue_settings.checkpoint.title")
+                        .arguments(Component.text(venue.getCheckPoints().indexOf(trackPoint) + 1)),
                 Component.translatable("gui.venue_settings.checkpoint.lore1"),
-                Component.translatable("gui.venue_settings.checkpoint.lore2"));
+                Component.text(bb.getMinX() + ", " + bb.getMinY() + ", " + bb.getMinZ()).color(NamedTextColor.GRAY),
+                Component.text(bb.getMaxX() + ", " + bb.getMaxY() + ", " + bb.getMaxZ()).color(NamedTextColor.GRAY),
+                Component.translatable("gui.venue_settings.checkpoint.lore2"),
+                Component.translatable("gui.venue_settings.checkpoint.lore3"));
     }
 
     private @NotNull ItemStack add() {
@@ -88,7 +94,7 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
         if (e.getClick().isRightClick()) {
             p.openInventory(new ConfirmationGUI(this, player -> {
                 venue.getCheckPoints().remove(i);
-                updateGUI();
+                updateAll();
                 p.playSound(UI_BUTTON_CLICK_SOUND);
                 return false;
             }).getInventory());
@@ -101,7 +107,7 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
     @ButtonHandler("add")
     public void add(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         venue.getCheckPoints().add(new TrackPoint(p.getLocation(), new BoundingBox()));
-        updateGUI();
+        updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 

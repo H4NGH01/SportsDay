@@ -28,7 +28,7 @@ public class ConfirmationGUI extends PluginGUI {
      * @param prev previous gui
      * @param function function executed after confirmation
      */
-    public ConfirmationGUI(PluginGUI prev, Function<Player, Boolean> function) {
+    public ConfirmationGUI(@NotNull PluginGUI prev, @NotNull Function<Player, Boolean> function) {
         super(27, Component.translatable("gui.confirm.title"));
         this.prev = prev;
         this.function = function;

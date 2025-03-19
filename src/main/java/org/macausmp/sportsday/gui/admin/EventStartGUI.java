@@ -12,12 +12,12 @@ import org.macausmp.sportsday.util.ItemUtil;
 
 @PermissionRequired
 public class EventStartGUI extends PluginGUI {
-    private static final ItemStack START_EVENT = ItemUtil.head(ItemUtil.START, "start_event", "gui.start.title", "gui.start.lore");
+    private static final ItemStack START_EVENT = ItemUtil.head(ItemUtil.START, "start_event", "gui.start_event.title", "gui.start_event.lore");
     private static final ItemStack LOAD_EVENT = ItemUtil.item(Material.JUKEBOX, "load_event", "gui.load.title", "gui.load.lore");
     private static final ItemStack SCHEDULE = ItemUtil.item(Material.PAINTING, "schedule", "gui.menu.schedule.title", "gui.menu.schedule.lore");
 
     public EventStartGUI() {
-        super(36, Component.translatable("gui.start.title"));
+        super(36, Component.translatable("gui.start_event.title"));
         for (int i = 27; i < 36; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(35, BACK);

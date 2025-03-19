@@ -34,7 +34,7 @@ public class CustomizeMenuGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(10, clothing());
         getInventory().setItem(12, boatType());
         getInventory().setItem(14, weaponSkin());

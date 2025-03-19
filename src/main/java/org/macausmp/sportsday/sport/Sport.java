@@ -165,7 +165,7 @@ public class Sport implements Keyed, ComponentLike {
         PLUGIN.getConfig().set(getKey().getKey() + "." + setting.name(), value);
         PLUGIN.saveConfig();
         settings.put(setting, value);
-        SportSettingsGUI.updateGUI();
+        SportSettingsGUI.updateAll(SportSettingsGUI.class);
     }
 
     /**

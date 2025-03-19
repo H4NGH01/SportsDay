@@ -17,7 +17,7 @@ public class CombatSettingsGUI extends SportSettingsGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(2, weapon());
         getInventory().setItem(3, weaponTime());
@@ -26,7 +26,7 @@ public class CombatSettingsGUI extends SportSettingsGUI {
     private @NotNull ItemStack weapon() {
         boolean weapon = sport.getSetting(Sport.CombatSettings.ENABLE_WEAPON);
         return ItemUtil.item(weapon ? Material.BLAZE_ROD : Material.STICK, "weapon",
-                Component.translatable("gui.event_settings.weapon").color(NamedTextColor.YELLOW)
+                Component.translatable("gui.sport_settings.weapon").color(NamedTextColor.YELLOW)
                         .arguments(Component.translatable(weapon ? "gui.enabled" : "gui.disabled")),
                 "gui.toggle");
     }
@@ -34,7 +34,7 @@ public class CombatSettingsGUI extends SportSettingsGUI {
     private @NotNull ItemStack weaponTime() {
         int time = sport.getSetting(Sport.CombatSettings.WEAPON_TIME);
         ItemStack stack = ItemUtil.item(Material.CLOCK, "weapon_time",
-                Component.translatable("gui.event_settings.weapon_time").arguments(Component.text(time)).color(NamedTextColor.YELLOW),
+                Component.translatable("gui.sport_settings.weapon_time").arguments(Component.text(time)).color(NamedTextColor.YELLOW),
                 "gui.increase", "gui.decrease");
         stack.setAmount(Math.max(time, 1));
         return stack;

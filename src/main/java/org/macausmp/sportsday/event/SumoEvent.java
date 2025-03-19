@@ -195,11 +195,11 @@ public class SumoEvent extends SportingEvent {
                 .arguments(getSumoStage()).toBuilder();
         for (int i = getSumoStage().getCurrentMatchIndex() + 1; i < getSumoStage().getMatchList().size();) {
             SumoMatch m = getSumoStage().getMatchList().get(i);
-            builder.appendNewline().append(Component.translatable("event.sumo.queue")
+            builder.appendNewline().append(Component.translatable("event.sumo.match.info")
                     .arguments(Component.text(++i), m.getFirstPlayerName(), m.getSecondPlayerName()));
         }
         Bukkit.broadcast(builder.build());
-        SumoEventGUI.updateGUI();
+        SumoEventGUI.updateAll(SumoEventGUI.class);
     }
 
     private void nextSumoStage() {
@@ -234,7 +234,7 @@ public class SumoEvent extends SportingEvent {
                     return;
                 }
                 if (i <= 5 && i > 0)
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_stage_countdown")
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_stage.countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
                     nextMatch();
@@ -317,7 +317,7 @@ public class SumoEvent extends SportingEvent {
     protected void onMatchStart() {
         SumoMatch match = getSumoStage().getCurrentMatch();
         match.setStatus(SumoMatch.MatchStatus.COMING);
-        SumoEventGUI.updateGUI();
+        SumoEventGUI.updateAll(SumoEventGUI.class);
         OfflinePlayer p1 = match.getFirstPlayer();
         OfflinePlayer p2 = match.getSecondPlayer();
         if (!SportsDay.isContestant(p1) || !SportsDay.isContestant(p2)) {
@@ -339,12 +339,12 @@ public class SumoEvent extends SportingEvent {
             @Override
             public void run() {
                 if (i != 0)
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start_countdown")
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match.start_countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                 if (i-- == 0) {
                     match.setStatus(SumoMatch.MatchStatus.STARTED);
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
-                    SumoEventGUI.updateGUI();
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match.start"));
+                    SumoEventGUI.updateAll(SumoEventGUI.class);
                     if (weapon) {
                         addTask(new BukkitRunnable() {
                             int i = weaponTime;
@@ -379,8 +379,8 @@ public class SumoEvent extends SportingEvent {
         if (match.getLoser() != null)
             getVenue().getLocation().getWorld()
                     .strikeLightningEffect(Objects.requireNonNull(Bukkit.getPlayer(match.getLoser())).getLocation());
-        Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_end"));
-        Bukkit.broadcast(Component.translatable("event.sumo.match_winner")
+        Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match.end"));
+        Bukkit.broadcast(Component.translatable("event.sumo.match.winner")
                 .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName()).color(NamedTextColor.YELLOW));
         match.forEachPlayer(p -> p.getInventory().clear());
         // eliminate loser
@@ -393,7 +393,7 @@ public class SumoEvent extends SportingEvent {
         // If this stage is not over
         if (getSumoStage().hasNextMatch()) {
             SumoMatch m = getSumoStage().getNextMatch();
-            Bukkit.broadcast(Component.translatable("event.sumo.next_queue")
+            Bukkit.broadcast(Component.translatable("event.sumo.match.next")
                     .arguments(m.getFirstPlayerName(), m.getSecondPlayerName()));
             nextMatch();
         } else {
@@ -402,7 +402,7 @@ public class SumoEvent extends SportingEvent {
             else
                 end();
         }
-        SumoEventGUI.updateGUI();
+        SumoEventGUI.updateAll(SumoEventGUI.class);
     }
 
     protected void nextMatch() {
@@ -414,7 +414,7 @@ public class SumoEvent extends SportingEvent {
                     Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
                     return;
                 }
-                Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match_countdown")
+                Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match.countdown")
                         .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
                     SumoMatch prev = getSumoStage().getCurrentMatch();
@@ -573,10 +573,10 @@ public class SumoEvent extends SportingEvent {
         }
 
         public enum MatchStatus implements ComponentLike {
-            UPCOMING("competition.status.upcoming"),
-            COMING("competition.status.coming"),
-            STARTED("competition.status.started"),
-            ENDED("competition.status.ended");
+            UPCOMING("event.sumo.match.status.upcoming"),
+            COMING("event.sumo.match.status.coming"),
+            STARTED("event.sumo.match.status.started"),
+            ENDED("event.sumo.match.status.ended");
 
             private final Component name;
 

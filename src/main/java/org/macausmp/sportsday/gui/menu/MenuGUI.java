@@ -44,7 +44,7 @@ public class MenuGUI extends PluginGUI {
             p.teleport(p.getWorld().getSpawnLocation());
             p.playSound(TELEPORT_SOUND);
         } else {
-            p.sendMessage(Component.translatable("competition.function_disable"));
+            p.sendMessage(Component.translatable("event.function_disable"));
             p.playSound(EXECUTION_FAIL_SOUND);
             p.closeInventory();
         }
@@ -52,14 +52,8 @@ public class MenuGUI extends PluginGUI {
 
     @ButtonHandler("schedule")
     public void schedule(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (SportsDay.getCurrentEvent() == null) {
-            p.openInventory(new ScheduleGUI().getInventory());
-            p.playSound(UI_BUTTON_CLICK_SOUND);
-        } else {
-            p.sendMessage(Component.translatable("competition.function_disable"));
-            p.playSound(EXECUTION_FAIL_SOUND);
-            p.closeInventory();
-        }
+        p.openInventory(new ScheduleGUI().getInventory());
+        p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
     @ButtonHandler("training")
@@ -68,7 +62,7 @@ public class MenuGUI extends PluginGUI {
             p.openInventory(new TrainingGUI().getInventory());
             p.playSound(UI_BUTTON_CLICK_SOUND);
         } else {
-            p.sendMessage(Component.translatable("competition.function_disable"));
+            p.sendMessage(Component.translatable("event.function_disable"));
             p.playSound(EXECUTION_FAIL_SOUND);
             p.closeInventory();
         }

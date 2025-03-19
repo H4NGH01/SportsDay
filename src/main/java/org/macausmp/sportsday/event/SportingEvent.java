@@ -197,8 +197,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
             p.getInventory().setItem(4, ItemUtil.SPRAY);
         });
         Bukkit.broadcast(Component.translatable("event.broadcast.ready")
-                .arguments(this, Component.text(PLUGIN.getConfig().getInt("ready_time")))
-                .color(NamedTextColor.GREEN));
+                .arguments(this, Component.text(3)).color(NamedTextColor.GREEN));
         Bukkit.broadcast(Component.translatable("sport.desc." + sport.getKey().getKey()));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").arguments(this));
         addTask(new BukkitRunnable() {

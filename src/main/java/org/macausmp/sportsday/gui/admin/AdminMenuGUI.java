@@ -17,8 +17,7 @@ import org.macausmp.sportsday.util.ItemUtil;
 
 @PermissionRequired
 public class AdminMenuGUI extends PluginGUI {
-    private static final ItemStack EVENT_START = ItemUtil.head(ItemUtil.START, "event_start", "gui.start.title", "gui.start.lore");
-    private static final ItemStack EVENT_CONSOLE = ItemUtil.item(Material.COMMAND_BLOCK, "event_console", "gui.console.title", "gui.console.lore");
+    private static final ItemStack EVENT_START = ItemUtil.head(ItemUtil.START, "start", "gui.start_event.title", "gui.start_event.lore");
     private static final ItemStack SPORTS_SETTINGS = ItemUtil.item(Material.REPEATER, "sports_settings", "gui.settings.title", "gui.settings.lore");
     private static final ItemStack PLAYERS_LIST = ItemUtil.item(Material.PLAYER_HEAD, "players_list", "gui.players_list.title", "gui.players_list.lore");
     private static final ItemStack VENUES_LIST = ItemUtil.item(Material.MAP, "venues_list", "gui.venues_list.title", "gui.venues_list.lore");
@@ -28,23 +27,40 @@ public class AdminMenuGUI extends PluginGUI {
     public AdminMenuGUI() {
         super(45, Component.translatable("gui.menu.title"));
         getInventory().setItem(11, EVENT_START);
-        getInventory().setItem(13, EVENT_CONSOLE);
         getInventory().setItem(15, SPORTS_SETTINGS);
         getInventory().setItem(29, PLAYERS_LIST);
         getInventory().setItem(31, VENUES_LIST);
         getInventory().setItem(33, VERSION);
+        update();
     }
 
-    @ButtonHandler("event_start")
+    @Override
+    protected void update() {
+        getInventory().setItem(13, event());
+    }
+
+    private @NotNull ItemStack event() {
+        SportingEvent event = SportsDay.getCurrentEvent();
+        if (event == null) {
+            return ItemUtil.item(Material.BARRIER, "event", "gui.event.none");
+        }
+        return ItemUtil.item(event.getSports().getDisplayItem(), "event",
+                Component.translatable("gui.event.title").arguments(event),
+                "gui.event.lore");
+    }
+
+    @ButtonHandler("start")
     public void eventStart(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.openInventory(new EventStartGUI().getInventory());
         p.playSound(UI_BUTTON_CLICK_SOUND);
+        updateAll();
     }
 
-    @ButtonHandler("event_console")
+    @ButtonHandler("event")
     public void eventConsole(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         SportingEvent event = SportsDay.getCurrentEvent();
         if (event == null) {
+            p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
         p.openInventory(event.getEventGUI().getInventory());

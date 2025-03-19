@@ -28,7 +28,7 @@ public class JavelinThrowEventGUI extends EventGUI<JavelinThrowEvent> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(49, pages());
         if (event.getCurrentContestant() != null)
@@ -39,7 +39,7 @@ public class JavelinThrowEventGUI extends EventGUI<JavelinThrowEvent> {
     private @NotNull ItemStack current() {
         ContestantData data = event.getCurrentContestant();
         ItemStack stack = ItemUtil.item(Material.PLAYER_HEAD, "current",
-                Component.translatable("gui.competition.javelin.current_player")
+                Component.translatable("gui.event.javelin.current_player")
                         .arguments(Component.text(data.getName())));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
@@ -48,10 +48,10 @@ public class JavelinThrowEventGUI extends EventGUI<JavelinThrowEvent> {
     private @NotNull ItemStack icon(@NotNull ContestantData data) {
         JavelinThrowEvent.ScoreResult sr = event.getScoreResult(data.getUUID());
         ItemStack stack = ItemUtil.item(Material.PLAYER_HEAD, "icon",
-                Component.translatable("gui.competition.javelin.player").arguments(Component.text(data.getName())),
-                Component.translatable("gui.competition.javelin.result").arguments(sr == null || !sr.isSet()
-                        ? Component.translatable("gui.competition.tbd")
-                        : Component.translatable("gui.competition.javelin.meters").arguments(Component.text(sr.getDistance()))));
+                Component.translatable("gui.event.javelin.player").arguments(Component.text(data.getName())),
+                Component.translatable("gui.event.javelin.result").arguments(sr == null || !sr.isSet()
+                        ? Component.translatable("gui.event.tbd")
+                        : Component.translatable("gui.event.javelin.meters").arguments(Component.text(sr.getDistance()))));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
     }

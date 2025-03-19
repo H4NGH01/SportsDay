@@ -30,7 +30,7 @@ public class WeaponSkinGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         pageBox.updatePage(this::skin);
     }
 

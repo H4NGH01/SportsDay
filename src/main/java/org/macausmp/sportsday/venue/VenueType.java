@@ -62,7 +62,7 @@ public class VenueType<T extends Venue> implements Keyed {
         return venueDataType;
     }
 
-    public VenueSettingsGUI<T> getSettingsGUIFunction(@NotNull Sport sport, @NotNull Venue venue) {
+    public VenueSettingsGUI<T> getSettingsGUI(@NotNull Sport sport, @NotNull Venue venue) {
         return settingsGUIFunction.apply(sport, cast(venue));
     }
 

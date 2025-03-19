@@ -17,7 +17,7 @@ public class TrackSportSettingsGUI extends SportSettingsGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         super.update();
         getInventory().setItem(2, laps());
         getInventory().setItem(3, checkpoints());
@@ -26,7 +26,7 @@ public class TrackSportSettingsGUI extends SportSettingsGUI {
     private @NotNull ItemStack laps() {
         int laps = sport.getSetting(Sport.TrackSettings.LAPS);
         ItemStack stack = ItemUtil.item(Material.LEAD, "laps",
-                Component.translatable("gui.event_settings.laps")
+                Component.translatable("gui.sport_settings.laps")
                         .arguments(Component.text(laps)).color(NamedTextColor.YELLOW),
                 "gui.increase", "gui.decrease");
         stack.setAmount(laps);
@@ -36,7 +36,7 @@ public class TrackSportSettingsGUI extends SportSettingsGUI {
     private @NotNull ItemStack checkpoints() {
         boolean checkpoints = sport.getSetting(Sport.TrackSettings.ALL_CHECKPOINTS_REQUIRED);
         return ItemUtil.item(Material.RED_BED, "checkpoints",
-                Component.translatable("gui.event_settings.all_checkpoints_required").color(NamedTextColor.YELLOW)
+                Component.translatable("gui.sport_settings.all_checkpoints_required").color(NamedTextColor.YELLOW)
                         .arguments(Component.translatable(checkpoints ? "gui.enabled" : "gui.disabled")),
                 "gui.toggle");
     }
