@@ -1,6 +1,8 @@
 package org.macausmp.sportsday.gui.customize;
 
 import com.google.common.collect.ImmutableMultimap;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -103,8 +105,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
     @ButtonHandler("present")
     public void present(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (e.isRightClick()) {
-            p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
-            p.playSound(UI_BUTTON_CLICK_SOUND);
+            new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).open(p);
         }
     }
 
@@ -114,12 +115,12 @@ public class ClothingCustomizeGUI extends PluginGUI {
             PlayerCustomize.setClothMaterial(p, item.getType());
             update();
             PlayerCustomize.suitUp(p);
+            p.playSound(Sound.sound(Key.key("minecraft:item.armor.equip_generic"), Sound.Source.MASTER, 1f, 1f));
         } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
             if (PlayerCustomize.getCloth(p, item.getType().getEquipmentSlot()) == null)
                 PlayerCustomize.setClothMaterial(p, item.getType());
-            p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
+            new ClothingColorGUI(p, item.getType().getEquipmentSlot()).open(p);
         }
-        p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 
     @ButtonHandler("reset")
@@ -137,7 +138,6 @@ public class ClothingCustomizeGUI extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new CustomizeMenuGUI(p).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new CustomizeMenuGUI(p).open(p);
     }
 }

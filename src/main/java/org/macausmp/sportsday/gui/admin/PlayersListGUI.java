@@ -101,8 +101,7 @@ public class PlayersListGUI extends PluginGUI {
     @ButtonHandler("player_icon")
     public void profile(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         OfflinePlayer player = Objects.requireNonNull(((SkullMeta) item.getItemMeta()).getOwningPlayer());
-        p.openInventory(new PlayerProfileGUI(player).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new PlayerProfileGUI(player).open(p);
     }
 
     @ButtonHandler("next_page")
@@ -145,7 +144,6 @@ public class PlayersListGUI extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new AdminMenuGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new AdminMenuGUI().open(p);
     }
 }

@@ -80,8 +80,6 @@ public class SportSettingsGUI extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new SportsSelectGUI(new AdminMenuGUI(),
-                sport -> p.openInventory(sport.getSettingGUI().getInventory())).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new SportsSelectGUI(new AdminMenuGUI(), sport -> p.openInventory(sport.getSettingGUI().getInventory())).open(p);
     }
 }

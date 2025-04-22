@@ -78,30 +78,27 @@ public class TrackSettingsGUI extends VenueSettingsGUI<Track> {
 
     @ButtonHandler("start")
     public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new TrackPointSettingsGUI(this, venue.getStartPoint(), "gui.venue_settings.start_point.title").getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new TrackPointSettingsGUI(this, venue.getStartPoint(), "gui.venue_settings.start_point.title").open(p);
     }
 
     @ButtonHandler("end")
     public void end(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new TrackPointSettingsGUI(this, venue.getEndPoint(), "gui.venue_settings.end_point.title").getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new TrackPointSettingsGUI(this, venue.getEndPoint(), "gui.venue_settings.end_point.title").open(p);
     }
 
     @ButtonHandler("checkpoint")
     public void checkpoint(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         int i = e.getSlot() - 36 + pageBox.getSize() * pageBox.getPage();
         if (e.getClick().isRightClick()) {
-            p.openInventory(new ConfirmationGUI(this, player -> {
+            new ConfirmationGUI(this, player -> {
                 venue.getCheckPoints().remove(i);
                 updateAll();
                 p.playSound(UI_BUTTON_CLICK_SOUND);
                 return false;
-            }).getInventory());
+            }).open(p);
             return;
         }
-        p.openInventory(new TrackPointSettingsGUI(this, venue.getCheckPoints().get(i), "gui.venue_settings.checkpoint.title").getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new TrackPointSettingsGUI(this, venue.getCheckPoints().get(i), "gui.venue_settings.checkpoint.title").open(p);
     }
 
     @ButtonHandler("add")

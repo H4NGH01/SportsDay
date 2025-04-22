@@ -1,6 +1,9 @@
 # SportsDay
 Macau SMP SportsDay papermc plugin
 ## Commands
+* `/sportsday`
+> Open sportsday GUI
+> * `book`
 * `/event`
 > Event hosting command
 > * `start <event_id>`
@@ -17,9 +20,6 @@ Macau SMP SportsDay papermc plugin
 > Terminate the current event
 > * `info`
 > Display current status information list
-* `/sgb`
-> Open Sports Governing Body GUI
-> * `book`
 * `/contestant`
 > Contestant management command
 > * `join <player> <number>`

@@ -404,8 +404,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
         if (e.getItem() != null && ItemUtil.equals(e.getItem(), ItemUtil.SPRAY)) {
             e.setCancelled(true);
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
-                p.openInventory(new GraffitiSprayGUI(p).getInventory());
-                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+                new GraffitiSprayGUI(p).open(p);
                 return;
             }
             if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK))

@@ -9,7 +9,7 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SGBCommand extends PluginCommand {
+public class SportsDayCommand extends PluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {
@@ -23,7 +23,7 @@ public class SGBCommand extends PluginCommand {
 
     @Override
     public String name() {
-        return "sgb";
+        return "sportsday";
     }
 
     @Override

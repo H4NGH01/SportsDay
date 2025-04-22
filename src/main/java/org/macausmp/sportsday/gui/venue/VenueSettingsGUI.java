@@ -61,8 +61,7 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("name")
     public void name(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        AnvilGUI gui = new AnvilGUI(() -> venue.getType().getSettingsGUI(sport, venue), p, venue.getName(), venue::setName);
-        PLUGIN.getServer().getPluginManager().registerEvents(gui, PLUGIN);
+        new AnvilGUI(() -> venue.getType().getSettingsGUI(sport, venue), p, venue.getName(), venue::setName);
         updateAll();
         p.playSound(UI_BUTTON_CLICK_SOUND);
     }
@@ -88,17 +87,16 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("delete")
     public void delete(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ConfirmationGUI(this, player -> {
+        new ConfirmationGUI(this, player -> {
             sport.removeVenue(venue.getUUID());
             p.openInventory(new VenueListGUI<>(sport).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
             return true;
-        }).getInventory());
+        }).open(p);
     }
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new VenueListGUI<>(sport).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new VenueListGUI<>(sport).open(p);
     }
 }

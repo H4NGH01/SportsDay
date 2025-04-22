@@ -1,8 +1,6 @@
 package org.macausmp.sportsday;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -17,7 +15,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -615,19 +612,16 @@ public final class SportsDay extends JavaPlugin implements Listener {
             e.setCancelled(true);
         Player p = e.getPlayer();
         if (ItemUtil.equals(e.getItem(), ItemUtil.MENU)) {
-            p.openInventory(new MenuGUI().getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            new MenuGUI().open(p);
             return;
         }
         if (ItemUtil.equals(e.getItem(), ItemUtil.CUSTOMIZE)) {
-            p.openInventory(new CustomizeMenuGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            new CustomizeMenuGUI(p).open(p);
             return;
         }
         if (ItemUtil.equals(e.getItem(), ItemUtil.OP_BOOK)) {
             if (p.isOp()) {
-                p.openInventory(new AdminMenuGUI().getInventory());
-                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+                new AdminMenuGUI().open(p);
                 return;
             }
             // Easter egg, happen if player use the book without op permission

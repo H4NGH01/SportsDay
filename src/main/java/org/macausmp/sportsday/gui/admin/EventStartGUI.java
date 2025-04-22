@@ -28,24 +28,21 @@ public class EventStartGUI extends PluginGUI {
 
     @ButtonHandler("start_event")
     public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new SportsSelectGUI(this,
-                sport -> p.openInventory(new VenuesSelectGUI<>(this, sport,
-                        v -> {
-                            if (!SportsDay.startEvent(p, sport, v))
-                                p.playSound(EXECUTION_FAIL_SOUND);
-                        }).getInventory())).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new SportsSelectGUI(this, sport -> p.openInventory(new VenuesSelectGUI<>(this, sport,
+                v -> {
+                    if (!SportsDay.startEvent(p, sport, v))
+                        p.playSound(EXECUTION_FAIL_SOUND);
+                }).getInventory())
+        ).open(p);
     }
 
     @ButtonHandler("load_event")
     public void load(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new EventLoadGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new EventLoadGUI().open(p);
     }
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new AdminMenuGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new AdminMenuGUI().open(p);
     }
 }

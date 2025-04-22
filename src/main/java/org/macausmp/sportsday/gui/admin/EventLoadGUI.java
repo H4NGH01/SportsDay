@@ -66,18 +66,16 @@ public class EventLoadGUI extends PluginGUI {
 
     @ButtonHandler("clear")
     public void clear(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ConfirmationGUI(this, player -> {
+        new ConfirmationGUI(this, player -> {
             SportsDay.clearSavedEvents();
             p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
             updateAll();
             return false;
-        }).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        }).open(p);
     }
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new EventStartGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new EventStartGUI().open(p);
     }
 }

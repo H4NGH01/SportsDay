@@ -73,7 +73,6 @@ public class VenuesSelectGUI<T extends Venue> extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(prev.getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        prev.open(p);
     }
 }

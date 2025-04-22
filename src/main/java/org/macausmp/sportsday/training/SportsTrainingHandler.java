@@ -50,7 +50,7 @@ public abstract class SportsTrainingHandler implements Listener {
         player.setRespawnLocation(venue.getLocation(), true);
         equip(player);
         player.sendMessage(Component.translatable("training.teleported").arguments(sport, venue));
-        player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        player.playSound(Sound.sound(Key.key("minecraft:entity.bat.takeoff"), Sound.Source.MASTER, 1f, 1f));
     }
 
     public void leaveTraining(@NotNull UUID uuid) {

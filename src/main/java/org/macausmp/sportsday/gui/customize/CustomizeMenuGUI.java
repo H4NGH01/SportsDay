@@ -151,15 +151,14 @@ public class CustomizeMenuGUI extends PluginGUI {
     @ButtonHandler
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         switch (e.getSlot()) {
-            case 10 -> p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-            case 12 -> p.openInventory(new BoatTypeGUI(p).getInventory());
-            case 14 -> p.openInventory(new WeaponSkinGUI(p).getInventory());
-            case 16 -> p.openInventory(new VictoryDanceGUI(p).getInventory());
-            case 28 -> p.openInventory(new ProjectileTrailGUI(p).getInventory());
-            case 30 -> p.openInventory(new WalkingEffectGUI(p).getInventory());
-            case 32 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
-            case 34 -> p.openInventory(new MusickitGUI(p).getInventory());
+            case 10 -> new ClothingCustomizeGUI(p).open(p);
+            case 12 -> new BoatTypeGUI(p).open(p);
+            case 14 -> new WeaponSkinGUI(p).open(p);
+            case 16 -> new VictoryDanceGUI(p).open(p);
+            case 28 -> new ProjectileTrailGUI(p).open(p);
+            case 30 -> new WalkingEffectGUI(p).open(p);
+            case 32 -> new GraffitiSprayGUI(p).open(p);
+            case 34 -> new MusickitGUI(p).open(p);
         }
-        p.playSound(UI_BUTTON_CLICK_SOUND);
     }
 }

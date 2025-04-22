@@ -51,8 +51,7 @@ public class AdminMenuGUI extends PluginGUI {
 
     @ButtonHandler("start")
     public void eventStart(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new EventStartGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new EventStartGUI().open(p);
         updateAll();
     }
 
@@ -63,27 +62,21 @@ public class AdminMenuGUI extends PluginGUI {
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
-        p.openInventory(event.getEventGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        event.getEventGUI().open(p);
     }
 
     @ButtonHandler("sports_settings")
     public void sportsSettings(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new SportsSelectGUI(this,
-                sport -> p.openInventory(sport.getSettingGUI().getInventory())).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new SportsSelectGUI(this, sport -> p.openInventory(sport.getSettingGUI().getInventory())).open(p);
     }
 
     @ButtonHandler("players_list")
     public void playersList(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new PlayersListGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new PlayersListGUI().open(p);
     }
 
     @ButtonHandler("venues_list")
     public void venuesList(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new SportsSelectGUI(this,
-                sport -> p.openInventory(new VenueListGUI<>(sport).getInventory())).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new SportsSelectGUI(this, sport -> p.openInventory(new VenueListGUI<>(sport).getInventory())).open(p);
     }
 }

@@ -51,14 +51,12 @@ public class TrainingGUI extends PluginGUI {
                     .getPersistentDataContainer().get(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE)));
             if (sport == null)
                 return;
-            p.openInventory(new VenuesSelectGUI<>(this, sport,
-                    venue -> sport.getTrainingHandler().joinTraining(p, venue)).getInventory());
+            new VenuesSelectGUI<>(this, sport, venue -> sport.getTrainingHandler().joinTraining(p, venue)).open(p);
         }
     }
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new MenuGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new MenuGUI().open(p);
     }
 }

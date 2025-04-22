@@ -64,7 +64,6 @@ public class WalkingEffectGUI extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new CustomizeMenuGUI(p).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new CustomizeMenuGUI(p).open(p);
     }
 }

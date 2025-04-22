@@ -70,8 +70,7 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
     public void venue(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         V venue = map.get(UUID.fromString(Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer()
                 .get(VENUE_ID, PersistentDataType.STRING))));
-        p.openInventory(venue.getType().getSettingsGUI(sport, venue).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        venue.getType().getSettingsGUI(sport, venue).open(p);
     }
 
     @SuppressWarnings("unchecked")
@@ -79,8 +78,7 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
     public void add(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         V venue = (V) sport.addVenue(null, p.getLocation());
         updateAll();
-        p.openInventory(venue.getType().getSettingsGUI(sport, venue).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        venue.getType().getSettingsGUI(sport, venue).open(p);
     }
 
     @ButtonHandler("next_page")
@@ -97,8 +95,6 @@ public class VenueListGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new SportsSelectGUI(new AdminMenuGUI(),
-                sport -> p.openInventory(new VenueListGUI<>(sport).getInventory())).getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new SportsSelectGUI(new AdminMenuGUI(), sport -> p.openInventory(new VenueListGUI<>(sport).getInventory())).open(p);
     }
 }

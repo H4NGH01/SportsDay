@@ -52,15 +52,13 @@ public class MenuGUI extends PluginGUI {
 
     @ButtonHandler("schedule")
     public void schedule(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ScheduleGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new ScheduleGUI().open(p);
     }
 
     @ButtonHandler("training")
     public void training(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (SportsDay.getCurrentEvent() == null) {
-            p.openInventory(new TrainingGUI().getInventory());
-            p.playSound(UI_BUTTON_CLICK_SOUND);
+            new TrainingGUI().open(p);
         } else {
             p.sendMessage(Component.translatable("event.function_disable"));
             p.playSound(EXECUTION_FAIL_SOUND);

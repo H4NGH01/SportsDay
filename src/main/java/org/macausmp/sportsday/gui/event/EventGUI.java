@@ -110,17 +110,15 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
-        p.playSound(UI_BUTTON_CLICK_SOUND);
-        p.openInventory(new ConfirmationGUI(this, player -> {
+        new ConfirmationGUI(this, player -> {
             event.terminate(player);
             player.playSound(UI_BUTTON_CLICK_SOUND);
             return true;
-        }).getInventory());
+        }).open(p);
     }
 
     @ButtonHandler("back")
     public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new AdminMenuGUI().getInventory());
-        p.playSound(UI_BUTTON_CLICK_SOUND);
+        new AdminMenuGUI().open(p);
     }
 }
