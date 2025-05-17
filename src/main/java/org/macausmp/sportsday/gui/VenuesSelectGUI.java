@@ -39,10 +39,10 @@ public class VenuesSelectGUI<T extends Venue> extends PluginGUI {
         update();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void update() {
         map.clear();
+        //noinspection unchecked
         sport.getVenues().forEach(v -> map.put(v.getUUID(), (T) v));
         getInventory().setItem(49, pages());
         pageBox.updatePage(this::venue);

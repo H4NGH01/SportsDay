@@ -4,15 +4,20 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.sport.Sport;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.venue.Track;
 import org.macausmp.sportsday.venue.TrackPoint;
+import org.macausmp.sportsday.venue.Venue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +32,13 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
     }
 
     @Override
+    public void joinTraining(@NotNull Player player, @NotNull Venue venue) {
+        super.joinTraining(player, venue);
+        player.getInventory().setItem(2, ItemUtil.CHECKPOINT);
+        player.getInventory().setItem(5, ItemUtil.RESET);
+    }
+
+    @Override
     public void leaveTraining(@NotNull UUID uuid) {
         if (runningMap.containsKey(uuid)) {
             runningMap.get(uuid).cancel();
@@ -34,6 +46,10 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
             checkpointMap.remove(uuid);
         }
         super.leaveTraining(uuid);
+    }
+
+    protected void teleport(@NotNull Player player, @NotNull Location location) {
+        player.teleportAsync(location);
     }
 
     @EventHandler
@@ -50,10 +66,10 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
 
                 @Override
                 public void run() {
-                    p.sendActionBar(Component.text("%.2f".formatted(time / 20f)));
+                    p.sendActionBar(Component.text("%.2f".formatted(time / 20f)).color(NamedTextColor.YELLOW));
                     if (track.getEndPoint().overlaps(p) && checkpointMap.get(uuid) == track.getCheckPoints().size()) {
                         p.sendMessage(Component.translatable("training.finished")
-                                .arguments(Component.text(time / 20f), sport));
+                                .arguments(Component.text(time / 20f).color(NamedTextColor.YELLOW), sport));
                         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                                 Sound.Source.MASTER, 1f, 1f));
                         checkpointMap.remove(uuid);
@@ -72,7 +88,7 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
         if (next < track.getCheckPoints().size()) {
             for (int i = next + 1; i < track.getCheckPoints().size(); i++) {
                 if (track.getCheckPoints().get(i).overlaps(p)) {
-                    p.teleportAsync((next > 1 ? track.getCheckPoints().get(next - 1) : track.getStartPoint()).getLocation());
+                    teleport(p, (next > 0 ? track.getCheckPoints().get(next - 1) : track.getStartPoint()).getLocation());
                     p.sendActionBar(Component.translatable("event.track.checkpoint_missed")
                             .color(NamedTextColor.RED));
                     p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"),
@@ -89,6 +105,31 @@ public abstract class TrackSportsHandler extends SportsTrainingHandler {
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                         Sound.Source.MASTER, 1f, 1f));
             }
+        }
+    }
+
+    @EventHandler
+    public void onInteract(@NotNull PlayerInteractEvent e) {
+        Player p = e.getPlayer();
+        if (!isTraining(p))
+            return;
+        ItemStack item = e.getItem();
+        if (item == null)
+            return;
+        Track track = (Track) getTrainingVenue(p);
+        UUID uuid = p.getUniqueId();
+        if (ItemUtil.equals(item, ItemUtil.CHECKPOINT) && checkpointMap.containsKey(uuid)) {
+            int i = checkpointMap.get(uuid);
+            teleport(p, (i > 0 ? track.getCheckPoints().get(i - 1) : track.getStartPoint()).getLocation());
+            p.sendMessage(Component.translatable("training.checkpoint"));
+        } else if (ItemUtil.equals(item, ItemUtil.RESET)) {
+            if (runningMap.containsKey(uuid)) {
+                runningMap.get(uuid).cancel();
+                runningMap.remove(uuid);
+                checkpointMap.remove(uuid);
+            }
+            teleport(p, track.getLocation());
+            p.sendMessage(Component.translatable("training.reset"));
         }
     }
 }

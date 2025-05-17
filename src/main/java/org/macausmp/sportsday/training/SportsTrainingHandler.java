@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.SportsRegistry;
@@ -45,8 +46,8 @@ public abstract class SportsTrainingHandler implements Listener {
         player.setFreezeTicks(0);
         player.setHealth(Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).getValue());
         PlayerCustomize.suitUp(player);
-        player.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
-        player.teleportAsync(venue.getLocation());
+        player.getInventory().setItem(8, ItemUtil.LEAVE_TRAINING);
+        player.teleport(venue.getLocation());
         player.setRespawnLocation(venue.getLocation(), true);
         equip(player);
         player.sendMessage(Component.translatable("training.teleported").arguments(sport, venue));
@@ -101,9 +102,10 @@ public abstract class SportsTrainingHandler implements Listener {
         Player p = e.getPlayer();
         if (!isTraining(p))
             return;
-        if (e.getItem() == null)
+        ItemStack item = e.getItem();
+        if (item == null)
             return;
-        if (!ItemUtil.equals(e.getItem(), ItemUtil.LEAVE_PRACTICE))
+        if (!ItemUtil.equals(item, ItemUtil.LEAVE_TRAINING))
             return;
         SportsTrainingHandler.leaveSportsTraining(p.getUniqueId());
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));

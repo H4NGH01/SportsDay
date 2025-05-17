@@ -70,7 +70,7 @@ public class EventLoadGUI extends PluginGUI {
             SportsDay.clearSavedEvents();
             p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
             updateAll();
-            return false;
+            return this;
         }).open(p);
     }
 

@@ -22,8 +22,8 @@ public class TrackPointSettingsGUI extends PluginGUI {
     private final PluginGUI prev;
     private final TrackPoint trackPoint;
 
-    public TrackPointSettingsGUI(@NotNull PluginGUI prev, @NotNull TrackPoint trackPoint, @NotNull String title) {
-        super(36, Component.translatable(title));
+    public TrackPointSettingsGUI(@NotNull PluginGUI prev, @NotNull TrackPoint trackPoint, @NotNull Component title) {
+        super(36, title);
         this.prev = prev;
         this.trackPoint = trackPoint;
         for (int i = 27; i < 36; i++)

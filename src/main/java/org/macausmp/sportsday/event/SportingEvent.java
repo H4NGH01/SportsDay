@@ -56,7 +56,7 @@ public abstract class SportingEvent implements ComponentLike, Listener {
     private final long startTime;
     private EventStatus status = EventStatus.UPCOMING;
     private boolean pause = false;
-    private final Collection<ContestantData> contestants = new HashSet<>();
+    private final Collection<ContestantData> contestants = new LinkedHashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
     private final Set<BukkitTask> tasks = new HashSet<>();
     protected final Predicate<Player> predicate = p -> {

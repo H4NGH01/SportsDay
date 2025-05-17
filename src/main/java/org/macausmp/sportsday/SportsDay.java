@@ -46,6 +46,7 @@ import org.macausmp.sportsday.util.FileStorage;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.KeyDataType;
 import org.macausmp.sportsday.util.TextUtil;
+import org.macausmp.sportsday.venue.Track;
 import org.macausmp.sportsday.venue.Venue;
 
 import java.time.Instant;
@@ -180,8 +181,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        SportingEvent event = getCurrentEvent();
-        if (event != null) {
+        if (getCurrentEvent() != null) {
             CommandSender sender = getServer().getConsoleSender();
             saveEvent(sender);
             terminate(sender);
@@ -222,6 +222,13 @@ public final class SportsDay extends JavaPlugin implements Listener {
         if (getOnlineContestants().size() < i) {
             sender.sendMessage(Component.translatable("command.competition.not_enough_player_required")
                     .arguments(Component.text(i)).color(NamedTextColor.RED));
+            return false;
+        }
+        int j, k;
+        if (venue instanceof Track track && (j = track.getStartPoints().size()) < (k = getOnlineContestants().size())) {
+            sender.sendMessage(Component.translatable("command.competition.not_enough_start_points")
+                    .arguments(Component.text(j), Component.text(k - j))
+                    .color(NamedTextColor.RED));
             return false;
         }
         if (getOnlineContestants().size() < getContestants().size()) {

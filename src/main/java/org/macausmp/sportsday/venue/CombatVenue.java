@@ -1,8 +1,8 @@
 package org.macausmp.sportsday.venue;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -29,7 +29,7 @@ public class CombatVenue extends Venue {
             PersistentDataContainer container = context.newPersistentDataContainer();
             container.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.getUUID().toString());
             container.set(new NamespacedKey(PLUGIN, "name"), STRING, complex.getName());
-            container.set(new NamespacedKey(PLUGIN, "item"), STRING, complex.getItem().name());
+            container.set(new NamespacedKey(PLUGIN, "item"), BYTE_ARRAY, complex.getItem().serializeAsBytes());
             container.set(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE, complex.getLocation());
             container.set(new NamespacedKey(PLUGIN, "p1"), LocationDataType.LOCATION_DATA_TYPE, complex.p1);
             container.set(new NamespacedKey(PLUGIN, "p2"), LocationDataType.LOCATION_DATA_TYPE, complex.p2);
@@ -40,10 +40,10 @@ public class CombatVenue extends Venue {
         public @NotNull CombatVenue fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
             UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
             String name = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "name"), STRING));
-            Material item = Material.getMaterial(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), STRING)));
+            ItemStack item = ItemStack.deserializeBytes(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), BYTE_ARRAY)));
             Location location = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE));
             CombatVenue combatVenue = new CombatVenue(VenueType.COMBAT_VENUE, uuid, name, location);
-            combatVenue.setItem(Objects.requireNonNull(item));
+            combatVenue.setItem(item);
             combatVenue.p1 = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), LocationDataType.LOCATION_DATA_TYPE));
             combatVenue.p2 = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), LocationDataType.LOCATION_DATA_TYPE));
             return combatVenue;

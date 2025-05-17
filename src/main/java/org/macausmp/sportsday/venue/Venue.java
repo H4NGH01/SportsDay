@@ -5,6 +5,7 @@ import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -33,7 +34,7 @@ public class Venue implements ComponentLike {
             PersistentDataContainer container = context.newPersistentDataContainer();
             container.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.getUUID().toString());
             container.set(new NamespacedKey(PLUGIN, "name"), STRING, complex.name);
-            container.set(new NamespacedKey(PLUGIN, "item"), STRING, complex.item.name());
+            container.set(new NamespacedKey(PLUGIN, "item"), BYTE_ARRAY, complex.item.serializeAsBytes());
             container.set(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE, complex.location);
             return container;
         }
@@ -42,7 +43,7 @@ public class Venue implements ComponentLike {
         public @NotNull Venue fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
             UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
             String name = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "name"), STRING));
-            Material item = Material.getMaterial(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), STRING)));
+            ItemStack item = ItemStack.deserializeBytes(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "item"), BYTE_ARRAY)));
             Location location = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "location"), LocationDataType.LOCATION_DATA_TYPE));
             Venue venue = new Venue(VenueType.VENUE, uuid, name, location);
             venue.item = item;
@@ -53,14 +54,14 @@ public class Venue implements ComponentLike {
     private final VenueType<? extends Venue> type;
     private final UUID uuid;
     private String name;
-    private Material item;
+    private ItemStack item;
     private Location location;
 
     public Venue(@NotNull VenueType<? extends Venue> type, @NotNull UUID uuid, @NotNull String name, @NotNull Location location){
         this.type = type;
         this.uuid = uuid;
         this.name = name;
-        this.item = Material.MAP;
+        this.item = new ItemStack(Material.MAP);
         this.location = location;
     }
 
@@ -85,11 +86,11 @@ public class Venue implements ComponentLike {
         this.name = name;
     }
 
-    public Material getItem() {
+    public ItemStack getItem() {
         return item;
     }
 
-    public void setItem(@NotNull Material item) {
+    public void setItem(@NotNull ItemStack item) {
         this.item = item;
     }
 

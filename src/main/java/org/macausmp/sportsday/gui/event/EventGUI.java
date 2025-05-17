@@ -113,7 +113,7 @@ public class EventGUI<T extends SportingEvent> extends PluginGUI {
         new ConfirmationGUI(this, player -> {
             event.terminate(player);
             player.playSound(UI_BUTTON_CLICK_SOUND);
-            return true;
+            return null;
         }).open(p);
     }
 

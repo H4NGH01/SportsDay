@@ -49,7 +49,7 @@ public final class Filter<E, T> {
     public @NotNull ItemStack filterItem(@NotNull Material material, @NotNull String id) {
         Component[] lore = Arrays.stream(entries)
                 .map(e -> Component.translatable("- %s")
-                        .arguments(Component.translatable(e.content)).color(NamedTextColor.DARK_GRAY))
+                        .arguments(Component.translatable(e.content)).color(NamedTextColor.GRAY))
                 .toArray(Component[]::new);
         lore[counter] = lore[counter].color(NamedTextColor.YELLOW);
         return ItemUtil.item(material, id, "gui.filter", (Object[]) lore);

@@ -84,6 +84,9 @@ public abstract class PluginGUI implements InventoryHolder {
      */
     protected void update() {}
 
+    /**
+     * Update all gui content
+     */
     protected void updateAll() {
         Class<? extends PluginGUI> clazz = getClass();
         PLUGIN.getServer().getOnlinePlayers().stream()
