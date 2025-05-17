@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -93,11 +94,22 @@ public abstract class TrackEvent extends SportingEvent {
         return Optional.ofNullable(record.get(data)).orElse(-1f);
     }
 
+    protected void teleport(@NotNull Player player, @NotNull Location location) {
+        player.teleportAsync(location);
+    }
+
     @Override
     protected void onStart() {
         PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSports().getSetting(Sport.TrackSettings.READY_COMMAND));
-        getContestants().forEach(data -> lapMap.put(data, 0));
-        getContestants().forEach(data -> checkpointMap.put(data, 0));
+        int i = 0;
+        for (ContestantData data : getContestants()) {
+            Location start = getVenue().getStartPoints().get(i++).getLocation();
+            Player player = data.getPlayer();
+            player.setRespawnLocation(start, true);
+            player.teleport(start);
+            lapMap.put(data, 0);
+            checkpointMap.put(data, 0);
+        }
         Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
         onEventStart();
         Bukkit.broadcast(Component.translatable("event.broadcast.ready")
@@ -187,7 +199,7 @@ public abstract class TrackEvent extends SportingEvent {
             if (checkpoint)
                 for (int i = next + 1; i < getVenue().getCheckPoints().size(); i++) {
                     if (getVenue().getCheckPoints().get(i).overlaps(p)) {
-                        p.teleportAsync((next > 1 ? getVenue().getCheckPoints().get(next - 1) : getVenue().getStartPoint())
+                        teleport(p, (next > 0 ? getVenue().getCheckPoints().get(next - 1) : getVenue().getStartPoint())
                                 .getLocation());
                         p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"),
                                 Sound.Source.MASTER, 1f, 1f));

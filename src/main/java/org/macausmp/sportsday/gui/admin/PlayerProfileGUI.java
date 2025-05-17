@@ -129,7 +129,7 @@ public class PlayerProfileGUI extends PluginGUI {
     public void unregister(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         new ConfirmationGUI(this, player -> {
             SportsDay.leave(this.player);
-            return false;
+            return this;
         }).open(p);
         updateAll(player.getUniqueId());
     }

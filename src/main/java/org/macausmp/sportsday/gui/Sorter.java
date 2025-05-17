@@ -44,7 +44,7 @@ public final class Sorter<E> {
     public @NotNull ItemStack sorterItem(@NotNull Material material, @NotNull String id) {
         Component[] lore = Arrays.stream(entries)
                 .map(e -> Component.translatable("- %s")
-                        .arguments(Component.translatable(e.content)).color(NamedTextColor.DARK_GRAY))
+                        .arguments(Component.translatable(e.content)).color(NamedTextColor.GRAY))
                 .toArray(Component[]::new);
         lore[counter] = lore[counter].color(NamedTextColor.YELLOW);
         return ItemUtil.item(material, id, "gui.sorter", (Object[]) lore);

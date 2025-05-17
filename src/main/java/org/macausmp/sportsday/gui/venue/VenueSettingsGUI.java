@@ -3,6 +3,7 @@ package org.macausmp.sportsday.gui.venue;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -48,9 +49,12 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
     }
 
     protected @NotNull ItemStack location() {
+        Location loc = venue.getLocation();
         return ItemUtil.item(Material.ENDER_PEARL, "location",
                 Component.translatable("gui.venue_settings.location.title"),
-                Component.translatable("gui.venue_settings.location.lore"));
+                Component.translatable("gui.venue_settings.location.lore1")
+                        .arguments(Component.text(loc.x() + ", " + loc.y() + ", " + loc.z())),
+                Component.translatable("gui.venue_settings.location.lore2"));
     }
 
     protected @NotNull ItemStack delete() {
@@ -68,12 +72,16 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
 
     @ButtonHandler("item")
     public void item(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        Material material = p.getInventory().getItemInMainHand().getType();
-        if (material.isEmpty()) {
+        ItemStack itemStack = p.getInventory().getItemInMainHand();
+        if (itemStack.isEmpty()) {
             p.playSound(EXECUTION_FAIL_SOUND);
             return;
         }
-        venue.setItem(material);
+        itemStack.editMeta(meta -> {
+           meta.displayName(null);
+           meta.lore(null);
+        });
+        venue.setItem(itemStack);
         updateAll();
         p.playSound(EXECUTION_SUCCESS_SOUND);
     }
@@ -89,9 +97,8 @@ public abstract class VenueSettingsGUI<V extends Venue> extends PluginGUI {
     public void delete(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         new ConfirmationGUI(this, player -> {
             sport.removeVenue(venue.getUUID());
-            p.openInventory(new VenueListGUI<>(sport).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:item.bundle.drop_contents"), Sound.Source.MASTER, 1f, 1f));
-            return true;
+            return new VenueListGUI<>(sport);
         }).open(p);
     }
 

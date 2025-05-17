@@ -1,6 +1,8 @@
 package org.macausmp.sportsday.training;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDismountEvent;
@@ -11,12 +13,11 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.sport.Sport;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class IceBoatRacingHandler extends TrackSportsHandler {
     private final HashMap<UUID, Boat> boatMap = new HashMap<>();
+    private final HashSet<Player> dismountSet = new HashSet<>();
 
     public IceBoatRacingHandler(Sport sport) {
         super(sport);
@@ -28,18 +29,22 @@ public class IceBoatRacingHandler extends TrackSportsHandler {
     }
 
     @Override
-    public void leaveTraining(@NotNull UUID uuid) {
-        boatMap.remove(uuid).remove();
-        super.leaveTraining(uuid);
+    protected void teleport(@NotNull Player player, @NotNull Location location) {
+        dismountSet.add(player);
+        Optional.ofNullable(player.getVehicle()).ifPresent(Entity::remove);
+        dismountSet.remove(player);
+        player.teleport(location);
+        boat(player);
     }
 
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (isTraining(p))
+            if (isTraining(p) && !dismountSet.contains(p)) {
                 e.setCancelled(true);
-            else
-                boatMap.remove(p.getUniqueId());
+            } else {
+                Optional.ofNullable(boatMap.remove(p.getUniqueId())).ifPresent(Entity::remove);
+            }
         }
     }
 
@@ -80,7 +85,7 @@ public class IceBoatRacingHandler extends TrackSportsHandler {
      * @return a new boat containing the player
      */
     private @NotNull Boat boat(@NotNull Player p) {
-        Boat boat = (Boat) p.getWorld().spawnEntity(Objects.requireNonNull(p.getRespawnLocation()), PlayerCustomize.getBoatType(p));
+        Boat boat = (Boat) p.getWorld().spawnEntity(Objects.requireNonNull(p.getLocation()), PlayerCustomize.getBoatType(p));
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;
