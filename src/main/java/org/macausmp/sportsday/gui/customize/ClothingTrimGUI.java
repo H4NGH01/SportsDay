@@ -43,9 +43,9 @@ public class ClothingTrimGUI extends PluginGUI {
                 getInventory().setItem(i, material(materials.next()));
         }
         Iterator<Material> patterns = PlayerCustomize.getTrimPattern().iterator();
-        for (int i = 1; i < 35; i++) {
+        for (int i = 1; i < 44; i++) {
             int j = i % 9;
-            if (j == 1 || j == 2 || j == 6 || j == 7)
+            if (j == 1 || j == 2 && i < 36 || j == 6 && i < 36 || j == 7)
                 getInventory().setItem(i, pattern(patterns.next()));
         }
         getInventory().setItem(13, present());

@@ -8,7 +8,6 @@ commands:
   sportsday:
     usage: "/sportsday"
     description: "Open sportsday gui"
-    aliases: ["sd"]
     permission: op
   event:
     usage: "/event (start|load|save|pause|unpause|terminate|join|leave|score|info) <argument>"

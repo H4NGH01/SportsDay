@@ -1,160 +1,149 @@
 package org.macausmp.sportsday.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.ContestantData;
 import org.macausmp.sportsday.SportsDay;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Function;
 
 public class ContestantCommand extends PluginCommand {
-    @Override
-    public void onCommand(CommandSender sender, String @NotNull [] args) {
-        if (args.length == 0) {
-            sender.sendMessage(Component.text("/contestant (join|leave|score|list) <argument>"));
-            return;
-        }
-        switch (args[0]) {
-            case "join" -> {
-                if (args.length < 2) {
-                    sender.sendMessage(Component.text("/contestant join <player>"));
-                    return;
-                }
-                Player p = Bukkit.getPlayer(args[1]);
-                if (p == null) {
-                    sender.sendMessage(Component.translatable("argument.player.unknown")
-                            .color(NamedTextColor.RED));
-                    return;
-                }
-                if (SportsDay.isContestant(p)) {
-                    sender.sendMessage(Component.translatable("command.contestant.register.failed")
-                            .arguments(p.displayName()).color(NamedTextColor.RED));
-                    return;
-                }
-                int number;
-                if (args.length >= 3) {
-                    try {
-                        number = Integer.parseInt(args[2]);
-                        if (number < 0) {
-                            sender.sendMessage(Component.translatable("argument.number.negative")
-                                    .color(NamedTextColor.RED));
-                            return;
-                        }
-                    } catch (Exception e) {
-                        sender.sendMessage(Component.translatable("parsing.int.invalid")
-                                .arguments(Component.text(args[2])).color(NamedTextColor.RED));
-                        return;
-                    }
-                } else {
-                    number = SportsDay.genNumber();
-                }
-                sender.sendMessage(SportsDay.join(p, number)
-                        ? Component.translatable("command.contestant.register.success")
-                        .arguments(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN)
-                        : Component.translatable("contestant.register.failed.number_occupied")
-                        .arguments(Component.text(number)).color(NamedTextColor.RED));
-            }
-            case "leave" -> {
-                if (args.length < 2) {
-                    if (sender instanceof Player p) {
-                        if (!SportsDay.leave(p))
-                            sender.sendMessage(Component.translatable("contestant.unregister.failed")
-                                    .color(NamedTextColor.RED));
-                        return;
-                    }
-                    sender.sendMessage(Component.text("/contestant leave <player>"));
-                    return;
-                }
-                OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-                if (p.getName() == null || !p.hasPlayedBefore()) {
-                    sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
-                    return;
-                }
-                sender.sendMessage(SportsDay.leave(p)
-                        ? Component.translatable("command.contestant.unregister.success")
-                        .arguments(Component.text(p.getName())).color(NamedTextColor.GREEN)
-                        : Component.translatable("command.contestant.unregister.failed")
-                        .arguments(Component.text(p.getName())).color(NamedTextColor.RED));
-            }
-            case "score" -> {
-                if (args.length < 2) {
-                    sender.sendMessage(Component.text("/contestant score <player> <new_score>"));
-                    return;
-                }
-                OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-                if (p.getName() == null || p.getFirstPlayed() == 0L) {
-                    sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
-                    return;
-                }
-                if (!SportsDay.isContestant(p)) {
-                    sender.sendMessage(Component.translatable("command.contestant.unregister.failed")
-                            .arguments(Component.text(p.getName())));
-                    return;
-                }
-                ContestantData data = SportsDay.getContestant(p.getUniqueId());
-                if (args.length == 2) {
-                    sender.sendMessage(Component.translatable("command.contestant.score.query")
-                            .arguments(Component.text(p.getName()), Component.text(data.getScore()))
-                            .color(NamedTextColor.GREEN));
-                    return;
-                }
-                int score;
-                try {
-                    score = Integer.parseInt(args[2]);
-                    if (score < 0) {
-                        sender.sendMessage(Component.translatable("argument.score.negative").color(NamedTextColor.RED));
-                        return;
-                    }
-                } catch (Exception e) {
-                    sender.sendMessage(Component.translatable("parsing.int.invalid")
-                            .arguments(Component.text(args[2])).color(NamedTextColor.RED));
-                    return;
-                }
-                data.setScore(score);
-                sender.sendMessage(Component.translatable("command.contestant.score.set.success")
-                        .arguments(Component.text(p.getName()), Component.text(data.getScore()))
-                        .color(NamedTextColor.GREEN));
-            }
-            case "list" -> {
-                TextComponent.Builder builder = Component.text();
-                SportsDay.getContestants().forEach(data -> builder.appendNewline()
-                        .append(Component.text(data.getName() + " #" + data.getNumber())
-                                .color(data.isOnline() ? NamedTextColor.YELLOW : NamedTextColor.GRAY)));
-                sender.sendMessage(Component.translatable("command.contestant.list").color(NamedTextColor.YELLOW)
-                        .arguments(builder));
-            }
-        }
-    }
-
     @Override
     public String name() {
         return "contestant";
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        List<String> l = new ArrayList<>();
-        if (args.length == 1) {
-            l.add("join");
-            l.add("leave");
-            l.add("score");
-            l.add("list");
-        } else if (args.length == 2) {
-            switch (args[0]) {
-                case "join" -> Bukkit.getOnlinePlayers().stream()
-                        .filter(p -> !SportsDay.isContestant(p))
-                        .forEach(p -> l.add(p.getName()));
-                case "leave", "score" -> SportsDay.getContestants().forEach(d -> l.add(d.getName()));
-            }
-        }
-        return l;
+    public String description() {
+        return "Contestant management command";
+    }
+
+    @Override
+    protected Function<LiteralArgumentBuilder<CommandSourceStack>, LiteralArgumentBuilder<CommandSourceStack>> logic() {
+        return literal -> literal
+                .requires(sender -> sender.getSender().isOp())
+                .then(Commands.literal("join")
+                        .then(Commands.argument("player", ArgumentTypes.player())
+                                .suggests((ctx, builder) -> {
+                                    Bukkit.getOnlinePlayers().stream()
+                                            .filter(player -> !SportsDay.isContestant(player))
+                                            .map(Player::getName)
+                                            .filter(name -> name.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                            .forEach(builder::suggest);
+                                    return builder.buildFuture();
+                                })
+                                .then(Commands.argument("number", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> {
+                                            Player player = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
+                                            if (SportsDay.isContestant(player)) {
+                                                ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.register.failed")
+                                                        .arguments(player.displayName()).color(NamedTextColor.RED));
+                                                return Command.SINGLE_SUCCESS;
+                                            }
+                                            int number = ctx.getArgument("number", int.class);
+                                            ctx.getSource().getSender().sendMessage(SportsDay.join(player, number)
+                                                    ? Component.translatable("command.contestant.register.success")
+                                                    .arguments(player.displayName(), Component.text(number)).color(NamedTextColor.GREEN)
+                                                    : Component.translatable("contestant.register.failed.number_occupied")
+                                                    .arguments(Component.text(number)).color(NamedTextColor.RED));
+                                            return Command.SINGLE_SUCCESS;
+                                        })
+                                )
+                                .executes(ctx -> {
+                                    Player player = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
+                                    if (SportsDay.isContestant(player)) {
+                                        ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.register.failed")
+                                                .arguments(player.displayName()).color(NamedTextColor.RED));
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                    int number = SportsDay.genNumber();
+                                    ctx.getSource().getSender().sendMessage(SportsDay.join(player, number)
+                                            ? Component.translatable("command.contestant.register.success")
+                                            .arguments(player.displayName(), Component.text(number)).color(NamedTextColor.GREEN)
+                                            : Component.translatable("contestant.register.failed.number_occupied")
+                                            .arguments(Component.text(number)).color(NamedTextColor.RED));
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                )
+                .then(Commands.literal("leave")
+                        .then(Commands.argument("player", new ContestantArgument())
+                                .executes(ctx -> {
+                                    Player player = ctx.getArgument("player", Player.class);
+                                    ctx.getSource().getSender().sendMessage(SportsDay.leave(player)
+                                            ? Component.translatable("command.contestant.unregister.success")
+                                            .arguments(Component.text(player.getName())).color(NamedTextColor.GREEN)
+                                            : Component.translatable("command.contestant.unregister.failed")
+                                            .arguments(Component.text(player.getName())).color(NamedTextColor.RED));
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                        .executes(ctx -> {
+                            if (ctx.getSource().getSender() instanceof Player player) {
+                                if (!SportsDay.leave(player))
+                                    player.sendMessage(Component.translatable("contestant.unregister.failed")
+                                            .color(NamedTextColor.RED));
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            ctx.getSource().getSender().sendMessage(Component.text("/contestant leave <player>"));
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .then(Commands.literal("score")
+                        .then(Commands.argument("player", new ContestantArgument())
+                                .then(Commands.argument("score", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> {
+                                            Player player = ctx.getArgument("player", Player.class);
+                                            if (!SportsDay.isContestant(player)) {
+                                                ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.unregister.failed")
+                                                        .arguments(Component.text(player.getName())));
+                                                return Command.SINGLE_SUCCESS;
+                                            }
+                                            int score = ctx.getArgument("score", int.class);
+                                            ContestantData data = SportsDay.getContestant(player.getUniqueId());
+                                            data.setScore(score);
+                                            ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.score.set.success")
+                                                    .arguments(Component.text(player.getName()), Component.text(data.getScore()))
+                                                    .color(NamedTextColor.GREEN));
+                                            return Command.SINGLE_SUCCESS;
+                                        })
+                                )
+                                .executes(ctx -> {
+                                    Player player = ctx.getArgument("player", Player.class);
+                                    if (!SportsDay.isContestant(player)) {
+                                        ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.unregister.failed")
+                                                .arguments(Component.text(player.getName())));
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                    ContestantData data = SportsDay.getContestant(player.getUniqueId());
+                                    ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.score.query")
+                                            .arguments(Component.text(player.getName()), Component.text(data.getScore()))
+                                            .color(NamedTextColor.GREEN));
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                )
+                .then(Commands.literal("list")
+                        .executes(ctx -> {
+                            TextComponent.Builder builder = Component.text();
+                            SportsDay.getContestants().forEach(data -> builder.appendNewline()
+                                    .append(Component.text(data.getName() + " #" + data.getNumber())
+                                            .color(data.isOnline() ? NamedTextColor.YELLOW : NamedTextColor.GRAY)));
+                            ctx.getSource().getSender().sendMessage(Component.translatable("command.contestant.list")
+                                    .color(NamedTextColor.YELLOW)
+                                    .arguments(builder));
+                            return Command.SINGLE_SUCCESS;
+                        })
+                );
     }
 }

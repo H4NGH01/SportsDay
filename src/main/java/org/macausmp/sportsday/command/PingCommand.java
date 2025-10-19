@@ -1,37 +1,50 @@
 package org.macausmp.sportsday.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Function;
 
 public class PingCommand extends PluginCommand {
-    @Override
-    public void onCommand(CommandSender sender, String @NotNull [] args) {
-        if (args.length >= 1) {
-            Player p = Bukkit.getPlayerExact(args[0]);
-            sender.sendMessage(p == null
-                    ? Component.translatable("argument.player.unknown").color(NamedTextColor.RED)
-                    : Component.translatable("%s's ping: %sms").arguments(p.displayName(), Component.text(p.getPing())));
-        } else {
-            requirePlayer(sender, p -> p.sendMessage("Your ping: %sms".formatted(p.getPing())));
-        }
-    }
-
     @Override
     public String name() {
         return "ping";
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        return args.length == 1 ? null : new ArrayList<>();
+    public String description() {
+        return "Query player's ping";
+    }
+
+    @Override
+    protected Function<LiteralArgumentBuilder<CommandSourceStack>, LiteralArgumentBuilder<CommandSourceStack>> logic() {
+        return literal -> literal
+                .then(Commands.argument("player", ArgumentTypes.player())
+                        .suggests((ctx, builder) -> {
+                            Bukkit.getOnlinePlayers().stream()
+                                    .map(Player::getName)
+                                    .filter(name -> name.toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                    .forEach(builder::suggest);
+                            return builder.buildFuture();
+                        })
+                        .executes(ctx -> {
+                            Player player = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
+                            ctx.getSource().getSender().sendMessage(Component.translatable("%s's ping: %sms").arguments(player.displayName(), Component.text(player.getPing())));
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .requires(sender -> sender.getSender() instanceof Player)
+                .executes(ctx -> {
+                    Player player = (Player) ctx.getSource().getSender();
+                    player.sendMessage("Your ping: %sms".formatted(player.getPing()));
+                    return Command.SINGLE_SUCCESS;
+                });
     }
 }

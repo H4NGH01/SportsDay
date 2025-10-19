@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ClothingCustomizeGUI extends PluginGUI {
-    private static final String[] MATERIAL = {"LEATHER", "CHAINMAIL", "IRON", "GOLDEN", "DIAMOND", "NETHERITE"};
+    private static final String[] MATERIAL = {"LEATHER", "COPPER", "CHAINMAIL", "IRON", "GOLDEN", "DIAMOND", "NETHERITE"};
     private static final String[] ARMOR = {"HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"};
     private final Player player;
 
@@ -47,7 +47,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
     protected void update() {
         for (int i = 0; i < 4; i++) {
             PlayerCustomize.Cloth selected = PlayerCustomize.getCloth(player, EquipmentSlot.values()[5 - i]);
-            for (int j = 0; j < 6; j++) {
+            for (int j = 0; j < 7; j++) {
                 Material type = Material.getMaterial(MATERIAL[j] + "_" + ARMOR[i]);
                 ItemStack stack = select(type);
                 if (selected != null && selected.getMaterial().equals(type)) {
@@ -56,7 +56,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
                     stack.lore(lore);
                     stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
                 }
-                getInventory().setItem(2 + i * 9 + j, stack);
+                getInventory().setItem(1 + i * 9 + j, stack);
             }
         }
         getInventory().setItem(0, present(EquipmentSlot.HEAD));

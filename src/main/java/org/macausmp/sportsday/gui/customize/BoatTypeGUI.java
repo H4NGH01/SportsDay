@@ -18,7 +18,7 @@ public class BoatTypeGUI extends PluginGUI {
     private final PageBox<Material> pageBox = new PageBox<>(this, 0, 27,
             () -> List.of(Material.OAK_BOAT, Material.SPRUCE_BOAT, Material.BIRCH_BOAT, Material.JUNGLE_BOAT,
                     Material.ACACIA_BOAT, Material.DARK_OAK_BOAT, Material.MANGROVE_BOAT, Material.CHERRY_BOAT,
-                    Material.BAMBOO_RAFT));
+                    Material.PALE_OAK_BOAT, Material.BAMBOO_RAFT));
     private Material selected;
 
     public BoatTypeGUI(@NotNull Player player) {

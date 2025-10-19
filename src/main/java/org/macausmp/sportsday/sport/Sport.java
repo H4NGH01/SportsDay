@@ -201,15 +201,13 @@ public class Sport implements Keyed, ComponentLike {
 
     @SuppressWarnings("unchecked")
     public <V extends Venue> void saveVenues(@NotNull PersistentDataContainer container) {
-        ListPersistentDataType<PersistentDataContainer, V> dataType =
-                (ListPersistentDataType<PersistentDataContainer, V>)
-                        PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType());
-        container.set(getKey(), dataType, (List<V>) getVenues());
+        container.set(getKey(),
+                (ListPersistentDataType<PersistentDataContainer, V>) PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType()),
+                (List<V>) getVenues());
     }
 
     public void loadVenues(@NotNull PersistentDataContainer container) {
-        List<? extends Venue> list = container.get(getKey(),
-                PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType()));
+        List<? extends Venue> list = container.get(getKey(), PersistentDataType.LIST.listTypeFrom(venueType.getVenueDataType()));
         if (list == null)
             return;
         list.forEach(v -> venues.put(v.getUUID(), v));

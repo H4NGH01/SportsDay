@@ -1,36 +1,46 @@
 package org.macausmp.sportsday.command;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.entity.Player;
 import org.macausmp.sportsday.gui.admin.AdminMenuGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 public class SportsDayCommand extends PluginCommand {
-    @Override
-    public void onCommand(CommandSender sender, String[] args) {
-        requirePlayer(sender, p -> {
-            if (args.length != 0 && args[0].equals("book")) {
-                p.getInventory().addItem(ItemUtil.OP_BOOK);
-                return;
-            }
-            p.openInventory(new AdminMenuGUI().getInventory());
-        });
-    }
-
     @Override
     public String name() {
         return "sportsday";
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        List<String> list = new ArrayList<>();
-        if (args.length == 1)
-            list.add("book");
-        return list;
+    public String description() {
+        return "Open sportsday gui";
+    }
+
+    @Override
+    public Collection<String> aliases() {
+        return List.of("sd");
+    }
+
+    @Override
+    protected Function<LiteralArgumentBuilder<CommandSourceStack>, LiteralArgumentBuilder<CommandSourceStack>> logic() {
+        return literal -> literal
+                .requires(sender -> sender.getSender().isOp() && sender.getSender() instanceof Player)
+                .then(Commands.literal("book")
+                        .executes(ctx -> {
+                            ((Player) ctx.getSource().getSender()).getInventory().addItem(ItemUtil.OP_BOOK);
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .executes(ctx -> {
+                    ((Player) ctx.getSource().getSender()).openInventory(new AdminMenuGUI().getInventory());
+                    return Command.SINGLE_SUCCESS;
+                });
     }
 }

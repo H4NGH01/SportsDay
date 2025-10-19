@@ -26,15 +26,14 @@ import org.macausmp.sportsday.sport.Sport;
 import org.macausmp.sportsday.venue.Track;
 import org.macausmp.sportsday.venue.TrackPoint;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class TrackEvent extends SportingEvent {
     private final int laps;
     private final boolean checkpoint;
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Integer> checkpointMap = new HashMap<>();
+    private final List<ContestantData> pos = new ArrayList<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
     private int time = 0;
     private BukkitTask task = null;
@@ -109,6 +108,7 @@ public abstract class TrackEvent extends SportingEvent {
             player.teleport(start);
             lapMap.put(data, 0);
             checkpointMap.put(data, 0);
+            pos.add(data);
         }
         Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
         onEventStart();
@@ -134,7 +134,8 @@ public abstract class TrackEvent extends SportingEvent {
                         public void run() {
                             if (task == null)
                                 getContestants().forEach(data -> data.getPlayer()
-                                        .sendActionBar(Component.text("%.2f".formatted(time / 20f)).color(NamedTextColor.GREEN)));
+                                        .sendActionBar(Component.text("P%s LAPS %s/%s"
+                                                .formatted(pos.indexOf(data), lapMap.get(data) + 1, laps))));
                             ++time;
                         }
                     }.runTaskTimer(PLUGIN, 0L, 1L));
@@ -212,6 +213,13 @@ public abstract class TrackEvent extends SportingEvent {
             if (point.overlaps(p)) {
                 p.setRespawnLocation(p.getLocation(), true);
                 checkpointMap.put(data, ++next);
+                for (ContestantData data1 : pos.subList(0, pos.indexOf(data))) {
+                    int i1 = lapMap.get(data), i2 = lapMap.get(data1);
+                    if (i1 > i2 || (i1 == i2 && checkpointMap.get(data) > checkpointMap.get(data1))) {
+                        pos.set(pos.indexOf(data1), data);
+                        break;
+                    }
+                }
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                         Sound.Source.MASTER, 1f, 1f));
                 p.sendMessage(Component.translatable("event.track.checkpoint")
@@ -222,6 +230,12 @@ public abstract class TrackEvent extends SportingEvent {
             int lap = lapMap.get(data) + 1;
             lapMap.put(data, lap);
             checkpointMap.put(data, 0);
+            for (ContestantData data1 : pos.subList(0, pos.indexOf(data))) {
+                if (lapMap.get(data) > lapMap.get(data1)) {
+                    pos.set(pos.indexOf(data1), data);
+                    break;
+                }
+            }
             p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                     Sound.Source.MASTER, 1f, 1f));
             if (lap < getLaps()) {

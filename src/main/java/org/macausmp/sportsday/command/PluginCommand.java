@@ -1,52 +1,41 @@
 package org.macausmp.sportsday.command;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Function;
 
 /**
  * Represents a plugin command.
  */
-public abstract class PluginCommand implements CommandExecutor, TabCompleter {
-    /**
-     * Execute command.
-     * @param sender command sender
-     * @param args arguments
-     */
-    public abstract void onCommand(CommandSender sender, String[] args);
-
+public abstract class PluginCommand {
     /**
      * Command name.
      * @return name of command
      */
     public abstract String name();
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        onCommand(sender, args);
-        return true;
+    /**
+     * Command description.
+     * @return description of command
+     */
+    public abstract String description();
+
+    /**
+     * Command aliases.
+     * @return aliases of command
+     */
+    public Collection<String> aliases() {
+        return Collections.emptyList();
     }
 
-    @Override
-    @Nullable
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return new ArrayList<>();
-    }
+    protected abstract Function<LiteralArgumentBuilder<CommandSourceStack>, LiteralArgumentBuilder<CommandSourceStack>> logic();
 
-    protected void requirePlayer(@NotNull CommandSender sender, @NotNull Consumer<Player> consumer) {
-        if (sender instanceof Player p)
-            consumer.accept(p);
-        else
-            sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
+    public LiteralCommandNode<CommandSourceStack> create() {
+        return logic().apply(Commands.literal(name())).build();
     }
 }

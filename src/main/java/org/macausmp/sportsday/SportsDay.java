@@ -4,7 +4,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.translation.TranslationStore;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -49,6 +49,7 @@ import org.macausmp.sportsday.util.TextUtil;
 import org.macausmp.sportsday.venue.Track;
 import org.macausmp.sportsday.venue.Venue;
 
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -118,11 +119,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     private void registerTranslation() {
-        TranslationRegistry registry = TranslationRegistry.create(new NamespacedKey(this, "resource"));
-        // There is no way to use an alternative language other than the en_US localization file that ships as part of the vanilla jar
-        ResourceBundle bundle = ResourceBundle.getBundle("lang.Bundle", Locale.US, UTF8ResourceBundleControl.get());
-        registry.registerAll(Locale.US, bundle, true);
-        GlobalTranslator.translator().addSource(registry);
+        TranslationStore.StringBased<MessageFormat> store = TranslationStore.messageFormat(new NamespacedKey(this, "resource"));
+        ResourceBundle bundle = ResourceBundle.getBundle("lang.Bundle", Locale.US, UTF8ResourceBundleControl.utf8ResourceBundleControl());
+        store.registerAll(Locale.US, bundle, true);
+        GlobalTranslator.translator().addSource(store);
     }
 
     private @NotNull Team registerTeam(String name, String display, NamedTextColor color) {

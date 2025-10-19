@@ -3,7 +3,6 @@ package org.macausmp.sportsday;
 import com.google.common.base.Preconditions;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.sport.Sport;
@@ -15,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class SportsRegistry<T extends Keyed> implements Registry<T> {
+public final class SportsRegistry<T extends Keyed> implements Iterable<T> {
     private static final Set<Supplier<?>> DEFAULT_ENTRIES = new HashSet<>();
     public static final SportsRegistry<SportType> SPORT_TYPE = create(() -> SportType.ATHLETICS);
     public static final SportsRegistry<VenueType<?>> VENUE_TYPE = create(() -> VenueType.VENUE);
@@ -37,7 +36,7 @@ public final class SportsRegistry<T extends Keyed> implements Registry<T> {
 
     private SportsRegistry() {}
 
-    public void add(@NotNull NamespacedKey key, @NotNull T value) {
+    public void add(final @NotNull NamespacedKey key, final @NotNull T value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         Preconditions.checkState(!keyToValue.containsKey(key), "Adding duplicate key '%s' to registry", key);
@@ -47,24 +46,26 @@ public final class SportsRegistry<T extends Keyed> implements Registry<T> {
         valueToKey.put(value, key);
     }
 
-    @Override
-    public @Nullable T get(@NotNull NamespacedKey key) {
+    public @Nullable T get(final @NotNull NamespacedKey key) {
         return keyToValue.get(key);
     }
 
-    @Override
-    public @NotNull T getOrThrow(@NotNull NamespacedKey key) {
-        T value = get(key);
+    public @NotNull T getOrThrow(final @NotNull NamespacedKey key) {
+        final T value = get(key);
         Preconditions.checkArgument(value != null, "No registry entry found for key %s.", key);
         return value;
     }
 
-    @Override
-    public @Nullable NamespacedKey getKey(@NotNull T value) {
+    public @Nullable NamespacedKey getKey(final @NotNull T value) {
         return valueToKey.get(value);
     }
 
-    @Override
+    public @NotNull NamespacedKey getKeyOrThrow(final @NotNull T value) {
+        final NamespacedKey key = getKey(value);
+        Preconditions.checkArgument(key != null, "%s has no key.", value);
+        return key;
+    }
+
     public @NotNull Stream<T> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
